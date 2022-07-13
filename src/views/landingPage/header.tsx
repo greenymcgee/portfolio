@@ -1,11 +1,9 @@
 import clsx from 'clsx';
-import { useWindowSize } from '../../common/hooks';
+import { LandingPageArrow } from './arrow';
 
 export function LandingPageHeader() {
-  const { width } = useWindowSize();
-
   return (
-    <article className="container h-1/2 pt-30">
+    <header className="container h-1/2 pt-30">
       <p
         className={clsx(
           'mb-1 font-work-sans text-xl font-bold leading-8 tracking-widest',
@@ -22,20 +20,9 @@ export function LandingPageHeader() {
         <br />
         <span className="relative">
           and I&apos;d like to talk about that... just a little
-          {/* TODO: make this work better after the install */}
-          {width >= 370 ? (
-            <i
-              aria-label="Scroll Down"
-              className={clsx(
-                'absolute inset-1/2 pt-6 text-xl text-secondary-800',
-                'sm:text-2xl lg:text-3xl',
-              )}
-            >
-              Arrow
-            </i>
-          ) : null}
+          <LandingPageArrow />
         </span>
       </p>
-    </article>
+    </header>
   );
 }
