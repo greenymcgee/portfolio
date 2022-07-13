@@ -49,7 +49,19 @@ module.exports = {
           100: '#E6F4FC',
         },
       },
+      fontFamily: {
+        'work-sans': 'Work Sans, sans-serif',
+      },
+      fontSize: {
+        18: '4.5rem',
+        20: '5rem',
+        22: '5.5rem',
+      },
+      spacing: {
+        30: '7.5rem',
+      },
     },
+    container: { center: true, padding: { DEFAULT: '0.75rem' } },
   },
   plugins: [],
 };
