@@ -5,15 +5,14 @@ export default function Home() {
     <>
       <Head>
         <title>Houston Green</title>
-        <meta name="description" content="Houston Green's Portfolio" />
-        <link rel="icon" href="/favicon.ico" />
       </Head>
-
       <main>
-        <h1 className="bg-blue-500">Houston Green</h1>
+        <h1 className="text-primary-500">Houston Green</h1>
+        <p>i&apos;m gray-900</p>
+        <p className="text-purple-800">i&apos;m purple-800</p>
       </main>
 
-      <footer>footer</footer>
+      <footer className="text-secondary-500">footer</footer>
     </>
   );
 }
