@@ -5,14 +5,16 @@
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended",
     "next/core-web-vitals",
-    "next"
+    "next",
+    "plugin:tailwindcss/recommended"
   ],
   "parser": "@typescript-eslint/parser",
   "plugins": [
     "@typescript-eslint",
     "typescript-sort-keys",
     "sort-destructure-keys",
-    "react-hooks"
+    "react-hooks",
+    "tailwindcss"
   ],
   "env": {
     "browser": true,
