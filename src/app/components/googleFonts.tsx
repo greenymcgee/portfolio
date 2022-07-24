@@ -9,7 +9,7 @@ export function GoogleFonts() {
       />
       {/* eslint-disable-next-line @next/next/no-page-custom-font */}
       <link
-        href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;700&family=Work+Sans:wght@700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@700&family=Proza+Libre:wght@400;700&display=swap"
         rel="stylesheet"
       />
     </>
