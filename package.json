@@ -10,7 +10,7 @@
     "spellcheck": "cspell \"src/**/*.*\" --no-progress",
     "test": "jest",
     "tsc": "./node_modules/typescript/bin/tsc --noEmit",
-    "validate": "npm run test && npm run lint && npm run tsc && npm run spellcheck"
+    "validate": "npm run test && npm run lint && npm run tsc"
   },
   "devDependencies": {
     "@babel/preset-typescript": "^7.18.6",

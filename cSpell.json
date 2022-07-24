@@ -1,7 +1,7 @@
 {
   "version": "0.2",
   "language": "en",
-  "words": ["fontawesome", "fortawesome", "parens", "tailwindcss"],
+  "words": ["fontawesome", "fortawesome", "parens", "tailwindcss", "legos"],
   "flagWords": [],
   "dictionaries": ["lorem-ipsum"]
 }
