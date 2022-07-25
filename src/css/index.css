@@ -14,4 +14,8 @@
   h2 {
     @apply font-bold font-cormorant-garamond;
   }
+
+  h1 {
+    @apply text-h1 sm:text-h1-sm md:text-h1-md lg:text-h1-lg xl:text-h1-xl;
+  }
 }
