@@ -1,44 +1,46 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import { ClipboardCopy } from "lucide-react";
+import { useState } from 'react'
+import { ClipboardCopy } from 'lucide-react'
 
 interface CodeBlockProps {
-  code: string;
+  code: string
 }
 
 export function CodeBlock({ code }: CodeBlockProps) {
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState(false)
 
   const copyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(code);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      await navigator.clipboard.writeText(code)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
     } catch (err) {
-      console.error("Failed to copy text: ", err);
+      // eslint-disable-next-line no-console
+      console.error('Failed to copy text: ', err)
     }
-  };
+  }
 
   return (
-    <div className="relative bg-gray-900 rounded-md overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-2 bg-gray-800">
+    <div className="relative overflow-hidden rounded-md bg-gray-900">
+      <div className="flex items-center justify-between bg-gray-800 px-4 py-2">
         <span className="text-xs text-gray-400">Terminal</span>
         <button
-          onClick={copyToClipboard}
-          className="text-gray-400 hover:text-white transition-colors"
           aria-label="Copy to clipboard"
+          className="text-gray-400 transition-colors hover:text-white"
+          onClick={copyToClipboard}
+          type="button"
         >
           {copied ? (
-            <span className="text-green-400 text-xs">Copied!</span>
+            <span className="text-xs text-green-400">Copied!</span>
           ) : (
             <ClipboardCopy size={16} />
           )}
         </button>
       </div>
-      <pre className="p-4 overflow-x-auto text-gray-300 text-sm">
+      <pre className="overflow-x-auto p-4 text-sm text-gray-300">
         <code>{code}</code>
       </pre>
     </div>
-  );
+  )
 }
