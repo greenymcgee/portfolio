@@ -1,52 +1,59 @@
-"use client";
+'use client'
 
-import Link from "next/link";
-import { useSession, signOut } from "next-auth/react";
+import Link from 'next/link'
+import { signOut, useSession } from 'next-auth/react'
 
 export default function Header() {
-  const { data: session } = useSession();
+  const { data: session } = useSession()
 
   return (
-    <header className="w-full bg-white shadow-md py-4 px-8">
-      <nav className="flex justify-between items-center">
-        <Link href="/" className="text-xl font-bold text-gray-800 hover:text-blue-600 transition-colors">
-          Superblog
+    <header className="w-full bg-white px-8 py-4 shadow-md">
+      <nav className="flex items-center justify-between">
+        <Link
+          className="text-xl font-bold text-gray-800 transition-colors hover:text-blue-600"
+          href="/"
+        >
+          Coming soong
         </Link>
         <div className="flex items-center space-x-4">
-          <Link 
-            href="/posts" 
-            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
+          <Link
+            className="rounded-lg bg-blue-500 px-4 py-2 text-white transition hover:bg-blue-600"
+            href="/posts"
           >
             Posts
           </Link>
           {session ? (
             <>
-              <Link 
-                href="/posts/new" 
-                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
+              <Link
+                className="rounded-lg bg-blue-500 px-4 py-2 text-white transition hover:bg-blue-600"
+                href="/posts/new"
               >
                 New Post
               </Link>
               <div className="flex items-center space-x-4">
                 <div className="text-sm text-gray-500">
-                  {session.user?.name && <div>{session.user.name}</div>}
+                  {session.user?.name ? <div>{session.user.name}</div> : null}
                   <div>{session.user?.email}</div>
                 </div>
                 <button
+                  className="rounded-lg bg-red-500 px-4 py-2 text-white transition hover:bg-red-600"
                   onClick={() => signOut()}
-                  className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
+                  type="button"
                 >
                   Sign Out
                 </button>
               </div>
             </>
           ) : (
-            <Link href="/login" className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
+            <Link
+              className="rounded-lg bg-blue-500 px-4 py-2 text-white transition hover:bg-blue-600"
+              href="/login"
+            >
               Sign In
             </Link>
           )}
         </div>
       </nav>
     </header>
-  );
+  )
 }

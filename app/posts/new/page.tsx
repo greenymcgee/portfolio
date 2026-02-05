@@ -1,43 +1,52 @@
-"use client";
+'use client'
 
-import Form from "next/form";
-import { createPost } from "./actions";
+import Form from 'next/form'
+
+import { createPost } from './actions'
 
 export default function NewPost() {
   return (
-    <div className="max-w-2xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-6">Create New Post</h1>
+    <div className="mx-auto max-w-2xl p-4">
+      <h1 className="mb-6 text-2xl font-bold">Create New Post</h1>
       <Form action={createPost} className="space-y-6">
         <div>
-          <label htmlFor="title" className="flex text-lg font-medium mb-2 items-center">
-            Title 
-            <span className="ml-2 px-2 py-1 text-xs font-semibold text-white bg-gray-500 rounded-lg">
+          <label
+            className="mb-2 flex items-center text-lg font-medium"
+            htmlFor="title"
+          >
+            Title
+            <span className="ml-2 rounded-lg bg-gray-500 px-2 py-1 text-xs font-semibold text-white">
               Required
             </span>
           </label>
           <input
-            type="text"
+            className="w-full rounded-lg border px-4 py-2"
             id="title"
             name="title"
-            required
             placeholder="Enter your post title ..."
-            className="w-full px-4 py-2 border rounded-lg"
+            required
+            type="text"
           />
         </div>
         <div>
-          <label htmlFor="content" className="block text-lg font-medium mb-2">Content</label>
+          <label className="mb-2 block text-lg font-medium" htmlFor="content">
+            Content
+          </label>
           <textarea
+            className="w-full rounded-lg border px-4 py-2"
             id="content"
             name="content"
             placeholder="Write your post content here ..."
             rows={6}
-            className="w-full px-4 py-2 border rounded-lg"
           />
         </div>
-        <button type="submit" className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600">
+        <button
+          className="w-full rounded-lg bg-blue-500 py-3 text-white hover:bg-blue-600"
+          type="submit"
+        >
           Create Post
         </button>
       </Form>
     </div>
-  );
+  )
 }

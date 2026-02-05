@@ -1,57 +1,66 @@
-export const dynamic = "force-dynamic"; // This disables SSG and ISR
+export const dynamic = 'force-dynamic' // This disables SSG and ISR
 
-import prisma from "@/lib/prisma";
-import { redirect } from "next/navigation";
-import Form from "next/form";
+import Form from 'next/form'
+import { redirect } from 'next/navigation'
+
+import prisma from '@/lib/prisma'
 
 export default function NewUser() {
   async function createUser(formData: FormData) {
-    "use server";
+    'use server'
 
-    const name = formData.get("name") as string;
-    const email = formData.get("email") as string;
+    const name = formData.get('name') as string
+    const email = formData.get('email') as string
 
     await prisma.user.create({
-      data: { name, email, password: "" }, // password will be added by NextAuth
-    });
+      data: { email, name, password: '' }, // password will be added by NextAuth
+    })
 
-    redirect("/");
+    redirect('/')
   }
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md mt-12">
-      <h1 className="text-3xl font-bold mb-6">Create New User</h1>
+    <div className="mx-auto mt-12 max-w-2xl rounded-lg bg-white p-6 shadow-md">
+      <h1 className="mb-6 text-3xl font-bold">Create New User</h1>
       <Form action={createUser} className="space-y-6">
         <div>
-          <label htmlFor="name" className="block text-lg font-medium mb-2">Name</label>
+          <label className="mb-2 block text-lg font-medium" htmlFor="name">
+            Name
+          </label>
           <input
-            type="text"
+            className="w-full rounded-lg border px-4 py-2"
             id="name"
             name="name"
             placeholder="Enter user name ..."
-            className="w-full px-4 py-2 border rounded-lg"
+            type="text"
           />
         </div>
         <div>
-          <label htmlFor="email" className="flex text-lg font-medium mb-2 items-center">
-            Email 
-            <span className="ml-2 px-2 py-1 text-xs font-semibold text-white bg-gray-500 rounded-lg">
+          <label
+            className="mb-2 flex items-center text-lg font-medium"
+            htmlFor="email"
+          >
+            Email
+            <span className="ml-2 rounded-lg bg-gray-500 px-2 py-1 text-xs font-semibold text-white">
               Required
             </span>
           </label>
           <input
-            type="email"
+            className="w-full rounded-lg border px-4 py-2"
             id="email"
             name="email"
-            required
             placeholder="Enter user email ..."
-            className="w-full px-4 py-2 border rounded-lg"
+            required
+            type="email"
           />
         </div>
-        <button type="submit" className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600">
+        <button
+          className="w-full rounded-lg bg-blue-500 py-3 text-white hover:bg-blue-600"
+          type="submit"
+        >
           Create User
         </button>
       </Form>
     </div>
-  );
+  )
 }

@@ -1,0 +1,17 @@
+{
+  "ignorePaths": [
+    "node_modules/**",
+    "package.json",
+    "package-lock.json",
+    "prisma/seed.ts",
+    "tsconfig.tsbuildinfo",
+    "prisma/generated/**"
+  ],
+  "words": [
+    "autoincrement",
+    "cuid",
+    "greenymcgee",
+    "Vercel",
+    "vitest",
+  ]
+}

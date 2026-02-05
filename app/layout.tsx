@@ -1,28 +1,31 @@
 // app/layout.tsx
-import "./globals.css";
-import Header from "./Header";
-import Providers from "./providers";
+import { Metadata } from 'next'
 
-export const metadata = {
-  title: "Superblog",
-  description: "A blog app using Next.js and Prisma",
-};
+import './globals.css'
+
+import Header from './Header'
+import Providers from './providers'
+
+export const metadata: Metadata = {
+  description: 'Coming soon',
+  title: 'Coming soon',
+}
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
   return (
     <html lang="en">
       <body>
         <Providers>
-          <div className="min-h-screen flex flex-col">
+          <div className="flex min-h-screen flex-col">
             <Header />
             <main className="flex-1">{children}</main>
           </div>
         </Providers>
       </body>
     </html>
-  );
+  )
 }

@@ -1,13 +1,20 @@
-import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
-import nextTypescript from "eslint-config-next/typescript";
-import { dirname } from "path";
-import { fileURLToPath } from "url";
+import greenymcgeeConfig from '@greenymcgee/next-eslint-config'
+import nextCoreWebVitals from 'eslint-config-next/core-web-vitals'
+import nextTypescript from 'eslint-config-next/typescript'
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const eslintConfig = [...nextCoreWebVitals, ...nextTypescript, {
-  ignores: ["node_modules/**", ".next/**", "out/**", "build/**", "next-env.d.ts"]
-}];
-
-export default eslintConfig;
+export default [
+  ...nextCoreWebVitals,
+  ...nextTypescript,
+  ...greenymcgeeConfig,
+  {
+    ignores: [
+      'node_modules/**',
+      '.next/**',
+      'out/**',
+      'build/**',
+      'next-env.d.ts',
+      'eslint.config.mjs',
+      'prettier.config.mjs',
+    ],
+  },
+]

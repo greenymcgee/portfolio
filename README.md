@@ -1,6 +1,12 @@
 # Next.js & Prisma Postgres Auth Starter
 
-This repository provides a boilerplate to quickly set up a Next.js demo application with authentication using [NextAuth.js v4](https://next-auth.js.org/), [Prisma Postgres](https://www.prisma.io/postgres) and [Prisma ORM](https://www.prisma.io/orm), and deploy it to Vercel. It includes an easy setup process and example routes that demonstrate basic CRUD operations against the database.
+This repository provides a boilerplate to quickly set up a Next.js demo
+application with authentication using [NextAuth.js
+v4](https://next-auth.js.org/), [Prisma
+Postgres](https://www.prisma.io/postgres) and [Prisma
+ORM](https://www.prisma.io/orm), and deploy it to Vercel. It includes an easy
+setup process and example routes that demonstrate basic CRUD operations against
+the database.
 
 ## Features
 
@@ -77,7 +83,7 @@ npx auth secret
 In the end, your entire `.env` file should look similar to this (but using _your own values_ for the env vars):
 
 ```bash
-DATABASE_URL="prisma+postgres://accelerate.prisma-data.net/?api_key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlfa2V5IjoiMWEzMjBiYTEtYjg2Yy00ZTA5LThmZTktZDBhODA3YjQwZjBkIiwidGVuYW50X2lkIjoiY2RhYmM3ZTU1NzdmMmIxMmM0ZTI1Y2IwNWJhZmZhZmU4NjAxNzkxZThlMzhlYjI1NDgwNmIzZjI5NmU1NTkzNiIsImludGVybmFsX3NlY3JldCI6ImI3YmQzMjFhLTY2ODQtNGRiMC05ZWRiLWIyMGE2ZTQ0ZDMwMSJ9.JgKXQBatjjh7GIG3_fRHDnia6bDv8BdwvaX5F-XdBfw"
+DATABASE_URL="URL"
 
 AUTH_SECRET="gTwLSXFeNWFRpUTmxlRniOfegXYw445pd0k6JqXd7Ag="
 ```

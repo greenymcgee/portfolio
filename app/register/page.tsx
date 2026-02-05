@@ -1,105 +1,105 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { signIn } from "next-auth/react";
+import { useState } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { signIn } from 'next-auth/react'
 
 export default function RegisterPage() {
-  const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
+  const router = useRouter()
+  const [error, setError] = useState<string | null>(null)
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     try {
-      event.preventDefault();
-      const formData = new FormData(event.currentTarget);
-      const signInResult = await signIn("credentials", {
+      event.preventDefault()
+      const formData = new FormData(event.currentTarget)
+      const signInResult = await signIn('credentials', {
         ...Object.fromEntries(formData),
         redirect: false,
-      });
+      })
 
       if (signInResult?.error) {
-        setError("Failed to sign in after registration");
-        return;
+        setError('Failed to sign in after registration')
+        return
       }
 
-      router.push("/");
-      router.refresh();
+      router.push('/')
+      router.refresh()
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Registration failed");
+      setError(error instanceof Error ? error.message : 'Registration failed')
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Create your account
           </h2>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-xs -space-y-px">
+          <div className="-space-y-px rounded-md shadow-xs">
             <div>
-              <label htmlFor="name" className="sr-only">
+              <label className="sr-only" htmlFor="name">
                 Name
               </label>
               <input
+                className="relative block w-full appearance-none rounded-none rounded-t-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-blue-500 focus:ring-blue-500 focus:outline-hidden sm:text-sm"
                 id="name"
                 name="name"
-                type="text"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-hidden focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder="Full name"
+                required
+                type="text"
               />
             </div>
             <div>
-              <label htmlFor="email" className="sr-only">
+              <label className="sr-only" htmlFor="email">
                 Email address
               </label>
               <input
+                className="relative block w-full appearance-none rounded-none border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-blue-500 focus:ring-blue-500 focus:outline-hidden sm:text-sm"
                 id="email"
                 name="email"
-                type="email"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-hidden focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder="Email address"
+                required
+                type="email"
               />
             </div>
             <div>
-              <label htmlFor="password" className="sr-only">
+              <label className="sr-only" htmlFor="password">
                 Password
               </label>
               <input
+                className="relative block w-full appearance-none rounded-none rounded-b-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-blue-500 focus:ring-blue-500 focus:outline-hidden sm:text-sm"
                 id="password"
                 name="password"
-                type="password"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-hidden focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder="Password"
+                required
+                type="password"
               />
             </div>
           </div>
 
-          {error && (
-            <div className="text-red-500 text-sm text-center">{error}</div>
-          )}
+          {error ? (
+            <div className="text-center text-sm text-red-500">{error}</div>
+          ) : null}
 
           <div>
             <button
+              className="group relative flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-hidden"
               type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               Register
             </button>
           </div>
         </form>
         <div className="text-center">
-          <Link href="/login" className="text-blue-600 hover:underline">
+          <Link className="text-blue-600 hover:underline" href="/login">
             Already have an account? Sign in
           </Link>
         </div>
       </div>
     </div>
-  );
+  )
 }
