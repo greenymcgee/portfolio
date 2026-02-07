@@ -46,14 +46,14 @@ export default async function Post({
         <p className="mb-4 text-lg text-gray-600">
           by{' '}
           <span className="font-medium text-gray-800">
-            {post.author?.name || 'Anonymous'}
+            {post.author.firstName || 'Anonymous'}
           </span>
         </p>
 
         {/* Content Section */}
         <div className="space-y-6 border-t pt-6 text-lg leading-relaxed text-gray-800">
           {post.content ? (
-            <p>{post.content}</p>
+            <p>{JSON.stringify(post.content)}</p>
           ) : (
             <p className="text-gray-500 italic">
               No content available for this post.

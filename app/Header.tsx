@@ -13,7 +13,7 @@ export default function Header() {
           className="text-xl font-bold text-gray-800 transition-colors hover:text-blue-600"
           href="/"
         >
-          Coming soong
+          Coming soon
         </Link>
         <div className="flex items-center space-x-4">
           <Link
@@ -32,7 +32,9 @@ export default function Header() {
               </Link>
               <div className="flex items-center space-x-4">
                 <div className="text-sm text-gray-500">
-                  {session.user?.name ? <div>{session.user.name}</div> : null}
+                  {session.user?.firstName ? (
+                    <div>{session.user.firstName}</div>
+                  ) : null}
                   <div>{session.user?.email}</div>
                 </div>
                 <button

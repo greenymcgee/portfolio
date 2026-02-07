@@ -19,7 +19,7 @@ export default async function Home() {
     include: {
       author: {
         select: {
-          name: true,
+          firstName: true,
         },
       },
     },
@@ -42,7 +42,7 @@ export default async function Home() {
                 {post.title}
               </h2>
               <p className="text-sm text-gray-500">
-                by {post.author ? post.author.name : 'Anonymous'}
+                by {post.author.firstName}
               </p>
               <p className="mb-4 text-xs text-gray-400">
                 {new Date(post.createdAt).toLocaleDateString('en-US', {
@@ -51,12 +51,6 @@ export default async function Home() {
                   year: 'numeric',
                 })}
               </p>
-              <div className="relative">
-                <p className="line-clamp-2 leading-relaxed text-gray-700">
-                  {post.content || 'No content available.'}
-                </p>
-                <div className="absolute bottom-0 left-0 h-12 w-full bg-linear-to-t from-gray-50 to-transparent" />
-              </div>
             </div>
           </Link>
         ))}

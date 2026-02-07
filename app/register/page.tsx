@@ -42,13 +42,39 @@ export default function RegisterPage() {
           <div className="-space-y-px rounded-md shadow-xs">
             <div>
               <label className="sr-only" htmlFor="name">
-                Name
+                First Name
               </label>
               <input
                 className="relative block w-full appearance-none rounded-none rounded-t-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-blue-500 focus:ring-blue-500 focus:outline-hidden sm:text-sm"
-                id="name"
-                name="name"
-                placeholder="Full name"
+                id="first-name"
+                name="firstName"
+                placeholder="First name"
+                required
+                type="text"
+              />
+            </div>
+            <div>
+              <label className="sr-only" htmlFor="name">
+                Last Name
+              </label>
+              <input
+                className="relative block w-full appearance-none rounded-none rounded-t-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-blue-500 focus:ring-blue-500 focus:outline-hidden sm:text-sm"
+                id="last-name"
+                name="lastName"
+                placeholder="Last name"
+                required
+                type="text"
+              />
+            </div>
+            <div>
+              <label className="sr-only" htmlFor="name">
+                Username
+              </label>
+              <input
+                className="relative block w-full appearance-none rounded-none rounded-t-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-blue-500 focus:ring-blue-500 focus:outline-hidden sm:text-sm"
+                id="username"
+                name="username"
+                placeholder="Username"
                 required
                 type="text"
               />
