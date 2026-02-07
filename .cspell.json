@@ -3,15 +3,18 @@
     "node_modules/**",
     "package.json",
     "package-lock.json",
-    "prisma/seed.ts",
     "tsconfig.tsbuildinfo",
-    "prisma/generated/**"
+    "prisma/generated/**",
+    "down.sql",
+    "prisma/migrations/**"
   ],
   "words": [
     "autoincrement",
     "cuid",
+    "eatmyshorts",
     "greenymcgee",
+    "Testpass",
     "Vercel",
-    "vitest",
+    "vitest"
   ]
 }
