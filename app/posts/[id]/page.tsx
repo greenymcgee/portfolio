@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic' // This disables SSG and ISR
 
 import { notFound, redirect } from 'next/navigation'
 
-import prisma from '@/lib/prisma'
+import { prisma } from '@/lib/prisma'
 
 export default async function Post({
   params,

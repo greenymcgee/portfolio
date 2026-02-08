@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic' // This disables SSG and ISR
 import Form from 'next/form'
 import { redirect } from 'next/navigation'
 
-import prisma from '@/lib/prisma'
+import { prisma } from '@/lib/prisma'
 
 export default function NewUser() {
   async function createUser(formData: FormData) {
