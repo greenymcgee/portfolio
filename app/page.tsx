@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
 import { checkPostTableExists } from '@/lib/db-utils'
-import prisma from '@/lib/prisma'
+import { prisma } from '@/lib/prisma'
 
 export default async function Home() {
   // Check if the post table exists

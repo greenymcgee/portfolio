@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 
 import { authOptions } from '@/auth'
-import prisma from '@/lib/prisma'
+import { prisma } from '@/lib/prisma'
 
 export async function createPost(formData: FormData) {
   const session = await getServerSession(authOptions)
