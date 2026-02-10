@@ -1,34 +1,34 @@
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { signIn } from 'next-auth/react'
+
+import { handleSubmit } from './utils'
 
 export default function LoginPage() {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    try {
-      event.preventDefault()
-      const formData = new FormData(event.currentTarget)
-      const response = await signIn('credentials', {
-        ...Object.fromEntries(formData),
-        redirect: false,
-      })
+  const errorCallback = useCallback(() => setError('Something went wrong'), [])
 
-      if (response?.error) {
-        setError('Invalid credentials')
-        return
-      }
+  const responseErrorCallback = useCallback(
+    (message: string) => setError(message),
+    [],
+  )
 
-      router.push('/')
-      router.refresh()
-    } catch {
-      setError('An error occurred during login')
-    }
-  }
+  const successCallback = useCallback(() => {
+    router.push('/')
+    router.refresh()
+  }, [router])
+
+  const submitHandler = useMemo(() => {
+    return handleSubmit({
+      errorCallback,
+      responseErrorCallback,
+      successCallback,
+    })
+  }, [errorCallback, responseErrorCallback, successCallback])
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
@@ -38,7 +38,7 @@ export default function LoginPage() {
             Sign in to your account
           </h2>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <form className="mt-8 space-y-6" onSubmit={submitHandler}>
           <div className="-space-y-px rounded-md shadow-xs">
             <div>
               <label className="sr-only" htmlFor="email">
@@ -75,6 +75,7 @@ export default function LoginPage() {
           <div>
             <button
               className="group relative flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-hidden"
+              data-testid="submit-login-button"
               type="submit"
             >
               Sign in

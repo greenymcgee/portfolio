@@ -18,7 +18,10 @@
         "name": "next"
       }
     ],
+    "types": ["vitest/globals", "@greenymcgee/utility-types"],
     "paths": {
+      "@/lib": ["./lib/*"],
+      "@/test": ["./test/*"],
       "@/*": ["./*"]
     }
   },

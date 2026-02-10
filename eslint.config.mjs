@@ -15,6 +15,7 @@ export default [
       'next-env.d.ts',
       'eslint.config.mjs',
       'prettier.config.mjs',
+      'coverage/**',
     ],
   },
 ]

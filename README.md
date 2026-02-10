@@ -1,24 +1,57 @@
-# Next.js & Prisma Postgres Auth Starter
+# Houston C. Green Portfolio
 
-This repository provides a boilerplate to quickly set up a Next.js demo
-application with authentication using [NextAuth.js
-v4](https://next-auth.js.org/), [Prisma
-Postgres](https://www.prisma.io/postgres) and [Prisma
-ORM](https://www.prisma.io/orm), and deploy it to Vercel. It includes an easy
-setup process and example routes that demonstrate basic CRUD operations against
-the database.
+This is the repository for my personal portfolio/blog website. It is built with
+Next.js, Prisma, and Tailwind CSS.
 
-## Features
+## Core Technologies
 
-- Next.js 15 app with App Router, Server Actions & API Routes
-- Data modeling, database migrations, seeding & querying
-- Log in and sign up authentication flows
-- CRUD operations to create, view and delete blog posts
-- Pagination, filtering & relations queries
+- [Next.js](https://nextjs.org/)
+- [NextAuth.js v4](https://next-auth.js.org/)
+- [Prisma Postgres](https://www.prisma.io/postgres)
+- [Prisma ORM](https://www.prisma.io/orm)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Docker Compose](https://docs.docker.com/compose/) - for local development and testing
+- [GitHub Actions](https://github.com/features/actions)
+
+**Testing**
+
+- [Vitest](https://vitest.dev/)
+- [V8 Coverage](https://vitest.dev/guide/coverage.html)
+- [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/)
+- [msw](https://github.com/mswjs/msw)
+- [Faker.js](https://github.com/faker-js/faker)
+- [Fishery](https://github.com/thoughtbot/fishery)
+- [next-router-mock](https://github.com/scottrippey/next-router-mock)
+
+**Linting & Formatting**
+
+- [ESLint](https://eslint.org/)
+- [Prettier](https://prettier.io/)
+- [Spellcheck](https://cspell.org/)
+
+**Logging**
+
+- [Pino](https://github.com/pinojs/pino)
 
 ## Getting started
 
-### 1. Install dependencies
+### 1. Set up your `.env` file
+
+First, create a `.env` file by copying `.env.example`:
+
+```bash
+cp .env.example .env
+```
+
+Create an auth secret string using the following command and replace the
+`AUTH_SECRET` value in the `.env` file:
+
+```bash
+openssl rand -base64 32
+```
+
+### 2. Install dependencies
 
 After cloning the repo and navigating into it, install dependencies:
 
@@ -26,120 +59,31 @@ After cloning the repo and navigating into it, install dependencies:
 npm install
 ```
 
-### 1. Create a Prisma Postgres instance
+### 3. Create a Prisma Postgres instance using Docker Compose
 
-Create a Prisma Postgres instance by running the following command:
+Create a Postgres instance by running the following command:
 
 ```
-npx prisma init --db
+docker compose up -d
 ```
 
-This command is interactive and will prompt you to:
+### 4. Migrate the database
 
-1. Log in to the [Prisma Console](https://console.prisma.io)
-1. Select a **region** for your Prisma Postgres instance
-1. Give a **name** to your Prisma project
-
-Once the command has terminated, copy the **Database URL** from the terminal output. You'll need it in the next step when you configure your `.env` file.
-
-<!-- Create a Prisma Postgres database instance using [Prisma Data Platform](https://console.prisma.io):
-
-1. Navigate to [Prisma Data Platform](https://console.prisma.io).
-2. Click **New project** to create a new project.
-3. Enter a name for your project in the **Name** field.
-4. Inside the **Prisma Postgres** section, click **Get started**.
-5. Choose a region close to your location from the **Region** dropdown.
-6. Click **Create project** to set up your database. This redirects you to the database setup page.
-7. In the **Set up database access** section, copy the `DATABASE_URL`. You will use this in the next steps. -->
-
-### 2. Set up your `.env` file
-
-You now need to configure your database connection via an environment variable.
-
-First, create an `.env` file:
+Run the following command to set up your database and Prisma schema:
 
 ```bash
-touch .env
+npm run dev:db:migrate
 ```
 
-Then update the `.env` file by replacing the existing `DATABASE_URL` value with the one you previously copied. It will look similar to this:
-
-```bash
-DATABASE_URL="prisma+postgres://accelerate.prisma-data.net/?api_key=PRISMA_POSTGRES_API_KEY"
-```
-
-To ensure your authentication works properly, you'll also need to set [env vars for NextAuth.js](https://next-auth.js.org/configuration/options):
-
-```bash
-AUTH_SECRET="RANDOM_32_CHARACTER_STRING"
-```
-
-You can generate a random 32 character string for the `AUTH_SECRET` secret with this command:
-
-```
-npx auth secret
-```
-
-In the end, your entire `.env` file should look similar to this (but using _your own values_ for the env vars):
-
-```bash
-DATABASE_URL="URL"
-
-AUTH_SECRET="gTwLSXFeNWFRpUTmxlRniOfegXYw445pd0k6JqXd7Ag="
-```
-
-### 3. Migrate the database
-
-Run the following commands to set up your database and Prisma schema:
-
-```bash
-npx prisma migrate dev --name init
-```
-
-<!--
-<details>
-
-<summary>Expand for <code>yarn</code>, <code>pnpm</code> or <code>bun</code></summary>
-
-```bash
-# Using yarn
-yarn prisma migrate dev --name init
-
-# Using pnpm
-pnpm prisma migrate dev --name init
-
-# Using bun
-bun prisma migrate dev --name init
-```
-
-</details> -->
-
-### 4. Seed the database
+### 5. Seed the database
 
 Add initial data to your database:
 
 ```bash
-npx prisma db seed
+npm run dev:db:seed
 ```
 
-<details>
-
-<summary>Expand for <code>yarn</code>, <code>pnpm</code> or <code>bun</code></summary>
-
-```bash
-# Using yarn
-yarn prisma db seed
-
-# Using pnpm
-pnpm prisma db seed
-
-# Using bun
-bun prisma db seed
-```
-
-</details>
-
-### 5. Run the app
+### 6. Run the app
 
 Start the development server:
 
@@ -147,28 +91,48 @@ Start the development server:
 npm run dev
 ```
 
-<details>
-
-<summary>Expand for <code>yarn</code>, <code>pnpm</code> or <code>bun</code></summary>
-
-```bash
-# Using yarn
-yarn dev
-
-# Using pnpm
-pnpm run dev
-
-# Using bun
-bun run dev
-```
-
-</details>
-
 Once the server is running, visit `http://localhost:3000` to start using the app.
 
-## Next steps
+## Prisma Docs
 
 - [Prisma ORM documentation](https://www.prisma.io/docs/orm)
 - [Prisma Client API reference](https://www.prisma.io/docs/orm/prisma-client)
-- [Join our Discord community](https://discord.com/invite/prisma)
-- [Follow us on Twitter](https://twitter.com/prisma)
+
+## Unit Testing Database Code
+
+Before running tests, you need to migrate your test database with this command:
+
+```bash
+npm run test:db:migrate
+```
+
+Vitest is the testing framework for this project, and there is a test helper
+made specifically for testing code that interacts with the database. It will set
+up a test database, seed it with users, and tear down the database after the
+tests are run.
+
+```ts
+import { setupTestDatabase } from '@/test/helpers/utils'
+
+import { verifyLoginRequest } from '@/lib/auth/verifyLoginRequest'
+import { ADMIN_USER } from '@/test/fixtures'
+
+// Includes options for seeding with various data.
+setupTestDatabase({ withUsers: true })
+
+it('should return the user upon success', async () => {
+  const result = await verifyLoginRequest({
+    email: ADMIN_USER.email,
+    password: ADMIN_USER.password,
+  })
+  expect(result.id).toBe(ADMIN_USER.id)
+})
+```
+
+## Integration Testing React Code
+
+`@testing-library/react` is the core library used for testing React, and `msw`
+is our core library for testing API requests. API requests should be to internal
+API routes that interact with either auth, the database, or any other services.
+This allows the React components to be tested on their own using async requests
+to the API endpoints.

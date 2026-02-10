@@ -6,14 +6,20 @@
     "tsconfig.tsbuildinfo",
     "prisma/generated/**",
     "down.sql",
-    "prisma/migrations/**"
+    "prisma/migrations/**",
+    "coverage/**"
   ],
   "words": [
     "autoincrement",
     "cuid",
     "eatmyshorts",
     "greenymcgee",
+    "isready",
+    "nextauth",
+    "Pino",
+    "svgs",
     "Testpass",
+    "theflanman",
     "Vercel",
     "vitest"
   ]

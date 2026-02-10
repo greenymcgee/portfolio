@@ -4,14 +4,15 @@ import { Suspense, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 
+import { User } from '@/prisma/generated/client'
+
+// TODO: should not be recreating model types
 interface Post {
+  author: Pick<User, 'firstName'>
+  content: string
+  createdAt: string
   id: number
   title: string
-  content?: string
-  createdAt: string
-  author?: {
-    name: string
-  }
 }
 
 // Disable static generation
@@ -72,7 +73,7 @@ function PostsList() {
                     {post.title}
                   </Link>
                   <p className="text-sm text-gray-500">
-                    by {post.author?.name || 'Anonymous'}
+                    by {post.author.firstName || 'Anonymous'}
                   </p>
                   <p className="text-xs text-gray-400">
                     {new Date(post.createdAt).toLocaleDateString('en-US', {
