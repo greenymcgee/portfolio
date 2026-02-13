@@ -32,7 +32,7 @@
     "react-dom": "19.2.4"
   },
   "devDependencies": {
-    "@faker-js/faker": "^10.2.0",
+    "@faker-js/faker": "^10.3.0",
     "@greenymcgee/next-eslint-config": "^0.1.2",
     "@greenymcgee/tailwind-prettier-config": "^0.1.0",
     "@greenymcgee/utility-types": "^0.1.0",
