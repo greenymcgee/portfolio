@@ -26,20 +26,12 @@ describe('<LoginPage />', () => {
     expect(mockRouter.pathname).toBe('/')
   })
 
-  it('should handle unknown login errors', async () => {
-    const response = { message: 'error' }
-    vi.mocked(signIn).mockRejectedValue(response)
-    render(<LoginPage />)
-    await submitLoginRequest()
-    expect(screen.getByText('Something went wrong')).toBeVisible()
-  })
-
-  it('should handle known response errors', async () => {
+  it('should render a message to the user for an error', async () => {
     const response = { error: 'error' }
     // @ts-expect-error: not important
     vi.mocked(signIn).mockReturnValue(response)
     render(<LoginPage />)
     await submitLoginRequest()
-    expect(screen.getByText(response.error)).toBeVisible()
+    expect(screen.getByText('Invalid email or password')).toBeVisible()
   })
 })

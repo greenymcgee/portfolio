@@ -40,7 +40,13 @@ vi.mock('next/navigation', async () => {
       .mockImplementation((pathname: string) => mockRouter.push(pathname)),
     useParams: () => mockRouter.query,
     usePathname: () => mockRouter.pathname,
-    useRouter: mockRouter.useRouter,
+    useRouter: () => ({
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      ...mockRouter.useRouter(),
+      // refresh doesn't exist for the pages router, so we need it.
+      refresh: vi.fn(),
+    }),
     useSearchParams: vi
       .fn()
       .mockImplementation(

@@ -4,18 +4,13 @@ import { useCallback, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
-import { handleSubmit } from './utils'
+import { handleLoginFormSubmit } from '@/features/users/utils'
 
 export default function LoginPage() {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
 
-  const errorCallback = useCallback(() => setError('Something went wrong'), [])
-
-  const responseErrorCallback = useCallback(
-    (message: string) => setError(message),
-    [],
-  )
+  const errorCallback = useCallback((message: string) => setError(message), [])
 
   const successCallback = useCallback(() => {
     router.push('/')
@@ -23,12 +18,11 @@ export default function LoginPage() {
   }, [router])
 
   const submitHandler = useMemo(() => {
-    return handleSubmit({
+    return handleLoginFormSubmit({
       errorCallback,
-      responseErrorCallback,
       successCallback,
     })
-  }, [errorCallback, responseErrorCallback, successCallback])
+  }, [errorCallback, successCallback])
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
