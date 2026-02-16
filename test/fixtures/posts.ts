@@ -43,21 +43,21 @@ function getDate(index: number) {
   return faker.date.past()
 }
 
-const UNPUBLISHED_POST = postFactory
+export const UNPUBLISHED_POST = postFactory
   .associations({ authorId: ADMIN_USER.id })
   .build({
     content: CONTENT,
     publishedAt: null,
     title: faker.book.title(),
   })
-const PUBLISHED_POST = postFactory
+export const PUBLISHED_POST = postFactory
   .associations({ authorId: ADMIN_USER.id })
   .build({
     content: CONTENT,
     publishedAt: faker.date.past(),
     title: faker.book.title(),
   })
-const WILL_BE_PUBLISHED_POST = postFactory
+export const WILL_BE_PUBLISHED_POST = postFactory
   .associations({ authorId: ADMIN_USER.id })
   .build({
     content: CONTENT,
