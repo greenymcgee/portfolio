@@ -5,7 +5,7 @@ import { defineConfig } from 'vitest/config'
 export default defineConfig({
   test: {
     coverage: {
-      include: ['app/', 'lib/'],
+      include: ['app/', 'features/', 'lib/'],
       exclude: [
         'app/layout.tsx',
         '**/types.ts',
@@ -28,8 +28,6 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@/test': path.resolve(__dirname, './test/'),
-      '@/lib': path.resolve(__dirname, './lib/'),
       '@': path.resolve(__dirname, './'),
     },
   },
