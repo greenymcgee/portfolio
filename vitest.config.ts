@@ -14,6 +14,7 @@ export default defineConfig({
         'app/globals.css',
         'app/api/auth/[...nextauth]/route.ts',
         'lib/logger.ts',
+        'lib/prisma/errorClasses.ts',
       ],
       // thresholds: {
       //   branches: 97,
