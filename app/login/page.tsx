@@ -17,7 +17,7 @@ export default function LoginPage() {
     router.refresh()
   }, [router])
 
-  const submitHandler = useMemo(() => {
+  const handleSubmit = useMemo(() => {
     return handleLoginFormSubmit({
       errorCallback,
       successCallback,
@@ -32,7 +32,7 @@ export default function LoginPage() {
             Sign in to your account
           </h2>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={submitHandler}>
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="-space-y-px rounded-md shadow-xs">
             <div>
               <label className="sr-only" htmlFor="email">

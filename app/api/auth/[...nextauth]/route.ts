@@ -4,21 +4,3 @@ import { authOptions } from '@/auth'
 
 const handler = NextAuth(authOptions)
 export { handler as GET, handler as POST }
-
-declare module 'next-auth' {
-  interface Session {
-    user: {
-      id: string
-      firstName: string
-      lastName: string
-      email: string
-      username: string
-    }
-  }
-}
-
-declare module 'next-auth/jwt' {
-  interface JWT {
-    id: string
-  }
-}

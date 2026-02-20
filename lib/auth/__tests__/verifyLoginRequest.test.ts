@@ -1,5 +1,7 @@
 // @vitest-environment node
 
+import { prisma } from '@/lib/prisma'
+import { User } from '@/prisma/generated/client'
 import { ADMIN_USER } from '@/test/fixtures'
 import { setupTestDatabase } from '@/test/helpers/utils'
 
@@ -34,6 +36,9 @@ describe('verifyLoginRequest', () => {
       email: ADMIN_USER.email,
       password: ADMIN_USER.password,
     })
-    expect(result.id).toBe(ADMIN_USER.id)
+    const user = (await prisma.user.findUnique({
+      where: { email: ADMIN_USER.email },
+    })) as User
+    expect(result.id).toBe(user.id)
   })
 })

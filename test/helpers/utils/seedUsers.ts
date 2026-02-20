@@ -8,10 +8,12 @@ export async function seedUsers(prismaClient = prisma) {
     data: [
       {
         ...ADMIN_USER,
+        id: undefined,
         password: await bcrypt.hash(ADMIN_USER.password, 10),
       },
       {
         ...BASIC_USER,
+        id: undefined,
         password: await bcrypt.hash(BASIC_USER.password, 10),
       },
     ],
