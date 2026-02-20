@@ -24,7 +24,7 @@
     "@greenymcgee/summon": "^0.2.2",
     "@greenymcgee/typescript-utils": "^0.1.8",
     "@prisma/adapter-pg": "^7.3.0",
-    "@prisma/client": "^7.3.0",
+    "@prisma/client": "^7.4.1",
     "bcryptjs": "^3.0.3",
     "lucide-react": "^0.563.0",
     "next": "16.1.6",
