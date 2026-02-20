@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev | pino-pretty",
     "dev:db:migrate": "set -a && . ./.env && npx prisma migrate deploy",
     "dev:db:seed": "set -a && . ./.env && npx prisma db seed",
     "dev:db:reset": "set -a && . ./.env && npx prisma migrate reset",
