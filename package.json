@@ -23,7 +23,7 @@
   "dependencies": {
     "@greenymcgee/summon": "^0.2.2",
     "@greenymcgee/typescript-utils": "^0.1.8",
-    "@prisma/adapter-pg": "^7.3.0",
+    "@prisma/adapter-pg": "^7.4.1",
     "@prisma/client": "^7.3.0",
     "bcryptjs": "^3.0.3",
     "lucide-react": "^0.563.0",
