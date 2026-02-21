@@ -1,19 +1,38 @@
+import { faker } from '@faker-js/faker'
+import { Session } from 'next-auth'
+
 import { userFactory } from '@/test/factories'
 
 import { sessionCallback } from '../sessionCallback'
 
 describe('sessionCallback', () => {
-  it('should return the session and replace the user id with the token id', async () => {
+  it('should return the session.expires and populate the user with the token', async () => {
     const user = userFactory.build()
-    const session = { expires: '', user }
-    const token = { email: 'email', id: 'token-id' }
+    const session = {
+      expires: faker.date.future().toISOString(),
+      user: { email: user.email },
+    } as Session
+    const token = {
+      ...user,
+      sub: faker.string.alphanumeric({ casing: 'lower', length: 24 }),
+    }
     const result = await sessionCallback({
       newSession: '',
       session,
       token,
       trigger: 'update',
-      user: { ...user, emailVerified: new Date() },
+      user: { ...session.user, emailVerified: new Date() },
     })
-    expect(result).toEqual({ ...session, user: { ...user, id: token.id } })
+    expect(result).toEqual({
+      expires: session.expires,
+      user: {
+        email: session.user.email,
+        firstName: token.firstName,
+        id: token.id,
+        lastName: token.lastName,
+        roles: token.roles,
+        username: token.username,
+      },
+    })
   })
 })
