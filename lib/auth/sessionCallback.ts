@@ -17,6 +17,7 @@ interface Params extends Callback {
 export async function sessionCallback({ session, token }: Params) {
   return {
     expires: session.expires,
+    token,
     user: {
       email: session.user.email,
       firstName: token.firstName,

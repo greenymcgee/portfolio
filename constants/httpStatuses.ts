@@ -1,0 +1,38 @@
+export const HTTP_STATUSES = {
+  BAD_REQUEST: 400,
+  CONFLICT: 409,
+  CREATED: 201,
+  FORBIDDEN: 403,
+  INTERNAL_SERVER_ERROR: 500,
+  MULTI_STATUS: 207,
+  NOT_FOUND: 404,
+  SUCCESS: 200,
+  UNAUTHORIZED: 401,
+  UNPROCESSABLE_CONTENT: 422,
+} as const
+
+export const {
+  BAD_REQUEST,
+  CONFLICT,
+  CREATED,
+  FORBIDDEN,
+  INTERNAL_SERVER_ERROR,
+  MULTI_STATUS,
+  NOT_FOUND,
+  SUCCESS,
+  UNAUTHORIZED,
+  UNPROCESSABLE_CONTENT,
+} = HTTP_STATUSES
+
+export const HTTP_TEXT_BY_STATUS = {
+  [BAD_REQUEST]: 'Bad Request',
+  [CONFLICT]: 'Conflict',
+  [CREATED]: 'Created',
+  [FORBIDDEN]: 'Forbidden',
+  [INTERNAL_SERVER_ERROR]: 'Internal Server Error',
+  [MULTI_STATUS]: 'Multi-Status',
+  [NOT_FOUND]: 'Not Found',
+  [SUCCESS]: 'OK',
+  [UNAUTHORIZED]: 'Unauthorized',
+  [UNPROCESSABLE_CONTENT]: 'Unprocessable Entity',
+}

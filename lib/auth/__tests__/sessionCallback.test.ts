@@ -14,6 +14,9 @@ describe('sessionCallback', () => {
     } as Session
     const token = {
       ...user,
+      exp: Math.floor(faker.date.future().getTime() / 1000),
+      iat: faker.number.int(),
+      jti: faker.string.alphanumeric({ casing: 'lower', length: 24 }),
       sub: faker.string.alphanumeric({ casing: 'lower', length: 24 }),
     }
     const result = await sessionCallback({
@@ -25,6 +28,7 @@ describe('sessionCallback', () => {
     })
     expect(result).toEqual({
       expires: session.expires,
+      token,
       user: {
         email: session.user.email,
         firstName: token.firstName,

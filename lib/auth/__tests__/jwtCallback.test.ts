@@ -27,7 +27,6 @@ describe('jwtCallback', () => {
       id: user.id,
       lastName: user.lastName,
       roles: user.roles,
-      sub: token.sub,
       username: user.username,
     })
   })
@@ -35,6 +34,9 @@ describe('jwtCallback', () => {
   it('should return the token when the user is blank', async () => {
     const token = {
       ...userFactory.build(),
+      exp: Math.floor(faker.date.future().getTime() / 1000),
+      iat: faker.number.int(),
+      jti: faker.string.alphanumeric({ casing: 'lower', length: 24 }),
       sub: faker.string.alphanumeric({ casing: 'lower', length: 24 }),
     }
     const result = await jwtCallback({
