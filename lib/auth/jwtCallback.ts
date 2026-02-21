@@ -22,7 +22,6 @@ export async function jwtCallback({ token, user }: Params) {
       id: user.id,
       lastName: user.lastName,
       roles: user.roles,
-      sub: token.sub,
       username: user.username,
     }
   }

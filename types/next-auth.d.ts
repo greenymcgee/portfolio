@@ -1,8 +1,12 @@
+import { ISODateString } from 'next-auth'
+
 import type { User } from '@/prisma/generated/client'
 
 declare module 'next-auth' {
   interface Session {
-    user: User & { sub: string }
+    expires: ISODateString
+    token: JWT
+    user: User
   }
 }
 
@@ -15,5 +19,8 @@ declare module 'next-auth/jwt' {
     roles: GeneratedUser['roles']
     sub: string
     username: GeneratedUser['username']
+    iat: number
+    exp: number
+    jti: string
   }
 }

@@ -7,7 +7,7 @@ export const userFactory = Factory.define<User>(({ params, sequence }) => ({
   createdAt: params.createdAt ?? faker.date.past(),
   email: params.email ?? faker.internet.email(),
   firstName: params.firstName ?? faker.person.firstName(),
-  id: sequence.toString(),
+  id: `user_${sequence}`,
   lastName: params.lastName ?? faker.person.lastName(),
   password: params.password ?? faker.internet.password(),
   roles: params.roles ?? ['USER'],
