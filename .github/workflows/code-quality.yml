@@ -40,17 +40,22 @@ jobs:
         with:
           node-version: 24.12.0
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.28.2
+
       - name: Install Dependencies
-        run: npm install
+        run: pnpm install --frozen-lockfile
 
       - name: TSC
-        run: npm run tsc
+        run: pnpm run tsc
 
       - name: Lint
-        run: npm run lint
+        run: pnpm run lint
 
       - name: Spellcheck
-        run: npm run spellcheck
+        run: pnpm run spellcheck
 
       - name: Test
-        run: npx prisma migrate deploy && npm run test:ci
+        run: npx prisma migrate deploy && pnpm run test:ci
