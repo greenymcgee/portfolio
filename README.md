@@ -98,6 +98,62 @@ Once the server is running, visit `http://localhost:3000` to start using the app
 - [Prisma ORM documentation](https://www.prisma.io/docs/orm)
 - [Prisma Client API reference](https://www.prisma.io/docs/orm/prisma-client)
 
+## Testing Against User Authenticated Code
+
+There are a few utils that make mocking a User server session easier.
+
+### mockUserServerSession
+
+This util is useful for mocking a User server session for tests that don't
+require a test database.
+
+```ts
+import { mockUserServerSession } from '@/test/helpers/utils'
+
+it('should return an unauthorized status when the jwt is null', async () => {
+  mockUserServerSession(null)
+  const result = await getServerUser()
+  expect(result).toBe(ADMIN_USER)
+})
+```
+
+### mockUserServerSessionAsync
+
+This util is useful for mocking a User server session for tests that require a
+test database.
+
+```ts
+import {
+  mockUserServerSessionAsync,
+  setupTestDatabase,
+} from '@/test/helpers/utils'
+
+setupTestDatabase({ withUsers: true })
+
+it('should return an ok status and the post when the request succeeds', async () => {
+  const token = await mockUserServerSessionAsync('ADMIN')
+  const result = await createPost()
+  expect(result).toEqual(
+    new Ok({
+      post: expect.objectContaining({ authorId: token.id, title }),
+      status: SUCCESS,
+    }),
+  )
+})
+```
+
+### createJWTMock
+
+A util for mocking a JWT token for the given user.
+
+```ts
+import { userFactory } from '@/test/factories'
+import { createJWTMock } from '@/test/helpers/utils'
+
+const user = userFactory.build()
+const token = createJWTMock(user)
+```
+
 ## Unit Testing Database Code
 
 Before running tests, you need to migrate your test database with this command:

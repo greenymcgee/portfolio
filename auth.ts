@@ -5,6 +5,8 @@ import { jwtCallback } from './lib/auth/jwtCallback'
 import { sessionCallback } from './lib/auth/sessionCallback'
 import { verifyLoginRequest } from './lib/auth/verifyLoginRequest'
 
+const ONE_DAY_SECONDS = 60 * 60 * 24
+
 export const authOptions = {
   callbacks: {
     /**
@@ -24,4 +26,5 @@ export const authOptions = {
       },
     }),
   ],
+  session: { maxAge: ONE_DAY_SECONDS },
 } satisfies NextAuthOptions

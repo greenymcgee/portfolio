@@ -1,8 +1,10 @@
+import { PrismaErrorHTTPStatus } from '@/types/prisma'
+
 import { PrismaHTTPErrorCodeKey } from './errorClasses'
 
 export const PRISMA_ERROR_CODE_TO_HTTP_STATUS: Record<
   PrismaHTTPErrorCodeKey,
-  400 | 404 | 409 | 422
+  PrismaErrorHTTPStatus
 > = {
   P2000: 400,
   P2001: 404,

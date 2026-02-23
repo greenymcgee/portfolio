@@ -7,11 +7,11 @@ type JSONOptions = Omit<
   'status' | 'url'
 >
 
-interface Params extends JSONOptions {
+interface Params<Body extends Record<string, unknown>> extends JSONOptions {
   /**
    * Use this to send any custom data in the response.
    */
-  body?: Record<string, unknown>
+  body?: Body
   /**
    * An optional message to pass in the request. Defaults to the statusText.
    */
@@ -37,7 +37,7 @@ interface Params extends JSONOptions {
  * @param {Params} params - object
  * @returns {NextResponse['json']} JSON
  */
-export function createResponse({
+export function createResponse<Body extends Record<string, unknown>>({
   body,
   headers,
   status,
@@ -45,9 +45,9 @@ export function createResponse({
   message = statusText,
   nextConfig,
   url,
-}: Params) {
-  return NextResponse.json(
-    { ...body, message },
+}: Params<Body>) {
+  return NextResponse.json<Body & { message: string }>(
+    { message, ...body } as Body & { message: string },
     { headers, nextConfig, status, statusText, url },
   )
 }

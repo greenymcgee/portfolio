@@ -2,8 +2,9 @@ import { faker } from '@faker-js/faker'
 import { Session } from 'next-auth'
 
 import { userFactory } from '@/test/factories'
+import { createJWTMock } from '@/test/helpers/utils'
 
-import { sessionCallback } from '../sessionCallback'
+import { sessionCallback } from '..'
 
 describe('sessionCallback', () => {
   it('should return the session.expires and populate the user with the token', async () => {
@@ -12,13 +13,9 @@ describe('sessionCallback', () => {
       expires: faker.date.future().toISOString(),
       user: { email: user.email },
     } as Session
-    const token = {
-      ...user,
-      exp: Math.floor(faker.date.future().getTime() / 1000),
-      iat: faker.number.int(),
-      jti: faker.string.alphanumeric({ casing: 'lower', length: 24 }),
-      sub: faker.string.alphanumeric({ casing: 'lower', length: 24 }),
-    }
+    const token = createJWTMock(user, {
+      exp: Math.floor(new Date(session.expires).getTime() / 1000),
+    })
     const result = await sessionCallback({
       newSession: '',
       session,
