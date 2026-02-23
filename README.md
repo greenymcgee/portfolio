@@ -56,7 +56,7 @@ openssl rand -base64 32
 After cloning the repo and navigating into it, install dependencies:
 
 ```
-npm install
+pnpm install
 ```
 
 ### 3. Create a Prisma Postgres instance using Docker Compose
@@ -72,7 +72,7 @@ docker compose up -d
 Run the following command to set up your database and Prisma schema:
 
 ```bash
-npm run dev:db:migrate
+pnpm run dev:db:migrate
 ```
 
 ### 5. Seed the database
@@ -80,7 +80,7 @@ npm run dev:db:migrate
 Add initial data to your database:
 
 ```bash
-npm run dev:db:seed
+pnpm run dev:db:seed
 ```
 
 ### 6. Run the app
@@ -88,7 +88,7 @@ npm run dev:db:seed
 Start the development server:
 
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 Once the server is running, visit `http://localhost:3000` to start using the app.
@@ -159,7 +159,7 @@ const token = createJWTMock(user)
 Before running tests, you need to migrate your test database with this command:
 
 ```bash
-npm run test:db:migrate
+pnpm run test:db:migrate
 ```
 
 Vitest is the testing framework for this project, and there is a test helper
