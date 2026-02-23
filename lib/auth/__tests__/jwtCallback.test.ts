@@ -1,8 +1,9 @@
 import { faker } from '@faker-js/faker'
 
 import { userFactory } from '@/test/factories'
+import { createJWTMock } from '@/test/helpers/utils'
 
-import { jwtCallback } from '../jwtCallback'
+import { jwtCallback } from '..'
 
 describe('jwtCallback', () => {
   it('should return user data when it is present', async () => {
@@ -32,13 +33,7 @@ describe('jwtCallback', () => {
   })
 
   it('should return the token when the user is blank', async () => {
-    const token = {
-      ...userFactory.build(),
-      exp: Math.floor(faker.date.future().getTime() / 1000),
-      iat: faker.number.int(),
-      jti: faker.string.alphanumeric({ casing: 'lower', length: 24 }),
-      sub: faker.string.alphanumeric({ casing: 'lower', length: 24 }),
-    }
+    const token = createJWTMock(userFactory.build())
     const result = await jwtCallback({
       account: {
         provider: '123',

@@ -35,4 +35,4 @@ export const HTTP_TEXT_BY_STATUS = {
   [SUCCESS]: 'OK',
   [UNAUTHORIZED]: 'Unauthorized',
   [UNPROCESSABLE_CONTENT]: 'Unprocessable Entity',
-}
+} as const

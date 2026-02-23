@@ -6,3 +6,5 @@ function getBaseApiUrl() {
 }
 
 export const BASE_API_URL = getBaseApiUrl()
+
+export const AUTH_SECRET = process.env.AUTH_SECRET

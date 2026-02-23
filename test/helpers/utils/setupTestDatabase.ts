@@ -57,8 +57,8 @@ export function setupTestDatabase(options?: Options) {
   })
 
   teardown(async () => {
-    if (withPosts) await prisma.post.deleteMany()
-    if (withUsers) await prisma.user.deleteMany()
+    await prisma.post.deleteMany()
+    await prisma.user.deleteMany()
   })
 
   afterAll(async () => {

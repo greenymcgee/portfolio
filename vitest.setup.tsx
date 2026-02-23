@@ -131,3 +131,20 @@ beforeAll(() => {
     this.open = false
   })
 })
+
+/**
+ * Use mockUserServerSession and mockUserServerSessionAsync.
+ *
+ * @example
+ * import { mockUserServerSessionAsync } from '@test/helpers/utils'
+ *
+ * // mocks the logged in admin user and returns the generated token
+ * const token = await mockUserServerSessionAsync('ADMIN')
+ */
+vi.mock('next-auth/jwt', async () => {
+  const nextAuth = await vi.importActual('next-auth/jwt')
+  return {
+    ...nextAuth,
+    getToken: vi.fn().mockImplementation(() => undefined),
+  }
+})
