@@ -1,13 +1,7 @@
 /* eslint-disable require-await */
-import { CallbacksOptions, Session } from 'next-auth'
+import { CallbacksOptions } from 'next-auth'
 
-import { User } from '@/prisma/generated/client'
-
-type Callback = Omit<FirstParameterOf<CallbacksOptions['session']>, 'session'>
-
-interface Params extends Callback {
-  session: Session & { user: User }
-}
+type Params = FirstParameterOf<CallbacksOptions['session']>
 
 /**
  * This fires any time we try to access the session. Once the token is set, the
