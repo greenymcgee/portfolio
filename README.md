@@ -102,36 +102,36 @@ Once the server is running, visit `http://localhost:3000` to start using the app
 
 There are a few utils that make mocking a User server session easier.
 
-### mockUserServerSession
+### mockServerSession
 
 This util is useful for mocking a User server session for tests that don't
 require a test database.
 
 ```ts
-import { mockUserServerSession } from '@/test/helpers/utils'
+import { mockServerSession } from '@/test/helpers/utils'
 
 it('should return an unauthorized status when the jwt is null', async () => {
-  mockUserServerSession(null)
+  mockServerSession(null)
   const result = await getServerUser()
   expect(result).toBe(ADMIN_USER)
 })
 ```
 
-### mockUserServerSessionAsync
+### mockServerSessionAsync
 
 This util is useful for mocking a User server session for tests that require a
 test database.
 
 ```ts
 import {
-  mockUserServerSessionAsync,
+  mockServerSessionAsync,
   setupTestDatabase,
 } from '@/test/helpers/utils'
 
 setupTestDatabase({ withUsers: true })
 
 it('should return an ok status and the post when the request succeeds', async () => {
-  const token = await mockUserServerSessionAsync('ADMIN')
+  const token = await mockServerSessionAsync('ADMIN')
   const result = await createPost()
   expect(result).toEqual(
     new Ok({

@@ -13,8 +13,8 @@ import {
   UNPROCESSABLE_CONTENT,
 } from '@/constants'
 import {
-  mockUserServerSession,
-  mockUserServerSessionAsync,
+  mockServerSession,
+  mockServerSessionAsync,
   setupTestDatabase,
 } from '@/test/helpers/utils'
 
@@ -22,7 +22,7 @@ import * as postUtils from '../../utils'
 import { CreatePostService } from '..'
 
 afterEach(() => {
-  mockUserServerSession('ADMIN')
+  mockServerSession('ADMIN')
 })
 
 afterAll(() => {
@@ -33,7 +33,7 @@ describe('CreatePostService', () => {
   describe('createPost', () => {
     describe('error', () => {
       it('should return an unauthorized status when the jwt is null', async () => {
-        mockUserServerSession(null)
+        mockServerSession(null)
         const service = new CreatePostService(
           new NextRequest('http://nothing.greeny'),
         )
@@ -42,7 +42,7 @@ describe('CreatePostService', () => {
       })
 
       it('should return a forbidden status when the user does not have permission', async () => {
-        mockUserServerSession('USER')
+        mockServerSession('USER')
         const service = new CreatePostService(
           new NextRequest('http://nothing.greeny'),
         )
@@ -146,7 +146,7 @@ describe('CreatePostService', () => {
       setupTestDatabase({ mutatesData: true, withUsers: true })
 
       it('should return an ok status and the post when the request succeeds', async () => {
-        const token = await mockUserServerSessionAsync('ADMIN')
+        const token = await mockServerSessionAsync('ADMIN')
         const title = faker.book.title()
         const service = new CreatePostService(
           new NextRequest('http://nothing.greeny', {

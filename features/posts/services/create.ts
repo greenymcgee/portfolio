@@ -1,7 +1,7 @@
 import { tryCatch } from '@greenymcgee/typescript-utils'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client'
 import { errAsync, okAsync } from 'neverthrow'
-import { JWT } from 'next-auth/jwt'
+import { Session } from 'next-auth'
 import { ZodError } from 'zod'
 
 import {
@@ -21,8 +21,8 @@ import { type PostCreateParams, postCreateSchema } from '../schemas'
 import { tryInsertPost } from '../utils'
 
 /**
- * Authorizes and authenticates the User by the JWT token, validates the params,
- * and creates the Post.
+ * Authorizes and authenticates the User, validates the params, and creates the
+ * Post.
  *
  * @param {Request} request
  */
@@ -34,10 +34,10 @@ export class CreatePostService {
   }
 
   public async createPost() {
-    const jwt = await authenticateAPISession(this.request)
-    if (jwt === null) return errAsync({ status: UNAUTHORIZED } as const)
+    const user = await authenticateAPISession()
+    if (user === null) return errAsync({ status: UNAUTHORIZED } as const)
 
-    const authorizedUser = this.authorizeUser(jwt)
+    const authorizedUser = this.authorizeUser(user)
     if (authorizedUser === null) return errAsync({ status: FORBIDDEN } as const)
 
     const params = await this.validateParams()
@@ -52,7 +52,7 @@ export class CreatePostService {
       return errAsync({ details: params.details, status: params.status })
     }
 
-    const post = await this.insertPost(params, jwt)
+    const post = await this.insertPost(params, user)
     if (post instanceof PrismaHTTPStatusError) {
       return errAsync({ details: post.details, status: post.status } as const)
     }
@@ -64,10 +64,10 @@ export class CreatePostService {
     return okAsync({ post, status: SUCCESS } as const)
   }
 
-  private authorizeUser(jwt: JWT) {
-    if (hasPermission(jwt, 'posts', 'create')) return jwt
+  private authorizeUser(user: Session['user']) {
+    if (hasPermission(user, 'posts', 'create')) return user
 
-    logger.error({ userId: jwt.id }, 'POST_CREATE_PERMISSION_ERROR')
+    logger.error({ userId: user.id }, 'POST_CREATE_PERMISSION_ERROR')
     return null
   }
 
@@ -78,8 +78,8 @@ export class CreatePostService {
     return { result: postCreateSchema.safeParse(response) }
   }
 
-  private async insertPost(params: PostCreateParams, jwt: JWT) {
-    const { error, response: post } = await tryInsertPost(params, jwt)
+  private async insertPost(params: PostCreateParams, user: Session['user']) {
+    const { error, response: post } = await tryInsertPost(params, user)
     const status = getPrismaErrorHTTPStatus(error)
     if (error && status) {
       logger.error({ error }, 'POST_CREATE_PRISMA_ERROR')
