@@ -6,9 +6,9 @@ import { NextRequest } from 'next/server'
 import { ZodError } from 'zod'
 
 import {
+  CREATED,
   FORBIDDEN,
   INTERNAL_SERVER_ERROR,
-  SUCCESS,
   UNAUTHORIZED,
   UNPROCESSABLE_CONTENT,
 } from '@/constants'
@@ -146,7 +146,7 @@ describe('CreatePostService', () => {
       setupTestDatabase({ mutatesData: true, withUsers: true })
 
       it('should return an ok status and the post when the request succeeds', async () => {
-        const token = await mockServerSessionAsync('ADMIN')
+        const { token } = await mockServerSessionAsync('ADMIN')
         const title = faker.book.title()
         const service = new CreatePostService(
           new NextRequest('http://nothing.greeny', {
@@ -158,7 +158,7 @@ describe('CreatePostService', () => {
         expect(result).toEqual(
           new Ok({
             post: expect.objectContaining({ authorId: token.id, title }),
-            status: SUCCESS,
+            status: CREATED,
           }),
         )
       })

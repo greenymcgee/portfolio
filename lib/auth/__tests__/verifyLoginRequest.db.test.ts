@@ -1,5 +1,3 @@
-// @vitest-environment node
-
 import { prisma } from '@/lib/prisma'
 import { User } from '@/prisma/generated/client'
 import { ADMIN_USER } from '@/test/fixtures'

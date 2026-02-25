@@ -19,7 +19,7 @@ export async function mockServerSessionAsync(role: OneOf<User['roles']>) {
   }
 
   const token = createJWTMock(user)
-  vi.mocked(getServerSession).mockResolvedValue({
+  const session = {
     expires: token.exp,
     token,
     user: {
@@ -30,6 +30,7 @@ export async function mockServerSessionAsync(role: OneOf<User['roles']>) {
       roles: user.roles,
       username: user.username,
     },
-  })
-  return token
+  }
+  vi.mocked(getServerSession).mockResolvedValue(session)
+  return session
 }
