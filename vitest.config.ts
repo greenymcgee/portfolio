@@ -25,8 +25,31 @@ export default defineConfig({
       // },
     },
     globals: true,
-    environment: 'jsdom',
     setupFiles: ['./vitest.setup.tsx'],
+    projects: [
+      {
+        extends: true,
+        test: {
+          environment: 'node',
+          name: 'db',
+          include: ['**/*.db.test.ts', '**/*.db.test.tsx'],
+          maxWorkers: 1,
+        },
+      },
+      {
+        extends: true,
+        test: {
+          environment: 'jsdom',
+          name: 'default',
+          exclude: [
+            '**/node_modules/**',
+            '**/.next/**',
+            '**/*.db.test.ts',
+            '**/*.db.test.tsx',
+          ],
+        },
+      },
+    ],
   },
   resolve: {
     alias: {

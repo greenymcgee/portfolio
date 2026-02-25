@@ -5,9 +5,9 @@ import { Session } from 'next-auth'
 import { ZodError } from 'zod'
 
 import {
+  CREATED,
   FORBIDDEN,
   INTERNAL_SERVER_ERROR,
-  SUCCESS,
   UNAUTHORIZED,
   UNPROCESSABLE_CONTENT,
 } from '@/constants'
@@ -49,7 +49,10 @@ export class CreatePostService {
     }
 
     if (params instanceof RequestJSONError) {
-      return errAsync({ details: params.details, status: params.status })
+      return errAsync({
+        details: params.details,
+        status: params.status,
+      } as const)
     }
 
     const post = await this.insertPost(params, user)
@@ -61,7 +64,7 @@ export class CreatePostService {
       return errAsync({ details: post, status: INTERNAL_SERVER_ERROR } as const)
     }
 
-    return okAsync({ post, status: SUCCESS } as const)
+    return okAsync({ post, status: CREATED } as const)
   }
 
   private authorizeUser(user: Session['user']) {
