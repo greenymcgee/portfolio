@@ -59,8 +59,8 @@ importers:
         specifier: ^10.3.0
         version: 10.3.0
       '@greenymcgee/next-eslint-config':
-        specifier: ^0.1.6
-        version: 0.1.6(@vitest/eslint-plugin@1.6.9(eslint@9.39.3(jiti@2.6.1))(typescript@5.9.3)(vitest@4.0.18(@types/node@25.3.0)(jiti@2.6.1)(jsdom@28.1.0)(lightningcss@1.31.1)(msw@2.12.10(@types/node@25.3.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)))(eslint-config-next@16.1.6(@typescript-eslint/parser@8.56.1(eslint@9.39.3(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.3(jiti@2.6.1))(typescript@5.9.3))(eslint-plugin-simple-import-sort@12.1.1(eslint@9.39.3(jiti@2.6.1)))(eslint@9.39.3(jiti@2.6.1))
+        specifier: ^0.1.8
+        version: 0.1.8(@vitest/eslint-plugin@1.6.9(eslint@9.39.3(jiti@2.6.1))(typescript@5.9.3)(vitest@4.0.18(@types/node@25.3.0)(jiti@2.6.1)(jsdom@28.1.0)(lightningcss@1.31.1)(msw@2.12.10(@types/node@25.3.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)))(eslint-config-next@16.1.6(@typescript-eslint/parser@8.56.1(eslint@9.39.3(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.3(jiti@2.6.1))(typescript@5.9.3))(eslint-plugin-simple-import-sort@12.1.1(eslint@9.39.3(jiti@2.6.1)))(eslint@9.39.3(jiti@2.6.1))
       '@greenymcgee/tailwind-prettier-config':
         specifier: ^0.1.1
         version: 0.1.1(prettier-plugin-tailwindcss@0.7.2(prettier@3.8.1))(prettier@3.8.1)
@@ -785,8 +785,8 @@ packages:
     resolution: {integrity: sha512-It0Sne6P3szg7JIi6CgKbvTZoMjxBZhcv91ZrqrNuaZQfB5WoqYYbzCUOq89YR+VY8juY9M1vDWmDDa2TzfXCw==}
     engines: {node: ^20.19.0 || ^22.13.0 || ^23.5.0 || >=24.0.0, npm: '>=10'}
 
-  '@greenymcgee/next-eslint-config@0.1.6':
-    resolution: {integrity: sha512-7FlUFJw3CwPrQ1nZ+pt4yEVn2H2ARflhtaBQzGwz1zK4TpVh8upqeGYeLHLARja1c1L/0lbPyI3na1wGHZQrNw==}
+  '@greenymcgee/next-eslint-config@0.1.8':
+    resolution: {integrity: sha512-ADIXSd2mhitnEgLcJgZEtaR2G/wDvwQBEnICE6R8ucGvefmJXckK8t/ePm1zodGHk9TGQicWRBpOF1hNeIBwDQ==}
     peerDependencies:
       '@vitest/eslint-plugin': ^1.0.0
       eslint: ^9.0.0
@@ -4743,7 +4743,7 @@ snapshots:
 
   '@faker-js/faker@10.3.0': {}
 
-  '@greenymcgee/next-eslint-config@0.1.6(@vitest/eslint-plugin@1.6.9(eslint@9.39.3(jiti@2.6.1))(typescript@5.9.3)(vitest@4.0.18(@types/node@25.3.0)(jiti@2.6.1)(jsdom@28.1.0)(lightningcss@1.31.1)(msw@2.12.10(@types/node@25.3.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)))(eslint-config-next@16.1.6(@typescript-eslint/parser@8.56.1(eslint@9.39.3(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.3(jiti@2.6.1))(typescript@5.9.3))(eslint-plugin-simple-import-sort@12.1.1(eslint@9.39.3(jiti@2.6.1)))(eslint@9.39.3(jiti@2.6.1))':
+  '@greenymcgee/next-eslint-config@0.1.8(@vitest/eslint-plugin@1.6.9(eslint@9.39.3(jiti@2.6.1))(typescript@5.9.3)(vitest@4.0.18(@types/node@25.3.0)(jiti@2.6.1)(jsdom@28.1.0)(lightningcss@1.31.1)(msw@2.12.10(@types/node@25.3.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)))(eslint-config-next@16.1.6(@typescript-eslint/parser@8.56.1(eslint@9.39.3(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.3(jiti@2.6.1))(typescript@5.9.3))(eslint-plugin-simple-import-sort@12.1.1(eslint@9.39.3(jiti@2.6.1)))(eslint@9.39.3(jiti@2.6.1))':
     dependencies:
       '@vitest/eslint-plugin': 1.6.9(eslint@9.39.3(jiti@2.6.1))(typescript@5.9.3)(vitest@4.0.18(@types/node@25.3.0)(jiti@2.6.1)(jsdom@28.1.0)(lightningcss@1.31.1)(msw@2.12.10(@types/node@25.3.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2))
       eslint: 9.39.3(jiti@2.6.1)
