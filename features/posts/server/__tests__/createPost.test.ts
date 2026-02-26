@@ -50,7 +50,9 @@ describe('createPost', () => {
       status: UNAUTHORIZED,
     })
     await createPost({ status: 'IDLE' }, FORM_DATA)
-    expect(redirect).toHaveBeenCalledWith(ROUTES.login)
+    expect(redirect).toHaveBeenCalledWith(
+      ROUTES.loginWithRedirect(ROUTES.newPost),
+    )
   })
 
   it('should redirect to the home page when the response is forbidden', async () => {

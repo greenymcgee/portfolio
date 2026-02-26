@@ -26,7 +26,9 @@ export async function createPost(_: State, formData: FormData): Promise<State> {
   const { error, response } = await tryPostNewPost(validate.data, cookie)
   if (!error) return redirect(ROUTES.post(response.data.post.id))
 
-  if (error.response.status === UNAUTHORIZED) return redirect(ROUTES.login)
+  if (error.response.status === UNAUTHORIZED) {
+    return redirect(ROUTES.loginWithRedirect(ROUTES.newPost))
+  }
 
   if (error.response.status === FORBIDDEN) return redirect(ROUTES.home)
 

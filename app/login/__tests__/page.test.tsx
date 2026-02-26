@@ -18,12 +18,22 @@ async function submitLoginRequest() {
 }
 
 describe('<LoginPage />', () => {
-  it('should render a login form', async () => {
+  it('should render a login form that redirects to the home page by default', async () => {
     // @ts-expect-error: object properties not important for this test
     vi.mocked(signIn).mockReturnValue({})
     render(<LoginPage />)
     await submitLoginRequest()
     expect(mockRouter.pathname).toBe('/')
+  })
+
+  it('should redirect to the redirect pathname when it is present', async () => {
+    const query = { redirect: '/new-path' }
+    mockRouter.query = query
+    // @ts-expect-error: object properties not important for this test
+    vi.mocked(signIn).mockReturnValue({})
+    render(<LoginPage />)
+    await submitLoginRequest()
+    expect(mockRouter.pathname).toBe(query.redirect)
   })
 
   it('should render a message to the user for an error', async () => {
