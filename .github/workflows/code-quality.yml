@@ -8,8 +8,9 @@ defaults:
     shell: bash
 
 env:
-  DATABASE_URL: ${{ secrets.DATABASE_URL }}
   AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+  DATABASE_URL: ${{ secrets.DATABASE_URL }}
+  VERCEL_URL: ${{ secrets.VERCEL_URL }}
 
 jobs:
   code-quality:

@@ -2,9 +2,9 @@
 import { Metadata } from 'next'
 
 import './globals.css'
+import { Providers } from '@/lib/components'
 
 import Header from './Header'
-import Providers from './providers'
 
 export const metadata: Metadata = {
   description: 'Coming soon',
