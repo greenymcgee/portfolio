@@ -6,13 +6,13 @@ declare module 'next-auth' {
   interface Session {
     expires: ISODateString
     token: {
-      email: GeneratedUser['email']
-      firstName: GeneratedUser['firstName']
+      email: User['email']
+      firstName: User['firstName']
       id: string
-      lastName: GeneratedUser['lastName']
-      roles: GeneratedUser['roles']
+      lastName: User['lastName']
+      roles: User['roles']
       sub: string
-      username: GeneratedUser['username']
+      username: User['username']
       iat: number
       exp: number
       jti: string
@@ -26,13 +26,13 @@ declare module 'next-auth' {
 
 declare module 'next-auth/jwt' {
   interface JWT {
-    email: GeneratedUser['email']
-    firstName: GeneratedUser['firstName']
+    email: User['email']
+    firstName: User['firstName']
     id: string
-    lastName: GeneratedUser['lastName']
-    roles: GeneratedUser['roles']
+    lastName: User['lastName']
+    roles: User['roles']
     sub: string
-    username: GeneratedUser['username']
+    username: User['username']
     iat: number
     exp: number
     jti: string
