@@ -1,4 +1,3 @@
-import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { ZodError } from 'zod'
 
@@ -10,6 +9,7 @@ import {
   UNAUTHORIZED,
 } from '@/constants'
 import { UNPUBLISHED_POST } from '@/test/fixtures'
+import { mockCookieHeader } from '@/test/helpers/utils'
 import { mockPostsCreateResponse, postsServer } from '@/test/servers'
 
 import { createPost } from '..'
@@ -39,12 +39,13 @@ describe('createPost', () => {
 
   it('should redirect to the login page when the cookie is not set', async () => {
     await createPost({ status: 'IDLE' }, FORM_DATA)
-    expect(redirect).toHaveBeenCalledWith(ROUTES.login)
+    expect(redirect).toHaveBeenCalledWith(
+      ROUTES.loginWithRedirect(ROUTES.newPost),
+    )
   })
 
   it('should redirect to the login page when the response is unauthorized', async () => {
-    const { get } = await headers()
-    vi.mocked(get).mockReturnValue('cookie')
+    await mockCookieHeader()
     mockPostsCreateResponse({
       message: HTTP_TEXT_BY_STATUS[UNAUTHORIZED],
       status: UNAUTHORIZED,
@@ -56,8 +57,7 @@ describe('createPost', () => {
   })
 
   it('should redirect to the home page when the response is forbidden', async () => {
-    const { get } = await headers()
-    vi.mocked(get).mockReturnValue('cookie')
+    await mockCookieHeader()
     mockPostsCreateResponse({
       message: HTTP_TEXT_BY_STATUS[FORBIDDEN],
       status: FORBIDDEN,
@@ -67,8 +67,7 @@ describe('createPost', () => {
   })
 
   it('should return the error status and the formValues when an unknown error occurs', async () => {
-    const { get } = await headers()
-    vi.mocked(get).mockReturnValue('cookie')
+    await mockCookieHeader()
     mockPostsCreateResponse({
       message: HTTP_TEXT_BY_STATUS[INTERNAL_SERVER_ERROR],
       status: INTERNAL_SERVER_ERROR,
@@ -83,8 +82,7 @@ describe('createPost', () => {
   })
 
   it('should redirect to the post page upon success', async () => {
-    const { get } = await headers()
-    vi.mocked(get).mockReturnValue('cookie')
+    await mockCookieHeader()
     await createPost({ status: 'IDLE' }, FORM_DATA)
     expect(redirect).toHaveBeenCalledWith(ROUTES.post(UNPUBLISHED_POST.id))
   })

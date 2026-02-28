@@ -21,7 +21,7 @@ export async function createPost(_: State, formData: FormData): Promise<State> {
 
   const headersList = await headers()
   const cookie = headersList.get('cookie')
-  if (!cookie) return redirect(ROUTES.login)
+  if (!cookie) return redirect(ROUTES.loginWithRedirect(ROUTES.newPost))
 
   const { error, response } = await tryPostNewPost(validate.data, cookie)
   if (!error) return redirect(ROUTES.post(response.data.post.id))

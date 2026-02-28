@@ -98,6 +98,19 @@ Once the server is running, visit `http://localhost:3000` to start using the app
 - [Prisma ORM documentation](https://www.prisma.io/docs/orm)
 - [Prisma Client API reference](https://www.prisma.io/docs/orm/prisma-client)
 
+## Test Utils
+
+- [createJWTMock](https://github.com/greenymcgee/portfolio/blob/main/test/helpers/utils/createJWTMock.ts)
+- [factories](https://github.com/greenymcgee/portfolio/blob/main/test/factories/)
+- [getApiUrl](https://github.com/greenymcgee/portfolio/blob/main/test/helpers/utils/getApiUrl.ts)
+- [mockCookieHeader](https://github.com/greenymcgee/portfolio/blob/main/test/helpers/utils/mockCookieHeader.ts)
+- [mockServerSession](https://github.com/greenymcgee/portfolio/blob/main/test/helpers/utils/mockServerSession.ts)
+- [mockServerSessionAsync](https://github.com/greenymcgee/portfolio/blob/main/test/helpers/utils/mockServerSessionAsync.ts)
+- [renderWithProviders](https://github.com/greenymcgee/portfolio/blob/main/test/helpers/utils/renderWithProviders.tsx)
+- [seedPosts](https://github.com/greenymcgee/portfolio/blob/main/test/helpers/utils/seedPosts.ts)
+- [seedUsers](https://github.com/greenymcgee/portfolio/blob/main/test/helpers/utils/seedUsers.ts)
+- [setupTestDatabase](https://github.com/greenymcgee/portfolio/blob/main/test/helpers/utils/setupTestDatabase.ts)
+
 ## Testing Against User Authenticated Code
 
 There are a few utils that make mocking a User server session easier.
