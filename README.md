@@ -98,6 +98,24 @@ Once the server is running, visit `http://localhost:3000` to start using the app
 - [Prisma ORM documentation](https://www.prisma.io/docs/orm)
 - [Prisma Client API reference](https://www.prisma.io/docs/orm/prisma-client)
 
+## Running Queries Against the Database
+
+First open a connection to the database using the following command:
+
+```bash
+# Replace this with a real connection string
+psql "postgresql://user:pass@host:port/db?sslmode=require"
+```
+
+Then run queries like this:
+```sql
+SELECT p.*, u."firstName", u."lastName", u.email
+  FROM "Post" p
+  JOIN "User" u ON p."authorId" = u.id
+  ORDER BY p."createdAt" DESC
+  LIMIT 10;
+```
+
 ## Test Utils
 
 - [createJWTMock](https://github.com/greenymcgee/portfolio/blob/main/test/helpers/utils/createJWTMock.ts)
