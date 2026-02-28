@@ -20,6 +20,8 @@
     "neverthrow",
     "nextauth",
     "Pino",
+    "psql",
+    "sslmode",
     "svgs",
     "Testpass",
     "theflanman",
