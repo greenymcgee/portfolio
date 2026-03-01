@@ -10,7 +10,7 @@ export default function Header() {
     <header className="w-full bg-white px-8 py-4 shadow-md">
       <nav className="flex items-center justify-between">
         <Link
-          className="text-xl font-bold text-gray-800 transition-colors hover:text-blue-600"
+          className="font-porter-sans-block text-xl font-bold text-gray-800 transition-colors hover:text-blue-600"
           href="/"
         >
           Coming soon

@@ -1,8 +1,41 @@
 @import 'tailwindcss';
 
 @theme {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  /* Colors */
+  --color-app-surface: #1b1b1b;
+  --color-app-surface-alt: #252525;
+  --color-border: #565656;
+  --color-on-app-surface: #d9d9d9;
+  --color-on-app-surface-alt: #e2e2e2;
+  --color-primary: #3cc0c3;
+  --color-subtle: #a1a1a1;
+
+  --color-background: var(--color-app-surface);
+  --color-foreground: var(--color-on-app-surface);
+
+  /* Text */
+  --text-xxxxl: 3.5rem;
+  --text-xxxl: 3rem;
+  --text-xxl: 2.5rem;
+  --text-xl: 1.75rem;
+  --text-lg: 1.125rem;
+  --text-base: 1rem;
+  --text-md: var(--text-base);
+  --text-sm: 0.875rem;
+  --text-xs: 0.75rem;
+
+  /* Leading */
+  --leading-md: 1.25;
+  --leading-lg: 1.5;
+
+  /* Fonts */
+  --font-open-sans: "Open Sans", "Open Sans Fallback";
+  --font-porter-sans-block: 'porterSansBlock', 'porterSansBlock Fallback';
+
+
+  /* Border Radii */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
 }
 
 /*
@@ -19,24 +52,15 @@
   ::before,
   ::backdrop,
   ::file-selector-button {
-    border-color: var(--color-gray-200, currentcolor);
+    border-color: var(--color-border, currentcolor);
   }
 }
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
+/* Dark Mode vs light later */
+/* @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
   }
-}
+} */
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-}
