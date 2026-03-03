@@ -1,20 +1,10 @@
 export const dynamic = 'force-dynamic' // This disables SSG and ISR
 
 import Link from 'next/link'
-import { redirect } from 'next/navigation'
 
-import { checkPostTableExists } from '@/lib/db-utils'
 import { prisma } from '@/lib/prisma'
 
 export default async function Home() {
-  // Check if the post table exists
-  const tableExists = await checkPostTableExists()
-
-  // If the post table doesn't exist, redirect to setup page
-  if (!tableExists) {
-    redirect('/setup')
-  }
-
   const posts = await prisma.post.findMany({
     include: {
       author: {

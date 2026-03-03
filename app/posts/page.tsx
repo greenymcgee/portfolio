@@ -20,7 +20,7 @@ export const dynamic = 'force-dynamic'
 
 function PostsList() {
   const searchParams = useSearchParams()
-  const page = parseInt(searchParams.get('page') || '1')
+  const page = parseInt(searchParams.get('page') || '0')
 
   const [posts, setPosts] = useState<Post[]>([])
   const [totalPages, setTotalPages] = useState(1)
@@ -89,7 +89,7 @@ function PostsList() {
 
           {/* Pagination Controls */}
           <div className="mt-8 flex justify-center space-x-4">
-            {page > 1 && (
+            {page > 0 && (
               <Link href={`/posts?page=${page - 1}`}>
                 <button
                   className="rounded-sm bg-gray-200 px-4 py-2 hover:bg-gray-300"

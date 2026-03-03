@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { prettifyError } from 'zod/v4/core'
 
 import {
   BAD_REQUEST,
@@ -9,29 +9,46 @@ import {
   UNAUTHORIZED,
   UNPROCESSABLE_CONTENT,
 } from '@/constants'
-import { CreatePostService } from '@/features/posts/services'
+import { CreatePostService, GetPostsService } from '@/features/posts/services'
 import { createResponse } from '@/lib/db'
 import { logger } from '@/lib/logger'
-import { prisma } from '@/lib/prisma'
 
 export async function GET(request: Request) {
-  const url = new URL(request.url)
-  const page = parseInt(url.searchParams.get('page') || '1')
-  const postsPerPage = 5
-  const offset = (page - 1) * postsPerPage
-
-  // Fetch paginated posts
-  const posts = await prisma.post.findMany({
-    include: { author: { select: { firstName: true } } },
-    orderBy: { createdAt: 'desc' },
-    skip: offset,
-    take: postsPerPage,
-  })
-
-  const totalPosts = await prisma.post.count()
-  const totalPages = Math.ceil(totalPosts / postsPerPage)
-
-  return NextResponse.json({ posts, totalPages })
+  const service = new GetPostsService(request)
+  const result = await service.getPosts()
+  return result.match(
+    (response) => {
+      return createResponse({
+        body: { posts: response.posts, totalPages: response.totalPages },
+        status: response.status,
+        url: request.url,
+      })
+    },
+    (error) => {
+      switch (error.type) {
+        case 'params':
+          return createResponse({
+            message: prettifyError(error.details),
+            status: error.status,
+            url: request.url,
+          })
+        case 'query':
+        case 'count': {
+          return createResponse({ status: error.status, url: request.url })
+        }
+        default: {
+          logger.error(
+            { error: error satisfies never },
+            'UNHANDLED_GET_POSTS_ERROR',
+          )
+          return createResponse({
+            status: INTERNAL_SERVER_ERROR,
+            url: request.url,
+          })
+        }
+      }
+    },
+  )
 }
 
 export async function POST(request: Request) {
