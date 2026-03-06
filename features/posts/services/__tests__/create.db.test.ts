@@ -1,6 +1,5 @@
 /* eslint-disable neverthrow/must-use-result */
 import { faker } from '@faker-js/faker'
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client'
 import { Err, Ok } from 'neverthrow'
 import { NextRequest } from 'next/server'
 import { ZodError } from 'zod'
@@ -8,10 +7,10 @@ import { ZodError } from 'zod'
 import {
   CREATED,
   FORBIDDEN,
-  INTERNAL_SERVER_ERROR,
   UNAUTHORIZED,
   UNPROCESSABLE_CONTENT,
 } from '@/constants'
+import { PrismaError } from '@/lib/errors'
 import {
   mockServerSession,
   mockServerSessionAsync,
@@ -38,7 +37,9 @@ describe('CreatePostService', () => {
           new NextRequest('http://nothing.greeny'),
         )
         const result = await service.createPost()
-        expect(result).toEqual(new Err({ status: UNAUTHORIZED }))
+        expect(result).toEqual(
+          new Err({ status: UNAUTHORIZED, type: 'unauthorized' }),
+        )
       })
 
       it('should return a forbidden status when the user does not have permission', async () => {
@@ -47,7 +48,9 @@ describe('CreatePostService', () => {
           new NextRequest('http://nothing.greeny'),
         )
         const result = await service.createPost()
-        expect(result).toEqual(new Err({ status: FORBIDDEN }))
+        expect(result).toEqual(
+          new Err({ status: FORBIDDEN, type: 'forbidden' }),
+        )
       })
 
       it('should return an unprocessable content status and details when zod throws an error', async () => {
@@ -62,6 +65,7 @@ describe('CreatePostService', () => {
           new Err({
             details: expect.any(ZodError),
             status: UNPROCESSABLE_CONTENT,
+            type: 'zod',
           }),
         )
       })
@@ -81,46 +85,16 @@ describe('CreatePostService', () => {
               message: 'JSON not parsable',
             },
             status: UNPROCESSABLE_CONTENT,
+            type: 'json',
           }),
         )
       })
 
-      it('should return the given status and details when a Prisma error that matches a mapped status is thrown', async () => {
-        const service = new CreatePostService(
-          new NextRequest('http://nothing.greeny', {
-            body: JSON.stringify({
-              content: {},
-              publishedAt: null,
-              title: faker.book.title(),
-            }),
-            method: 'POST',
-          }),
-        )
-        // throws foreign key constraint for author id because not authors seeded
-        const result = await service.createPost()
-        expect(result).toEqual(
-          new Err({
-            details: expect.any(PrismaClientKnownRequestError),
-            status: UNPROCESSABLE_CONTENT,
-          }),
-        )
-      })
-
-      it("should return a 500 status and details when a Prisma error is thrown that doesn't have a matching code", async () => {
+      it('should return an error when the insert fails', async () => {
+        const error = new PrismaError(new Error('Bad'))
         const tryInsertPostSpy = vi
           .spyOn(postUtils, 'tryInsertPost')
-          .mockResolvedValueOnce({
-            error: new PrismaClientKnownRequestError(
-              'Invalid Request Parameters',
-              {
-                clientVersion: '',
-                code: 'P5011',
-              },
-            ),
-            // @ts-expect-error: this matches what would happen if the error
-            // occurred
-            response: undefined,
-          })
+          .mockResolvedValueOnce(error)
         const service = new CreatePostService(
           new NextRequest('http://nothing.greeny', {
             body: JSON.stringify({
@@ -134,8 +108,9 @@ describe('CreatePostService', () => {
         const result = await service.createPost()
         expect(result).toEqual(
           new Err({
-            details: expect.any(PrismaClientKnownRequestError),
-            status: INTERNAL_SERVER_ERROR,
+            details: error.details,
+            status: error.status,
+            type: 'insert',
           }),
         )
         tryInsertPostSpy.mockRestore()
