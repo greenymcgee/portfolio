@@ -1,14 +1,6 @@
 import { prettifyError } from 'zod/v4/core'
 
-import {
-  BAD_REQUEST,
-  CONFLICT,
-  FORBIDDEN,
-  INTERNAL_SERVER_ERROR,
-  NOT_FOUND,
-  UNAUTHORIZED,
-  UNPROCESSABLE_CONTENT,
-} from '@/constants'
+import { INTERNAL_SERVER_ERROR } from '@/constants'
 import { CreatePostService, GetPostsService } from '@/features/posts/services'
 import { createResponse } from '@/lib/db'
 import { logger } from '@/lib/logger'
@@ -26,15 +18,20 @@ export async function GET(request: Request) {
     },
     (error) => {
       switch (error.type) {
-        case 'params':
+        case 'zod':
           return createResponse({
+            body: { type: error.type },
             message: prettifyError(error.details),
             status: error.status,
             url: request.url,
           })
         case 'query':
         case 'count': {
-          return createResponse({ status: error.status, url: request.url })
+          return createResponse({
+            body: { type: error.type },
+            status: error.status,
+            url: request.url,
+          })
         }
         default: {
           logger.error(
@@ -63,15 +60,24 @@ export async function POST(request: Request) {
       })
     },
     (error) => {
-      switch (error.status) {
-        case FORBIDDEN:
-        case UNAUTHORIZED:
-        case BAD_REQUEST:
-        case CONFLICT:
-        case INTERNAL_SERVER_ERROR:
-        case NOT_FOUND:
-        case UNPROCESSABLE_CONTENT: {
+      switch (error.type) {
+        case 'unauthorized':
+        case 'forbidden':
           return createResponse({ status: error.status, url: request.url })
+        case 'zod':
+          return createResponse({
+            body: { type: error.type },
+            message: prettifyError(error.details),
+            status: error.status,
+            url: request.url,
+          })
+        case 'json':
+        case 'insert': {
+          return createResponse({
+            body: { type: error.type },
+            status: error.status,
+            url: request.url,
+          })
         }
         default: {
           logger.error(

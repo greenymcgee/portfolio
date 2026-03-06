@@ -1,5 +1,6 @@
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client'
 
+import { PrismaError } from '@/lib/errors'
 import { prisma } from '@/lib/prisma'
 import { postFactory, userFactory } from '@/test/factories'
 import { createJWTMock } from '@/test/helpers/utils'
@@ -48,11 +49,11 @@ describe('tryInsertPost', () => {
   })
 
   it('should return an error', async () => {
-    const prismaError = new PrismaClientKnownRequestError('Bad', {
+    const error = new PrismaClientKnownRequestError('Bad', {
       clientVersion: '',
       code: 'P1005',
     })
-    vi.mocked(prisma.post.create).mockRejectedValue(prismaError)
+    vi.mocked(prisma.post.create).mockRejectedValue(error)
     const user = userFactory.build()
     const token = createJWTMock(user)
     const params = {
@@ -60,8 +61,8 @@ describe('tryInsertPost', () => {
       publishedAt: new Date(),
       title: 'Title',
     }
-    const { error } = await tryInsertPost(params, token)
-    expect(error).toBe(prismaError)
+    const result = await tryInsertPost(params, token)
+    expect(result).toEqual(new PrismaError(error))
   })
 
   it('should return a response', async () => {
@@ -74,7 +75,7 @@ describe('tryInsertPost', () => {
       publishedAt: new Date(),
       title: 'Title',
     }
-    const { response } = await tryInsertPost(params, token)
+    const response = await tryInsertPost(params, token)
     expect(response).toBe(prismaResponse)
   })
 })

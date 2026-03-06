@@ -35,7 +35,7 @@ export class GetPostsService {
       return errAsync({
         details: paramsError,
         status: BAD_REQUEST,
-        type: 'params' as const,
+        type: 'zod' as const,
       } as const)
     }
 
