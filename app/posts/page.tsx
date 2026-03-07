@@ -58,30 +58,29 @@ function PostsList() {
       ) : (
         <>
           {posts.length === 0 ? (
-            <p className="text-gray-600">No posts available.</p>
+            <p>No posts available.</p>
           ) : (
             <ul className="mx-auto w-full max-w-4xl space-y-6">
               {posts.map((post) => (
-                <li
-                  className="rounded-lg border bg-white p-6 shadow-md"
-                  key={post.id}
-                >
+                <li key={post.id}>
                   <Link
-                    className="text-2xl font-semibold text-gray-900 hover:underline"
+                    className="block rounded-lg border p-6 shadow-md"
                     href={`/posts/${post.id}`}
                   >
-                    {post.title}
+                    <p className="text-2xl font-semibold hover:underline">
+                      {post.title}
+                    </p>
+                    <p className="text-sm">
+                      by {post.author.firstName || 'Anonymous'}
+                    </p>
+                    <p className="text-xs">
+                      {new Date(post.createdAt).toLocaleDateString('en-US', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                      })}
+                    </p>
                   </Link>
-                  <p className="text-sm text-gray-500">
-                    by {post.author.firstName || 'Anonymous'}
-                  </p>
-                  <p className="text-xs text-gray-400">
-                    {new Date(post.createdAt).toLocaleDateString('en-US', {
-                      day: 'numeric',
-                      month: 'long',
-                      year: 'numeric',
-                    })}
-                  </p>
                 </li>
               ))}
             </ul>
@@ -91,20 +90,14 @@ function PostsList() {
           <div className="mt-8 flex justify-center space-x-4">
             {page > 0 && (
               <Link href={`/posts?page=${page - 1}`}>
-                <button
-                  className="rounded-sm bg-gray-200 px-4 py-2 hover:bg-gray-300"
-                  type="button"
-                >
+                <button className="rounded-sm px-4 py-2" type="button">
                   Previous
                 </button>
               </Link>
             )}
             {page < totalPages && (
               <Link href={`/posts?page=${page + 1}`}>
-                <button
-                  className="rounded-sm bg-gray-200 px-4 py-2 hover:bg-gray-300"
-                  type="button"
-                >
+                <button className="rounded-sm px-4 py-2" type="button">
                   Next
                 </button>
               </Link>
@@ -119,12 +112,12 @@ function PostsList() {
 // eslint-disable-next-line react/no-multi-comp
 export default function PostsPage() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-start bg-gray-50 p-8">
+    <div className="flex min-h-screen flex-col items-center justify-start p-8">
       <Suspense
         fallback={
           <div className="flex min-h-screen items-center justify-center">
-            <div className="h-10 w-10 animate-spin rounded-full border-4 border-blue-500 border-t-transparent" />
-            <p className="ml-3 text-gray-600">Loading page...</p>
+            <div className="h-10 w-10 animate-spin rounded-full border-4 border-t-transparent" />
+            <p className="ml-3">Loading page...</p>
           </div>
         }
       >

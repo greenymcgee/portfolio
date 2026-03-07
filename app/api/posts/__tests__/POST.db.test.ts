@@ -1,4 +1,5 @@
 import { errAsync } from 'neverthrow'
+import { getServerSession } from 'next-auth/next'
 
 import {
   CREATED,
@@ -12,6 +13,10 @@ import * as postServices from '@/features/posts/services'
 import { mockServerSessionAsync, setupTestDatabase } from '@/test/helpers/utils'
 
 import { POST } from '../route'
+
+beforeEach(() => {
+  vi.mocked(getServerSession).mockResolvedValue(null)
+})
 
 describe('POST:/api/posts/', () => {
   describe('unauthorized', () => {
@@ -36,7 +41,23 @@ describe('POST:/api/posts/', () => {
       expect(result.status).toEqual(UNPROCESSABLE_CONTENT)
     })
 
+    it('should return an unprocessable content response when a zod error occurs', async () => {
+      await mockServerSessionAsync('ADMIN')
+      const params = {
+        publishedAt: null,
+        title: 123,
+      }
+      const result = await POST(
+        new Request(new URL('http://nothing.greeny'), {
+          body: JSON.stringify(params),
+          method: 'POST',
+        }),
+      )
+      expect(result.status).toEqual(UNPROCESSABLE_CONTENT)
+    })
+
     it('should return an internal server error response for any unexpected errors', async () => {
+      await mockServerSessionAsync('ADMIN')
       const error = { details: {}, status: 418 }
       vi.spyOn(postServices, 'CreatePostService').mockImplementationOnce(
         class {

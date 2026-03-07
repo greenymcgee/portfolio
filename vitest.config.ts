@@ -12,11 +12,12 @@ export default defineConfig({
         '**/index.ts',
         'app/favicon.ico',
         'app/globals.css',
-        'app/api/auth/[...nextauth]/route.ts',
+        'app/api/auth/**',
         'lib/logger.ts',
         'lib/prisma/errorClasses.ts',
         'lib/prisma/client.ts',
         'lib/components/providers.tsx',
+        'components/svgs/**',
       ],
       // thresholds: {
       //   branches: 97,
