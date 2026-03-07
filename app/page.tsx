@@ -1,50 +1,20 @@
-export const dynamic = 'force-dynamic' // This disables SSG and ISR
+import clsx from 'clsx'
 
-import Link from 'next/link'
-
-import { prisma } from '@/lib/prisma'
-
-export default async function Home() {
-  const posts = await prisma.post.findMany({
-    include: {
-      author: {
-        select: {
-          firstName: true,
-        },
-      },
-    },
-    orderBy: {
-      createdAt: 'desc',
-    },
-    take: 6,
-  })
-
+export default function HomePage() {
   return (
-    <div className="flex min-h-screen flex-col items-center bg-gray-50 px-8 py-24">
-      <h1 className="mb-12 text-5xl font-extrabold text-[#333333]">
-        Recent Posts
+    <header>
+      <h1
+        className={clsx(
+          'font-porter-sans-block absolute top-43 text-balance',
+          'text-xl sm:text-2xl md:text-3xl lg:text-4xl',
+          'left-[-0.3rem] md:left-[-1.9rem]',
+        )}
+        data-testid="home-page-heading"
+      >
+        <span>Houston C. </span>
+        <br />
+        Green
       </h1>
-      <div className="mb-8 grid w-full max-w-6xl gap-8 md:grid-cols-2 lg:grid-cols-3">
-        {posts.map((post) => (
-          <Link className="group" href={`/posts/${post.id}`} key={post.id}>
-            <div className="rounded-lg border bg-white p-6 shadow-md transition-shadow duration-300 hover:shadow-lg">
-              <h2 className="mb-2 text-2xl font-semibold text-gray-900 group-hover:underline">
-                {post.title}
-              </h2>
-              <p className="text-sm text-gray-500">
-                by {post.author.firstName}
-              </p>
-              <p className="mb-4 text-xs text-gray-400">
-                {new Date(post.createdAt).toLocaleDateString('en-US', {
-                  day: 'numeric',
-                  month: 'long',
-                  year: 'numeric',
-                })}
-              </p>
-            </div>
-          </Link>
-        ))}
-      </div>
-    </div>
+    </header>
   )
 }

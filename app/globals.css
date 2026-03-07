@@ -14,9 +14,9 @@
   --color-foreground: var(--color-on-app-surface);
 
   /* Text */
-  --text-xxxxl: 3.5rem;
-  --text-xxxl: 3rem;
-  --text-xxl: 2.5rem;
+  --text-4xl: 3.5rem;
+  --text-3xl: 3rem;
+  --text-2xl: 2.5rem;
   --text-xl: 1.75rem;
   --text-lg: 1.125rem;
   --text-base: 1rem;
@@ -29,9 +29,8 @@
   --leading-lg: 1.5;
 
   /* Fonts */
-  --font-open-sans: "Open Sans", "Open Sans Fallback";
+  --font-open-sans: 'Open Sans', 'Open Sans Fallback';
   --font-porter-sans-block: 'porterSansBlock', 'porterSansBlock Fallback';
-
 
   /* Border Radii */
   --radius-sm: 0.25rem;
@@ -56,6 +55,14 @@
   }
 }
 
+@utility display-unset {
+  display: unset;
+}
+
+@utility max-w-unset {
+  max-width: unset;
+}
+
 /* Dark Mode vs light later */
 /* @media (prefers-color-scheme: dark) {
   :root {
@@ -63,4 +70,3 @@
     --foreground: #ededed;
   }
 } */
-
