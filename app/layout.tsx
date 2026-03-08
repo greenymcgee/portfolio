@@ -23,12 +23,12 @@ type Props = {
 export const metadata: Metadata = {
   description:
     "I'm a software engineer, and these are some of the things I've been up to.",
-  manifest: '/site.webmanifest',
+  manifest: '/manifest.json',
   title: 'Houston C. Green',
 }
 
 export const viewport: Viewport = {
-  themeColor: '#1B1B1B',
+  themeColor: '#3CC0C3',
   width: 'device-width',
 }
 
