@@ -8,7 +8,7 @@ import {
   FORBIDDEN,
   UNAUTHORIZED,
   UNPROCESSABLE_CONTENT,
-} from '@/constants'
+} from '@/globals/constants'
 import { authenticateAPISession } from '@/lib/auth'
 import { PrismaError, RequestJSONError } from '@/lib/errors'
 import { logger } from '@/lib/logger'

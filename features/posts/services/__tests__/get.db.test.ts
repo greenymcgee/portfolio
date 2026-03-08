@@ -2,7 +2,7 @@
 import { Err, Ok } from 'neverthrow'
 import { NextRequest } from 'next/server'
 
-import { INTERNAL_SERVER_ERROR, SUCCESS } from '@/constants'
+import { INTERNAL_SERVER_ERROR, SUCCESS } from '@/globals/constants'
 import { PrismaError } from '@/lib/errors'
 import { prisma } from '@/lib/prisma'
 import { setupTestDatabase } from '@/test/helpers/utils'

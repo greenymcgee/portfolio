@@ -9,7 +9,7 @@ import {
   FORBIDDEN,
   UNAUTHORIZED,
   UNPROCESSABLE_CONTENT,
-} from '@/constants'
+} from '@/globals/constants'
 import { PrismaError } from '@/lib/errors'
 import {
   mockServerSession,

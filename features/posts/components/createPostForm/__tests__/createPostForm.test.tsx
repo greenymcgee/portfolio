@@ -2,7 +2,7 @@ import { fireEvent, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import mockRouter from 'next-router-mock'
 
-import { INTERNAL_SERVER_ERROR, ROUTES } from '@/constants'
+import { INTERNAL_SERVER_ERROR, ROUTES } from '@/globals/constants'
 import { UNPUBLISHED_POST } from '@/test/fixtures'
 import { mockCookieHeader, renderWithProviders } from '@/test/helpers/utils'
 import {

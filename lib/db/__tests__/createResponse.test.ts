@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker'
 import { NextResponse } from 'next/server'
 
-import { HTTP_TEXT_BY_STATUS, SUCCESS } from '@/constants'
+import { HTTP_TEXT_BY_STATUS, SUCCESS } from '@/globals/constants'
 
 import { createResponse } from '..'
 

@@ -1,6 +1,7 @@
 import { errAsync } from 'neverthrow'
 import { getServerSession } from 'next-auth/next'
 
+import * as postServices from '@/features/posts/services'
 import {
   CREATED,
   FORBIDDEN,
@@ -8,8 +9,7 @@ import {
   INTERNAL_SERVER_ERROR,
   UNAUTHORIZED,
   UNPROCESSABLE_CONTENT,
-} from '@/constants'
-import * as postServices from '@/features/posts/services'
+} from '@/globals/constants'
 import { mockServerSessionAsync, setupTestDatabase } from '@/test/helpers/utils'
 
 import { POST } from '../route'

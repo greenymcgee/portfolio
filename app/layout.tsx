@@ -12,8 +12,8 @@ import {
   Rainbow,
   SiteNavbar,
   SmallRainbow,
-} from '@/components'
-import { ROUTES } from '@/constants'
+} from '@/globals/components'
+import { ROUTES } from '@/globals/constants'
 import { Providers } from '@/lib/components'
 
 type Props = {

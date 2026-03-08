@@ -6,8 +6,8 @@ import Form from 'next/form'
 import { usePathname, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 
-import { ROUTES } from '@/constants'
 import { createPost } from '@/features/posts/server'
+import { ROUTES } from '@/globals/constants'
 import { hasPermission } from '@/lib/permissions'
 
 import { CreatePostFormBody } from '../createPostFormBody'

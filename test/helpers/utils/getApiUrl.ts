@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { API_ROUTES, BASE_API_URL } from '@/constants'
+import { API_ROUTES, BASE_API_URL } from '@/globals/constants'
 
 type RouteKey = keyof typeof API_ROUTES
 type RouteArgs<

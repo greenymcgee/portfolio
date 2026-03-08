@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import Link from 'next/link'
 
-import { ROUTES } from '@/constants'
+import { ROUTES } from '@/globals/constants'
 
 import { SITE_NAVBAR_CLASSNAMES } from './classNames'
 

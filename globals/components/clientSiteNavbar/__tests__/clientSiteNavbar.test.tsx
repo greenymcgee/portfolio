@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import mockRouter from 'next-router-mock'
 
-import { ROUTES } from '@/constants'
+import { ROUTES } from '@/globals/constants'
 import { PUBLISHED_POST } from '@/test/fixtures'
 
 import { ClientSiteNavbar } from '..'

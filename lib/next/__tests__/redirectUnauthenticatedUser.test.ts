@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-import { ROUTES } from '@/constants'
+import { ROUTES } from '@/globals/constants'
 
 import { redirectUnauthenticatedUser } from '..'
 
