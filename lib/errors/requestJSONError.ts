@@ -1,4 +1,4 @@
-import { UNPROCESSABLE_CONTENT } from '@/constants'
+import { UNPROCESSABLE_CONTENT } from '@/globals/constants'
 
 const MESSAGE = 'JSON not parsable' as const
 

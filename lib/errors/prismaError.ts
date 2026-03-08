@@ -1,6 +1,6 @@
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client'
 
-import { INTERNAL_SERVER_ERROR } from '@/constants'
+import { INTERNAL_SERVER_ERROR } from '@/globals/constants'
 
 import { PRISMA_ERROR_CODE_TO_HTTP_STATUS } from '../prisma/constants'
 import { PrismaHTTPErrorCodeKey } from '../prisma/errorClasses'

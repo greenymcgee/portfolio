@@ -7,7 +7,7 @@ import {
   INTERNAL_SERVER_ERROR,
   ROUTES,
   UNAUTHORIZED,
-} from '@/constants'
+} from '@/globals/constants'
 import { UNPUBLISHED_POST } from '@/test/fixtures'
 import { mockCookieHeader } from '@/test/helpers/utils'
 import { mockPostsCreateResponse, postsServer } from '@/test/servers'

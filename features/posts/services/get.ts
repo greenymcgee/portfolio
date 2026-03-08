@@ -1,6 +1,6 @@
 import { errAsync, okAsync } from 'neverthrow'
 
-import { BAD_REQUEST, SUCCESS } from '@/constants'
+import { BAD_REQUEST, SUCCESS } from '@/globals/constants'
 import { PrismaError } from '@/lib/errors'
 import { logger } from '@/lib/logger'
 

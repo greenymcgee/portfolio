@@ -9,8 +9,8 @@ import {
 } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
-import { ROUTES } from '@/constants'
 import { handleLoginFormSubmit } from '@/features/users/utils'
+import { ROUTES } from '@/globals/constants'
 
 type Props = {
   ActionBar: ReactElement

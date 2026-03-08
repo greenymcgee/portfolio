@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 
-import { HTTP_TEXT_BY_STATUS } from '@/constants'
+import { HTTP_TEXT_BY_STATUS } from '@/globals/constants'
 
 type JSONOptions = Omit<
   NonNullable<SecondParameterOf<typeof NextResponse.json>>,

@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker'
 import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
 
-import { CREATED, HTTP_TEXT_BY_STATUS, SUCCESS } from '@/constants'
+import { CREATED, HTTP_TEXT_BY_STATUS, SUCCESS } from '@/globals/constants'
 import { User } from '@/prisma/generated/client'
 
 import { ADMIN_USER, BASIC_USER, UNPUBLISHED_POST } from '../fixtures'

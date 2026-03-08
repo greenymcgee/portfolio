@@ -3,8 +3,7 @@
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 
-import { FORBIDDEN, UNAUTHORIZED } from '@/constants'
-import { ROUTES } from '@/constants/routes'
+import { FORBIDDEN, ROUTES, UNAUTHORIZED } from '@/globals/constants'
 
 import { postCreateSchema } from '../schemas'
 import { PostCreateState } from '../types'

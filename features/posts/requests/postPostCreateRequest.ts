@@ -1,4 +1,4 @@
-import { API_ROUTES } from '@/constants'
+import { API_ROUTES } from '@/globals/constants'
 import { baseAPI } from '@/lib/baseAPI'
 
 import type { PostCreateParams } from '../schemas'

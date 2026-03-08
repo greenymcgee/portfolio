@@ -1,13 +1,13 @@
 import { errAsync, okAsync } from 'neverthrow'
 
+import * as postServices from '@/features/posts/services'
 import {
   BAD_REQUEST,
   HTTP_TEXT_BY_STATUS,
   INTERNAL_SERVER_ERROR,
   NOT_FOUND,
   SUCCESS,
-} from '@/constants'
-import * as postServices from '@/features/posts/services'
+} from '@/globals/constants'
 import { POSTS } from '@/test/fixtures'
 
 import { GET } from '../route'

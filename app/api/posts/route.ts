@@ -1,7 +1,7 @@
 import { prettifyError } from 'zod/v4/core'
 
-import { INTERNAL_SERVER_ERROR } from '@/constants'
 import { CreatePostService, GetPostsService } from '@/features/posts/services'
+import { INTERNAL_SERVER_ERROR } from '@/globals/constants'
 import { createResponse } from '@/lib/db'
 import { logger } from '@/lib/logger'
 
