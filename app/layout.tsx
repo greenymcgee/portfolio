@@ -62,7 +62,7 @@ export default function RootLayout({ children }: Props) {
               className="md:display-unset sticky top-0 left-0 z-20 hidden h-screen"
               preserveAspectRatio="none"
             />
-            <div className="relative flex-1">
+            <div className="relative min-w-0 flex-1">
               <header
                 className={clsx(
                   'full-bleed-bg sticky top-0 right-0 z-10 py-6',
@@ -82,7 +82,7 @@ export default function RootLayout({ children }: Props) {
             />
             <SmallRainbow
               aria-hidden
-              className="sticky top-0 right-0 z-20 h-screen md:hidden"
+              className="sticky top-0 right-0 z-20 h-screen shrink-0 md:hidden"
               preserveAspectRatio="none"
             />
           </div>
