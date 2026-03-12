@@ -46,23 +46,29 @@ const openSans = Open_Sans({
 
 export default function RootLayout({ children }: Props) {
   return (
-    <html lang="en">
+    <html className="overscroll-behavior-none" lang="en">
       <body
         className={clsx(
           porterSansBlock.variable,
           openSans.variable,
-          'leading-lg font-open-sans text-foreground bg-background relative h-full',
+          'font-open-sans text-foreground bg-background leading-lg relative h-full',
+          'overscroll-behavior-none',
         )}
       >
         <Providers>
           <div className="relative flex min-h-screen justify-between gap-6">
             <Grunge
               aria-hidden
-              className="md:display-unset sticky top-0 left-0 hidden h-full max-h-screen"
+              className="md:display-unset sticky top-0 left-0 z-20 hidden h-screen"
               preserveAspectRatio="none"
             />
             <div className="relative flex-1">
-              <header className="bg-background sticky top-0 right-0 py-6">
+              <header
+                className={clsx(
+                  'full-bleed-bg sticky top-0 right-0 z-10 py-6',
+                  'lg:bg-background',
+                )}
+              >
                 <Suspense fallback={<SiteNavbar pathname={ROUTES.home} />}>
                   <ClientSiteNavbar />
                 </Suspense>
@@ -71,12 +77,12 @@ export default function RootLayout({ children }: Props) {
             </div>
             <Rainbow
               aria-hidden
-              className="md:display-unset sticky top-0 right-0 hidden h-full max-h-screen"
+              className="md:display-unset sticky top-0 right-0 z-20 hidden h-screen"
               preserveAspectRatio="none"
             />
             <SmallRainbow
               aria-hidden
-              className="sticky top-0 right-0 h-full max-h-screen md:hidden"
+              className="sticky top-0 right-0 z-20 h-screen md:hidden"
               preserveAspectRatio="none"
             />
           </div>

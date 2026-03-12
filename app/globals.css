@@ -1,6 +1,14 @@
 @import 'tailwindcss';
 
 @theme {
+  /* Breakpoints */
+  --breakpoint-xs: 25rem;
+
+  /* Background Images */
+  --background-image-computer-xs: url('/images/computer-xs.png');
+  --background-image-computer-md: url('/images/computer-md.png');
+  --background-image-computer-lg: url('/images/computer-lg.png');
+
   /* Colors */
   --color-app-surface: #1b1b1b;
   --color-app-surface-alt: #252525;
@@ -61,6 +69,24 @@
 
 @utility max-w-unset {
   max-width: unset;
+}
+
+@utility overscroll-behavior-none {
+  overscroll-behavior: none;
+}
+
+@layer components {
+  .full-bleed-bg {
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      left: calc(-50vw + 50%);
+      right: calc(-50vw + 50%);
+      background: inherit;
+      z-index: -1;
+    }
+  }
 }
 
 /* Dark Mode vs light later */
