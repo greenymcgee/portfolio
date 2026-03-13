@@ -1,18 +1,20 @@
 import clsx from 'clsx'
 
+import { Projects } from '@/features/landing/components'
+
 export default function HomePage() {
   return (
     <>
       <header
         className={clsx(
-          'z-10 mb-23 flex w-full flex-col overflow-y-clip',
+          'pointer-events-none z-10 mb-23 flex w-full flex-col overflow-y-clip',
           'sm:h-[calc(100vh-5.875rem)] sm:justify-between lg:fixed',
         )}
       >
         <div className="mb-8">
           <h1
             className={clsx(
-              'font-porter-sans-block leading-md bg-background -ml-[0.2rem] pt-28 text-xl',
+              'font-porter-sans-block leading-md bg-background -ml-[0.2rem] pt-28 text-xl xl:bg-transparent',
               'sm:text-2xl md:-ml-[1.9rem] md:text-3xl lg:text-4xl',
             )}
             data-testid="home-page-heading"
@@ -38,32 +40,35 @@ export default function HomePage() {
           )}
         />
       </header>
-      <article
-        className={clsx(
-          'text-subtle relative z-10 pl-6',
-          'md:pl-0 lg:ml-auto lg:max-w-1/2 lg:pt-80 lg:pr-10',
-        )}
-      >
-        <p className="mb-2">
-          My name is Houston, and I&apos;m a software engineer, but more
-          importantly, I&apos;m a creative person. I get deep fulfillment from
-          bringing something new to life, and oftentimes the way I do that comes
-          in the form of code.
-        </p>
-        <p className="mb-2">
-          Someone once told me, &quot;...making sure the next dev can read your
-          code might be just as important as the code itself.&quot; At first,
-          this didn&apos;t stick out to me as something worth paying too much
-          attention to. It wasn&apos;t until I built my first feature that I
-          realized this advice was profound.
-        </p>
-        <p>
-          After getting lost in my own code a few times, it became clear that
-          optimizing readability must be a top priority. This driving force
-          helped shape my career, and now I specialize in building scalable web
-          apps that stand the test of time.
-        </p>
-      </article>
+      <div className="max-w-[95%] pl-6 md:pl-0 lg:ml-auto lg:max-w-1/2 lg:pt-80 lg:pr-10">
+        <article className="text-subtle mb-24">
+          <p className="mb-2">
+            My name is Houston, and I&apos;m a software engineer, but more
+            importantly, I&apos;m a creative person. I get deep fulfillment from
+            bringing something new to life, and oftentimes the way I do that
+            comes in the form of code.
+          </p>
+          <p className="mb-2">
+            Someone once told me, &quot;...making sure the next dev can read
+            your code might be just as important as the code itself.&quot; At
+            first, this didn&apos;t stick out to me as something worth paying
+            too much attention to. It wasn&apos;t until I built my first feature
+            that I realized this advice was profound.
+          </p>
+          <p>
+            After getting lost in my own code a few times, it became clear that
+            optimizing readability must be a top priority. This driving force
+            helped shape my career, and now I specialize in building scalable
+            web apps that stand the test of time.
+          </p>
+        </article>
+        <section>
+          <h2 className="font-porter-sans-block leading-md mb-6 text-xl md:text-2xl">
+            Projects
+          </h2>
+          <Projects />
+        </section>
+      </div>
     </>
   )
 }
