@@ -3,11 +3,11 @@
 import { useCallback, useState } from 'react'
 
 import { Card } from '@/globals/components'
-import { PROJECTS } from '@/globals/constants'
+import { EXPERIENCES } from '@/globals/constants'
 
 type OnUserInteraction = PropsOf<typeof Card>['onUserInteraction']
 
-export function Projects() {
+export function Experience() {
   const [activeId, setActiveId] = useState('')
 
   const handleUserInteraction = useCallback<OnUserInteraction>((event) => {
@@ -18,17 +18,20 @@ export function Projects() {
 
   return (
     <ul className="flex flex-col gap-8">
-      {PROJECTS.map((project) => (
+      {EXPERIENCES.map((experience) => (
         <Card
           activeId={activeId}
-          description={project.description}
-          id={project.id}
-          key={project.id}
-          link={project.link}
-          name={project.name}
+          description={experience.description}
+          endDate={experience.endDate}
+          id={experience.id}
+          key={experience.id}
+          link={experience.link}
+          name={experience.name}
           onUserInteraction={handleUserInteraction}
           resetActiveId={resetActiveId}
-          tools={project.tools}
+          startDate={experience.startDate}
+          title={experience.title}
+          tools={experience.tools}
         />
       ))}
     </ul>

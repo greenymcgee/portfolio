@@ -12,3 +12,4 @@ type SoftwareTool =
   | 'Chakra UI'
   | 'Hotwired'
   | 'Flow-Typed'
+  | 'jQuery'

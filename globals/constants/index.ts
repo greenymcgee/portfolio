@@ -1,5 +1,6 @@
 export * from './apiRoutes'
 export * from './env'
+export * from './experiences'
 export * from './httpStatuses'
 export * from './projects'
 export * from './routes'
