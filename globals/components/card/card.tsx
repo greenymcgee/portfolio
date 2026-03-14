@@ -1,0 +1,112 @@
+import { ElementType, FocusEvent, MouseEvent, TouchEvent } from 'react'
+import clsx from 'clsx'
+import { SquareArrowOutUpRight } from 'lucide-react'
+import Link from 'next/link'
+
+type UserInteractionEvent =
+  | FocusEvent<HTMLLIElement>
+  | TouchEvent<HTMLLIElement>
+  | MouseEvent<HTMLLIElement>
+
+type Props = {
+  as?: ElementType
+  activeId: string
+  description: string
+  endDate?: string
+  id: string
+  link: string
+  name: string
+  onUserInteraction: (event: UserInteractionEvent) => void
+  resetActiveId: VoidFunction
+  startDate?: string
+  title?: string
+  tools: SoftwareTool[]
+}
+
+export function Card({
+  as: As = 'li',
+  activeId,
+  description,
+  endDate,
+  id,
+  link,
+  name,
+  onUserInteraction,
+  resetActiveId,
+  startDate,
+  title,
+  tools,
+}: Props) {
+  return (
+    <As
+      className={clsx(
+        'relative rounded-md pr-6',
+        'group transition-[color,padding]',
+        'hover:bg-app-surface-alt hover:border hover:p-3',
+        'focus-within:bg-app-surface-alt focus-within:border focus-within:p-3',
+        'active:bg-app-surface-alt active:border active:p-3',
+        { 'opacity-50': activeId && id !== activeId },
+      )}
+      data-test-active={activeId === id}
+      data-testid={`card-${id}`}
+      id={id}
+      onBlur={resetActiveId}
+      onFocus={onUserInteraction}
+      onMouseLeave={resetActiveId}
+      onMouseOver={onUserInteraction}
+      onTouchCancel={resetActiveId}
+      onTouchEnd={resetActiveId}
+      onTouchStart={onUserInteraction}
+    >
+      <div className="mb-2 flex items-center justify-between gap-1">
+        <header className="w-full">
+          <div className="flex items-center justify-between gap-1">
+            <div className="flex items-center gap-2">
+              <Link
+                className="after:absolute after:inset-0 after:content-[''] focus-visible:outline-0"
+                href={link}
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                <h3 className="text-primary font-semibold">{name}</h3>
+              </Link>
+              {startDate ? (
+                <p className="text-subtle flex items-center text-sm">
+                  {startDate}
+                  {endDate ? (
+                    <>
+                      <span
+                        aria-label="to"
+                        className="border-subtle mx-1 w-3 border-b"
+                      />
+                      {endDate}
+                    </>
+                  ) : null}
+                </p>
+              ) : null}
+            </div>
+            <SquareArrowOutUpRight
+              aria-hidden
+              className={clsx(
+                'text-primary inline h-[1em] w-[1em] text-lg',
+                'transition-[font-size] group-hover:text-[1.25rem]',
+              )}
+            />
+          </div>
+          {title ? <p className="pt-2 text-sm">{title}</p> : null}
+        </header>
+      </div>
+      <p className="text-subtle mb-6">{description}</p>
+      <ul className="grid grid-cols-2 grid-rows-2 gap-2 sm:flex">
+        {tools.map((tool) => (
+          <li
+            className="bg-primary/10 text-primary rounded-full border px-2 py-1 text-sm"
+            key={tool}
+          >
+            {tool}
+          </li>
+        ))}
+      </ul>
+    </As>
+  )
+}

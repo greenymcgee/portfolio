@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 
-import { Projects } from '@/features/landing/components'
+import { Experience, Projects } from '@/features/landing/components'
 
 export default function HomePage() {
   return (
@@ -8,7 +8,7 @@ export default function HomePage() {
       <header
         className={clsx(
           'pointer-events-none z-10 mb-23 flex w-full flex-col overflow-y-clip',
-          'sm:h-[calc(100vh-5.875rem)] sm:justify-between lg:fixed',
+          'lg:fixed lg:h-[calc(100vh-5.875rem)] lg:justify-between',
         )}
       >
         <div className="mb-8">
@@ -62,6 +62,12 @@ export default function HomePage() {
             web apps that stand the test of time.
           </p>
         </article>
+        <section className="mb-20">
+          <h2 className="font-porter-sans-block leading-md mb-6 text-xl md:text-2xl">
+            Experience
+          </h2>
+          <Experience />
+        </section>
         <section>
           <h2 className="font-porter-sans-block leading-md mb-6 text-xl md:text-2xl">
             Projects
