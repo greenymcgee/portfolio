@@ -1,3 +1,5 @@
+export * from './gitHub'
 export * from './grunge'
+export * from './linkedIn'
 export * from './rainbow'
 export * from './smallRainbow'

@@ -17,7 +17,7 @@ export function Projects() {
   const resetActiveId = useCallback(() => setActiveId(''), [])
 
   return (
-    <ul className="flex flex-col gap-8">
+    <ul className="flex flex-col gap-8" data-testid="projects">
       {PROJECTS.map((project) => (
         <Card
           activeId={activeId}
