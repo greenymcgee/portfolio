@@ -1,6 +1,9 @@
 import clsx from 'clsx'
+import Link from 'next/link'
 
 import { Experience, Projects } from '@/features/landing/components'
+import { LANDING_PAGE_CLASS_NAMES } from '@/features/landing/constants'
+import { Github, LinkedIn } from '@/globals/components'
 
 export default function HomePage() {
   return (
@@ -40,7 +43,7 @@ export default function HomePage() {
           )}
         />
       </header>
-      <div className="max-w-[95%] pl-6 md:pl-0 lg:ml-auto lg:max-w-1/2 lg:pt-80 lg:pr-10">
+      <div className={clsx('lg:pt-80', LANDING_PAGE_CLASS_NAMES.column)}>
         <article className="text-subtle mb-24">
           <p className="mb-2">
             My name is Houston, and I&apos;m a software engineer, but more
@@ -75,6 +78,28 @@ export default function HomePage() {
           <Projects />
         </section>
       </div>
+      <footer
+        className={clsx(
+          LANDING_PAGE_CLASS_NAMES.column,
+          'mb-20 pt-20 text-right text-[1.5rem]',
+        )}
+      >
+        <Link
+          className="mr-4"
+          href="https://github.com/greenymcgee"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          <Github className="inline" />
+        </Link>
+        <Link
+          href="https://linkedin.com/in/houston-green-050891161"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          <LinkedIn className="inline" />
+        </Link>
+      </footer>
     </>
   )
 }
