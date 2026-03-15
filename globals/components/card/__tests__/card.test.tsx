@@ -7,13 +7,10 @@ import { Card } from '..'
 const [PROJECT] = PROJECTS
 
 const PROPS: PropsOf<typeof Card> = {
-  activeId: PROJECT.id,
   description: 'Description',
   id: PROJECT.id,
   link: 'http://test-greeny.nothing',
   name: PROJECT.name,
-  onUserInteraction: vi.fn(),
-  resetActiveId: vi.fn(),
   tools: PROJECT.tools,
 }
 

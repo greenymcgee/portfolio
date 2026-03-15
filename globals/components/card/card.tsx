@@ -1,23 +1,15 @@
-import { ElementType, FocusEvent, MouseEvent, TouchEvent } from 'react'
+import { ElementType } from 'react'
 import clsx from 'clsx'
 import { SquareArrowOutUpRight } from 'lucide-react'
 import Link from 'next/link'
 
-type UserInteractionEvent =
-  | FocusEvent<HTMLLIElement>
-  | TouchEvent<HTMLLIElement>
-  | MouseEvent<HTMLLIElement>
-
 type Props = {
   as?: ElementType
-  activeId: string
   description: string
   endDate?: string
   id: string
   link: string
   name: string
-  onUserInteraction: (event: UserInteractionEvent) => void
-  resetActiveId: VoidFunction
   startDate?: string
   title?: string
   tools: SoftwareTool[]
@@ -25,14 +17,11 @@ type Props = {
 
 export function Card({
   as: As = 'li',
-  activeId,
   description,
   endDate,
   id,
   link,
   name,
-  onUserInteraction,
-  resetActiveId,
   startDate,
   title,
   tools,
@@ -41,22 +30,15 @@ export function Card({
     <As
       className={clsx(
         'relative rounded-md pr-6',
-        'group transition-[color,padding]',
+        'group transition-[color,opacity,padding]',
         'hover:bg-app-surface-alt hover:border hover:p-3',
         'focus-within:bg-app-surface-alt focus-within:border focus-within:p-3',
         'active:bg-app-surface-alt active:border active:p-3',
-        { 'opacity-50': activeId && id !== activeId },
+        'group-hover:opacity-50 hover:opacity-100!',
+        'group-focus-within:opacity-50 focus-within:opacity-100!',
       )}
-      data-test-active={activeId === id}
       data-testid={`card-${id}`}
       id={id}
-      onBlur={resetActiveId}
-      onFocus={onUserInteraction}
-      onMouseLeave={resetActiveId}
-      onMouseOver={onUserInteraction}
-      onTouchCancel={resetActiveId}
-      onTouchEnd={resetActiveId}
-      onTouchStart={onUserInteraction}
     >
       <div className="mb-2 flex items-center justify-between gap-1">
         <header className="w-full">
