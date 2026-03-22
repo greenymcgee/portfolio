@@ -17,6 +17,7 @@
   --color-border: #565656;
   --color-on-app-surface: #d9d9d9;
   --color-on-app-surface-alt: #e2e2e2;
+  --color-on-primary: var(--color-app-surface);
   --color-primary: #3cc0c3;
   --color-subtle: #a1a1a1;
 
@@ -73,8 +74,8 @@
   }
 
   :focus-visible {
+    box-shadow: 0 0 2px 2px var(--focus-ring-color);
     outline: var(--focus-ring-width) solid var(--focus-ring-color);
-    outline-offset: var(--focus-ring-offset-color);
   }
 }
 

@@ -63,10 +63,9 @@ export function CreatePostFormBody({
       </div>
       <button
         className={clsx(
-          'bg-primary text-background w-full cursor-pointer rounded-lg py-3 font-semibold',
-          'transition-[background-color,opacity]',
-          'hover:bg-primary/80 focus-visible:bg-primary/80',
-          { 'opacity-60': pending },
+          'bg-primary text-on-primary w-full cursor-pointer rounded-lg py-3 font-semibold',
+          'transition-[background-color,box-shadow,opacity,outline]',
+          'hover:bg-primary/80 focus-visible:bg-primary/80 disabled:opacity-60',
         )}
         data-testid="submit-post-button"
         disabled={pending}

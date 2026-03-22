@@ -10,6 +10,7 @@ import {
   UNAUTHORIZED,
   UNPROCESSABLE_CONTENT,
 } from '@/globals/constants'
+import { LEXICAL_EDITOR_JSON } from '@/test/fixtures'
 import { mockServerSessionAsync, setupTestDatabase } from '@/test/helpers/utils'
 
 import { POST } from '../route'
@@ -72,7 +73,7 @@ describe('POST:/api/posts/', () => {
     it('should return a success response with the post for a valid request', async () => {
       const { user } = await mockServerSessionAsync('ADMIN')
       const params = {
-        content: JSON.stringify({ h1: 'Hello' }),
+        content: LEXICAL_EDITOR_JSON,
         publishedAt: null,
         title: 'Hello',
       }

@@ -23,9 +23,6 @@ export function CreatePostForm() {
   const { data: session, status } = useSession()
   const pathname = usePathname()
   const [errorMessage, setErrorMessage] = useState('')
-  // TODO: need to prevent saving when content is empty
-  // this will require some lexical help
-  // issue #94
   const [state, action, pending] = useActionState(
     withCallbacks(createPost, {
       onError: () => setErrorMessage('Something went wrong'),
