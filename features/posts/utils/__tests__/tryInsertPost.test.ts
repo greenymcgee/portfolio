@@ -33,7 +33,7 @@ describe('tryInsertPost', () => {
     const user = userFactory.build()
     const token = createJWTMock(user)
     const params = {
-      content: { h1: 'Hello' },
+      content: JSON.stringify({ h1: 'Hello' }),
       publishedAt: new Date(),
       title: 'Title',
     }

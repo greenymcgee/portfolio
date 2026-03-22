@@ -1,9 +1,10 @@
+/* eslint-disable sort-keys */
 import { faker } from '@faker-js/faker'
 
 import { postFactory } from '../factories'
 import { ADMIN_USER } from './users'
 
-const CONTENT = {
+const CONTENT = JSON.stringify({
   root: {
     children: [
       {
@@ -18,22 +19,22 @@ const CONTENT = {
             version: 1,
           },
         ],
-        direction: 'ltr',
+        direction: null,
         format: '',
         indent: 0,
-        textFormat: 0,
-        textStyle: '',
         type: 'paragraph',
         version: 1,
+        textFormat: 0,
+        textStyle: '',
       },
     ],
-    direction: 'ltr',
+    direction: null,
     format: '',
     indent: 0,
     type: 'root',
     version: 1,
   },
-}
+})
 
 function getDate(index: number) {
   if (index === 3 || index === 7) return null
@@ -79,3 +80,5 @@ export const POSTS = [
   WILL_BE_PUBLISHED_POST,
   ...GENERATED_POSTS,
 ]
+
+/* eslint-enable sort-keys */

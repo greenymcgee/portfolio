@@ -4,6 +4,7 @@ import { Session } from 'next-auth'
 import { PrismaError } from '@/lib/errors'
 import { logger } from '@/lib/logger'
 import { prisma } from '@/lib/prisma'
+import { sanitizeHTML } from '@/lib/sanitizeHTML'
 
 import type { PostCreateParams } from '../schemas'
 
@@ -15,7 +16,9 @@ export async function tryInsertPost(
     prisma.post.create({
       data: {
         authorId: user.id,
-        content: params.content ?? undefined,
+        content: params.content
+          ? sanitizeHTML(params.content.toString())
+          : undefined,
         publishedAt: params.publishedAt,
         title: params.title,
       },

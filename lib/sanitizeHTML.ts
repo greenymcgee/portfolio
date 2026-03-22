@@ -1,0 +1,62 @@
+import sanitizeHtml from 'sanitize-html'
+
+const SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
+  allowedAttributes: {
+    '*': [
+      'border',
+      'cellpadding',
+      'cellspacing',
+      'class',
+      'color',
+      'colspan',
+      'height',
+      'href',
+      'rel',
+      'rowspan',
+      'src',
+      'style',
+      'target',
+      'width',
+    ],
+    allowedTags: [
+      'font',
+      'br',
+      'p',
+      'div',
+      'span',
+      'table',
+      'tr',
+      'td',
+      'th',
+      'tbody',
+      'thead',
+      'tfoot',
+      'a',
+      'b',
+      'i',
+      'em',
+      'strong',
+      'small',
+      'img',
+      'ul',
+      'ol',
+      'li',
+      'dl',
+      'dt',
+      'dd',
+      'pre',
+      'code',
+      'h1',
+      'h2',
+      'h3',
+      'h4',
+      'h5',
+      'h6',
+      'hr',
+    ],
+  },
+}
+
+export function sanitizeHTML(dirty: string): string {
+  return sanitizeHtml(dirty, SANITIZE_OPTIONS)
+}
