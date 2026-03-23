@@ -13,14 +13,6 @@ export async function tryInsertPost(
   user: Session['user'],
 ) {
   const editor = createHeadlessBlogEditor()
-  if (!params.content) {
-    logger.error(
-      { content: params.content },
-      'POST_CREATE_MISSING_CONTENT_ERROR',
-    )
-    return new Error('Post content required')
-  }
-
   try {
     editor.parseEditorState(params.content.toString())
   } catch (error) {

@@ -11,19 +11,6 @@ import { tryInsertPost } from '..'
 vi.mock('@/lib/prisma', () => ({ prisma: { post: { create: vi.fn() } } }))
 
 describe('tryInsertPost', () => {
-  it('should return an error when post content is missing', async () => {
-    const user = userFactory.build()
-    const token = createJWTMock(user)
-    const params = {
-      content: null,
-      publishedAt: null,
-      title: 'Title',
-    }
-    const result = await tryInsertPost(params, token)
-    expect(result).toEqual(new Error('Post content required'))
-    expect(prisma.post.create).not.toHaveBeenCalled()
-  })
-
   it('should return an error when post content is not valid Lexical state', async () => {
     const user = userFactory.build()
     const token = createJWTMock(user)
