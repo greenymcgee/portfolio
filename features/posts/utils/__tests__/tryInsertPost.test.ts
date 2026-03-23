@@ -3,6 +3,7 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client'
 import { PrismaError } from '@/lib/errors'
 import { prisma } from '@/lib/prisma'
 import { postFactory, userFactory } from '@/test/factories'
+import { LEXICAL_EDITOR_JSON } from '@/test/fixtures'
 import { createJWTMock } from '@/test/helpers/utils'
 
 import { tryInsertPost } from '..'
@@ -10,30 +11,24 @@ import { tryInsertPost } from '..'
 vi.mock('@/lib/prisma', () => ({ prisma: { post: { create: vi.fn() } } }))
 
 describe('tryInsertPost', () => {
-  it('should default to undefined content when params.content is null', async () => {
+  it('should return an error when post content is not valid Lexical state', async () => {
     const user = userFactory.build()
     const token = createJWTMock(user)
     const params = {
-      content: null,
-      publishedAt: null,
+      content: 'not-json',
+      publishedAt: new Date(),
       title: 'Title',
     }
-    await tryInsertPost(params, token)
-    expect(prisma.post.create).toHaveBeenCalledWith({
-      data: {
-        authorId: token.id,
-        content: undefined,
-        publishedAt: params.publishedAt,
-        title: params.title,
-      },
-    })
+    const result = await tryInsertPost(params, token)
+    expect(result).toEqual(new Error('Post content validation failed'))
+    expect(prisma.post.create).not.toHaveBeenCalled()
   })
 
-  it('should accept content', async () => {
+  it('should accept valid Lexical content', async () => {
     const user = userFactory.build()
     const token = createJWTMock(user)
     const params = {
-      content: { h1: 'Hello' },
+      content: LEXICAL_EDITOR_JSON,
       publishedAt: new Date(),
       title: 'Title',
     }
@@ -41,7 +36,7 @@ describe('tryInsertPost', () => {
     expect(prisma.post.create).toHaveBeenCalledWith({
       data: {
         authorId: token.id,
-        content: params.content,
+        content: LEXICAL_EDITOR_JSON,
         publishedAt: params.publishedAt,
         title: params.title,
       },
@@ -57,7 +52,7 @@ describe('tryInsertPost', () => {
     const user = userFactory.build()
     const token = createJWTMock(user)
     const params = {
-      content: { h1: 'Hello' },
+      content: LEXICAL_EDITOR_JSON,
       publishedAt: new Date(),
       title: 'Title',
     }
@@ -71,7 +66,7 @@ describe('tryInsertPost', () => {
     const user = userFactory.build()
     const token = createJWTMock(user)
     const params = {
-      content: { h1: 'Hello' },
+      content: LEXICAL_EDITOR_JSON,
       publishedAt: new Date(),
       title: 'Title',
     }

@@ -32,7 +32,10 @@ describe('<CreatePostForm />', () => {
     mockPostsCreateResponse({ status: INTERNAL_SERVER_ERROR })
     renderWithProviders(<CreatePostForm />)
     await userEvent.type(screen.getByLabelText(/Title/), 'title')
-    await userEvent.type(screen.getByLabelText('Content'), 'content')
+    const editor = screen
+      .getByTestId('content-editor')
+      .querySelector('[role="textbox"]') as Element
+    await userEvent.type(editor, 'content')
     const submitButton = screen.getByTestId('submit-post-button')
     fireEvent.click(submitButton)
     await waitFor(() => expect(submitButton).not.toBeDisabled())
@@ -43,7 +46,10 @@ describe('<CreatePostForm />', () => {
     await mockCookieHeader()
     renderWithProviders(<CreatePostForm />)
     await userEvent.type(screen.getByLabelText(/Title/), 'title')
-    await userEvent.type(screen.getByLabelText('Content'), 'content')
+    const editor = screen
+      .getByTestId('content-editor')
+      .querySelector('[role="textbox"]') as Element
+    await userEvent.type(editor, 'content')
     const submitButton = screen.getByTestId('submit-post-button')
     fireEvent.click(submitButton)
     await waitFor(() => expect(submitButton).not.toBeDisabled())

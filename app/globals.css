@@ -1,4 +1,6 @@
 @import 'tailwindcss';
+/* Styles for the <RichTextEditor /> */
+@source inline('font-bold italic underline line-through mb-2');
 
 @theme {
   /* Breakpoints */
@@ -15,6 +17,7 @@
   --color-border: #565656;
   --color-on-app-surface: #d9d9d9;
   --color-on-app-surface-alt: #e2e2e2;
+  --color-on-primary: var(--color-app-surface);
   --color-primary: #3cc0c3;
   --color-subtle: #a1a1a1;
 
@@ -43,6 +46,14 @@
   /* Border Radii */
   --radius-sm: 0.25rem;
   --radius-md: 0.5rem;
+
+  /* Transitions */
+  --default-transition-duration: 0.2s;
+
+  /* Focus Ring */
+  --focus-ring-color: var(--color-on-app-surface);
+  --focus-ring-width: 2px;
+  --focus-ring-offset-color: var(--color-on-app-surface-alt);
 }
 
 /*
@@ -60,6 +71,11 @@
   ::backdrop,
   ::file-selector-button {
     border-color: var(--color-border, currentcolor);
+  }
+
+  :focus-visible {
+    box-shadow: 0 0 2px 2px var(--focus-ring-color);
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
   }
 }
 

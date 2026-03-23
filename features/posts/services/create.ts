@@ -4,6 +4,7 @@ import { Session } from 'next-auth'
 import { ZodError } from 'zod'
 
 import {
+  BAD_REQUEST,
   CREATED,
   FORBIDDEN,
   UNAUTHORIZED,
@@ -67,6 +68,14 @@ export class CreatePostService {
       return errAsync({
         details: post.details,
         status: post.status,
+        type: 'insert',
+      } as const)
+    }
+
+    if (post instanceof Error) {
+      return errAsync({
+        details: post,
+        status: BAD_REQUEST,
         type: 'insert',
       } as const)
     }
