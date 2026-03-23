@@ -9,7 +9,7 @@ import {
   LexicalEditor,
 } from 'lexical'
 
-import { FIRST_PARAGRAPH_TEXT, SECOND_PARAGRAPH_TEXT } from '../fixtures'
+import { FIRST_PARAGRAPH_TEXT, SECOND_PARAGRAPH_TEXT } from '../../fixtures'
 
 type Props = {
   onReady: (editor: LexicalEditor) => void

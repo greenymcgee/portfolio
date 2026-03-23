@@ -2,8 +2,8 @@ import { faker } from '@faker-js/faker'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
-import { LexicalToolbarWrapper } from '@/test/components'
 import { FIRST_PARAGRAPH_TEXT, SECOND_PARAGRAPH_TEXT } from '@/test/fixtures'
+import { LexicalToolbarTestWrapper } from '@/test/helpers/components'
 
 import { ACTIVE_BUTTON_CLASS, BLOCK_TYPE_LABELS } from '../../constants'
 import { ToolbarPlugin } from '../toolbarPlugin'
@@ -18,9 +18,9 @@ describe('<ToolbarPlugin />', () => {
     ])('should render controls', async ({ name, textAlign }) => {
       const user = userEvent.setup()
       render(
-        <LexicalToolbarWrapper>
+        <LexicalToolbarTestWrapper>
           <ToolbarPlugin />
-        </LexicalToolbarWrapper>,
+        </LexicalToolbarTestWrapper>,
       )
       const editor = screen.getByRole('textbox')
       await user.click(editor)
@@ -36,9 +36,9 @@ describe('<ToolbarPlugin />', () => {
     it('should render controls', async () => {
       const user = userEvent.setup()
       render(
-        <LexicalToolbarWrapper>
+        <LexicalToolbarTestWrapper>
           <ToolbarPlugin />
-        </LexicalToolbarWrapper>,
+        </LexicalToolbarTestWrapper>,
       )
       const editor = screen.getByRole('textbox')
       await user.click(editor)
@@ -59,9 +59,9 @@ describe('<ToolbarPlugin />', () => {
     ])('should render controls', async (name) => {
       const user = userEvent.setup()
       render(
-        <LexicalToolbarWrapper>
+        <LexicalToolbarTestWrapper>
           <ToolbarPlugin />
-        </LexicalToolbarWrapper>,
+        </LexicalToolbarTestWrapper>,
       )
       const editor = screen.getByRole('textbox')
       await user.click(editor)
@@ -81,9 +81,9 @@ describe('<ToolbarPlugin />', () => {
       const user = userEvent.setup()
       const onReady = vi.fn()
       render(
-        <LexicalToolbarWrapper onUndoableHistoryReady={onReady}>
+        <LexicalToolbarTestWrapper onUndoableHistoryReady={onReady}>
           <ToolbarPlugin />
-        </LexicalToolbarWrapper>,
+        </LexicalToolbarTestWrapper>,
       )
       await waitFor(() => expect(onReady).toHaveBeenCalled())
       const editor = screen.getByRole('textbox')

@@ -100,7 +100,7 @@ describe('CreatePostService', () => {
         const service = new CreatePostService(
           new NextRequest('http://nothing.greeny', {
             body: JSON.stringify({
-              content: {},
+              content: LEXICAL_EDITOR_JSON,
               publishedAt: null,
               title: faker.book.title(),
             }),

@@ -5,14 +5,14 @@ import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary'
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin'
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin'
 
-import { TEST_LEXICAL_CONFIG } from '../fixtures'
+import { TEST_LEXICAL_CONFIG } from '../../fixtures'
 import { CreatesUndoableHistory } from './createsUndoableHistory'
 
 interface Props extends PropsWithChildren {
   onUndoableHistoryReady?: PropsOf<typeof CreatesUndoableHistory>['onReady']
 }
 
-export function LexicalToolbarWrapper({
+export function LexicalToolbarTestWrapper({
   children,
   onUndoableHistoryReady,
 }: Props) {

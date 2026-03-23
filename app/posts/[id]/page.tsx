@@ -50,8 +50,8 @@ export default async function Post({
         </p>
 
         <div className="space-y-6 border-t pt-6 text-lg leading-relaxed text-gray-800">
-          {post.content ? (
-            <RichTextEditor initialState={post.content as string} />
+          {typeof post.content === 'string' ? (
+            <RichTextEditor initialState={post.content} />
           ) : (
             <p className="text-gray-500 italic">
               No content available for this post.

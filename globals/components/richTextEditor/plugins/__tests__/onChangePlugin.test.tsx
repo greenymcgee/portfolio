@@ -4,20 +4,16 @@ import {
   LexicalComposer,
 } from '@lexical/react/LexicalComposer'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { ContentEditable } from '@lexical/react/LexicalContentEditable'
+import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary'
+import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin'
 import { render, waitFor } from '@testing-library/react'
-import {
-  $createParagraphNode,
-  $createTextNode,
-  $getRoot,
-  ParagraphNode,
-  TextNode,
-} from 'lexical'
+import { $createParagraphNode, $createTextNode, $getRoot } from 'lexical'
 
 import { OnChangePlugin } from '../onChangePlugin'
 
 const INITIAL_CONFIG: InitialConfigType = {
   namespace: 'on-change-plugin-test',
-  nodes: [ParagraphNode, TextNode],
   onError: () => {},
 }
 
@@ -43,14 +39,23 @@ describe('<OnChangePlugin />', () => {
     const onChange = vi.mocked(PROPS.onChange)
     render(
       <LexicalComposer initialConfig={INITIAL_CONFIG}>
+        <RichTextPlugin
+          ErrorBoundary={LexicalErrorBoundary}
+          contentEditable={<ContentEditable />}
+          placeholder={<div />}
+        />
         <OnChangePlugin {...PROPS} />
         <AppendParagraphPlugin text="hello" />
       </LexicalComposer>,
     )
-    await waitFor(() => expect(onChange).toHaveBeenCalled())
-    const editorState = onChange.mock.calls[onChange.mock.calls.length - 1][0]
-    expect(
-      editorState.read(() => $getRoot().getTextContent().trim()),
-    ).toBe('hello')
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalled()
+      expect(
+        onChange.mock.calls.some(
+          ([state]) =>
+            state.read(() => $getRoot().getTextContent().trim()) === 'hello',
+        ),
+      ).toBe(true)
+    })
   })
 })
