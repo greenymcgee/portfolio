@@ -1,6 +1,12 @@
 'use client'
 
-import { useActionState, useLayoutEffect, useMemo, useState } from 'react'
+import {
+  useActionState,
+  useCallback,
+  useLayoutEffect,
+  useMemo,
+  useState,
+} from 'react'
 import { withCallbacks } from '@greenymcgee/typescript-utils'
 import Form from 'next/form'
 import { usePathname, useRouter } from 'next/navigation'
@@ -27,6 +33,13 @@ export function CreatePostForm() {
     () => hasPermission(session?.user, 'posts', 'create'),
     [session?.user],
   )
+  const [content, setContent] = useState(state.content as string | null)
+
+  const handleContentChange = useCallback<
+    PropsOf<typeof CreatePostFormBody>['onContentChange']
+  >((editorState) => {
+    setContent(JSON.stringify(editorState.toJSON()))
+  }, [])
 
   useLayoutEffect(() => {
     if (permitted || status === 'loading' || pathname === ROUTES.home) return
@@ -37,9 +50,10 @@ export function CreatePostForm() {
   return (
     <Form action={action} className="space-y-6" data-testid="create-post-form">
       <CreatePostFormBody
-        defaultContent={state.content}
+        content={content}
         defaultTitle={state.title}
         errorMessage={errorMessage}
+        onContentChange={handleContentChange}
         pending={pending}
       />
     </Form>

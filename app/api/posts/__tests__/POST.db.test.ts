@@ -10,6 +10,7 @@ import {
   UNAUTHORIZED,
   UNPROCESSABLE_CONTENT,
 } from '@/globals/constants'
+import { LEXICAL_EDITOR_JSON } from '@/test/fixtures'
 import { mockServerSessionAsync, setupTestDatabase } from '@/test/helpers/utils'
 
 import { POST } from '../route'
@@ -72,7 +73,7 @@ describe('POST:/api/posts/', () => {
     it('should return a success response with the post for a valid request', async () => {
       const { user } = await mockServerSessionAsync('ADMIN')
       const params = {
-        content: { h1: 'Hello' },
+        content: LEXICAL_EDITOR_JSON,
         publishedAt: null,
         title: 'Hello',
       }
@@ -85,7 +86,10 @@ describe('POST:/api/posts/', () => {
       const json = await result.json()
       expect(json).toEqual({
         message: HTTP_TEXT_BY_STATUS[CREATED],
-        post: expect.objectContaining({ ...params, authorId: user.id }),
+        post: expect.objectContaining({
+          ...params,
+          authorId: user.id,
+        }),
       })
       expect(result.status).toEqual(CREATED)
     })

@@ -1,16 +1,20 @@
 import clsx from 'clsx'
 
+import { RichTextEditor } from '@/globals/components'
+
 type Props = {
-  defaultContent: FormDataEntryValue | null | undefined
+  content: string | null
   defaultTitle: FormDataEntryValue | null | undefined
   errorMessage: string
+  onContentChange: NonNullable<PropsOf<typeof RichTextEditor>['onChange']>
   pending: boolean
 }
 
 export function CreatePostFormBody({
-  defaultContent,
+  content,
   defaultTitle,
   errorMessage,
+  onContentChange,
   pending,
 }: Props) {
   return (
@@ -25,13 +29,10 @@ export function CreatePostFormBody({
         </p>
       ) : null}
       <div>
-        <label
-          className="mb-2 flex items-center text-lg font-medium"
-          htmlFor="title"
-        >
-          Title
-          <span className="ml-2 rounded-lg bg-gray-500 px-2 py-1 text-xs font-semibold text-white">
-            Required
+        <label className="mb-2 text-lg font-medium" htmlFor="title">
+          Title{' '}
+          <span aria-label="Required" className="">
+            *
           </span>
         </label>
         <input
@@ -39,7 +40,6 @@ export function CreatePostFormBody({
           defaultValue={defaultTitle ? String(defaultTitle) : undefined}
           id="title"
           name="title"
-          placeholder="Great things await ..."
           required
           type="text"
         />
@@ -48,19 +48,24 @@ export function CreatePostFormBody({
         <label className="mb-2 block text-lg font-medium" htmlFor="content">
           Content
         </label>
-        <textarea
-          className="w-full rounded-lg border px-4 py-2"
-          defaultValue={defaultContent ? String(defaultContent) : undefined}
+        <input
           id="content"
           name="content"
-          placeholder="Just start writing ..."
-          rows={6}
+          type="hidden"
+          value={content ?? ''}
+        />
+        <RichTextEditor
+          data-testid="content-editor"
+          editing
+          initialState={content}
+          onChange={onContentChange}
         />
       </div>
       <button
         className={clsx(
-          'w-full rounded-lg bg-blue-500 py-3 text-white hover:bg-blue-600',
-          { 'opacity-80': pending },
+          'bg-primary text-on-primary w-full cursor-pointer rounded-lg py-3 font-semibold',
+          'transition-[background-color,box-shadow,opacity,outline]',
+          'hover:bg-primary/80 focus-visible:bg-primary/80 disabled:opacity-60',
         )}
         data-testid="submit-post-button"
         disabled={pending}

@@ -5,7 +5,7 @@ import { defineConfig } from 'vitest/config'
 export default defineConfig({
   test: {
     coverage: {
-      include: ['app/', 'features/', 'lib/'],
+      include: ['app/', 'features/', 'globals/', 'lib/'],
       exclude: [
         'app/layout.tsx',
         '**/types.ts',
@@ -18,6 +18,7 @@ export default defineConfig({
         'lib/prisma/client.ts',
         'lib/components/providers.tsx',
         'components/svgs/**',
+        'globals/constants/**',
       ],
       // thresholds: {
       //   branches: 97,

@@ -1,7 +1,7 @@
-import { date, infer as zodInfer, json, object, string } from 'zod'
+import { date, infer as zodInfer, object, string } from 'zod'
 
 export const postCreateSchema = object({
-  content: json().nullable(),
+  content: string().min(2),
   publishedAt: date().nullable(),
   title: string().min(1),
 })

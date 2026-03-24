@@ -1,0 +1,145 @@
+---
+globs: "**/*.{test,spec}.{ts,tsx}"
+alwaysApply: false
+---
+
+## Pre-Test Checklist
+Before writing any test file:
+1. Read vitest.setup.ts to understand available mocks and globals
+2. Read vitest.config.ts to understand import path resolution
+3. Check test/helpers/utils/ for available test utilities.
+`renderWithProviders`, and `getApiUrl` are crucial helpers used throughout the app.
+4. **ALWAYS check test/factories/ for relevant factories BEFORE creating test data manually**
+   - Factories use Fishery and should ALWAYS be preferred over manually creating objects
+   - Import from the barrel export: `@/test/factories`
+   - Use `.associations()` method for related data (e.g., authorId, etc.)
+5. **Check test/fixtures/ for pre-built, reusable test data**
+   - Fixtures are pre-configured objects exported as constants (e.g., `PUBLISHED_POST`, `UNPUBLISHED_POST`)
+   - Import from the barrel export: `@/test/fixtures`
+   - Use fixtures when you need consistent, well-known test data across multiple tests
+   - Use factories when you need to customize data or generate unique instances
+6. Check test/servers/ for any relevant msw servers
+7. Check @greenymcgee/utility-types for types. Do not redefine PropsOf
+
+## Servers
+
+Servers made with MSW are stored in `test/servers/`. There are a few
+that still remain in the helpers directory, but any new servers should be added
+to the servers directory.
+
+## Rules for Writing Tests
+
+1. We use Vitest instead of Jest.
+2. No abbreviations for any reason.
+3. No conditional logic in tests.
+4. Global imports are turned on for Vitest. Don't import things like `it` or `describe`.
+5. When creating component tests, create a reusable const like this one `const PROPS: PropsOf<typeof Component> = { someProps: 'Hello' }`. By default, the PROPS should be for the happy path of the component, and any props that need to be overridden in a test can be, but follow rule 18 for handler props.
+6. Prefer `it` over `test`
+7. Don't add line breaks between things like the render and the expect within tests, but respect the column width rules. In other words, don't add unnecessary line breaks in tests. Changes that Prettier makes to break lines are fine. Instead, add lines between `it` and `describe` blocks.
+8. When possible, it's best if the code flows naturally in the test instead of mocking returns from hooks, utils, etc.
+9. Name top-level component test describes like `describe("<Component />", () => {})`.
+10. Aim for no more than two expects per `it` block.
+11. We're primarily testing functionality over style. We'd only want to test for styles in specific cases where a good argument could be made for why we need it.
+12. Keep any `beforeEach`, `afterEach`, etc. callbacks out of describes if possible. Needing to nest these callbacks is a good indicator that an abstraction might be beneficial.
+13. Test descriptions use "should" wording: `it("should behave this way", () => {})`.
+14. Test descriptions should be human readable. Avoid "should display internal name", and instead prefer "it should display the internal name".
+15. Avoid redundant tests. For example, if a test exists for ensuring a click handler gets called, and that test includes something like `screen.getByText("Click Me")`, we don't need a test to ensure that `screen.getByText("Click Me)"` exists or is visible.
+16. Avoid `mock` in when naming. Instead of `const mockOnClick = vi.fn()` write `const onClick = vi.fn()`. This helps avoid confusion and keeps the name describing exactly what is happening.
+17. Keep `vi.fn()` implementations simple. Only mock out specific details if something is required. Example: `vi.fn(() => vi.fn())` is overboard if all we need to test is `.toHaveBeenCalledWith("something")`.
+18. Don't provide new handler props when there is already one supplied in `PROPS` for the specific test we aim to test the handler in. `vi.clearAllMocks` will ensure that data is not persisting between tests.
+19. Don't assume anything.
+20. Instead of testing for the absence of elements when testing against a `null` render, use this:
+```
+const { container } = renderWithProviders(<Component />)
+expect(container).toBeEmptyDOMElement()
+```
+21.   Avoid selecting anything by a className. Instead, if a `data-testid` could be added and used, do that.
+22.   Prefer to test inputs that have associated labels by clicking on the label. This will ensure that the `for` attribute is associated with the input being tested.
+23.   Avoid mocking returns utils, hooks, facades, etc. Let the code flow through the test naturally if possible. We prefer scalable solutions vs manual mocks.
+24.   Try `fireEvent` before `userEvent` to avoid unnecessary async test setup.
+25.   Never ever import from the app directory into the test directory.
+
+## Factory Usage (Fishery)
+
+We use Fishery factories to create test data. **Always prefer factories over manually creating objects.**
+
+### Basic Factory Usage
+
+```typescript
+// ✅ CORRECT - Import from barrel export
+import { postFactory } from "@/test/factories"
+
+// ✅ CORRECT - Build with params
+const post = postFactory.build({ title: faker.book.title() })
+```
+
+### Using Associations
+
+For related data (arrays of objects, nested objects), use the `.associations()` method:
+
+```typescript
+// ✅ CORRECT - Use .associations() for authorId
+const user = userFactory.build()
+const post = postFactory.associations({ authorId: user.id }).build({ title: faker.book.title() })
+
+// ❌ WRONG - Don't pass associations as regular params
+const post = postFactory.build({ authorId: user.id, title: faker.book.title() })
+```
+
+### Why Use Factories?
+
+1. Factories provide sensible defaults for all required fields
+2. Factories ensure type safety and consistency
+3. Factories automatically handle complex relationships (via `.associations()`)
+4. Tests remain maintainable when types change - update the factory, not every test
+5. Never manually create objects with all properties when a factory exists
+
+### Referencing Built Values (No Hard-Coded Strings)
+
+**Never hard-code values in tests that should come from fixtures or factories.** Always reference the built object's properties. This ensures tests remain maintainable and won't break if factory defaults change.
+
+```typescript
+const post = postFactory.build({ title: "Title" })
+// ✅ CORRECT - Build the object first, then reference its property
+expect(screen.getByText(post.title)).toBeVisible()
+
+// ❌ WRONG - Hard-coded string duplicates what the factory provides
+expect(screen.getByText("Title")).toBeVisible()
+```
+
+This also applies to fixtures:
+
+```typescript
+// ✅ CORRECT - Reference fixture properties
+expect(screen.getByText(PUBLISHED_POST.title)).toBeInTheDocument()
+
+// ❌ WRONG - Hard-coded string that duplicates fixture data
+expect(screen.getByText("Published Post")).toBeInTheDocument()
+```
+
+## Fixtures vs Factories
+
+### Fixtures: Pre-built, Reusable Constants
+
+Fixtures are **pre-configured objects** exported as named constants. Use fixtures when you need:
+- Consistent data across multiple tests
+- Well-known reference data (e.g., `PUBLISHED_POST`, `UNPUBLISHED_POST`)
+- Complex objects with specific relationships already set up
+
+### Factories: Dynamic, Customizable Builders
+
+Factories **generate objects** with sensible defaults. Use factories when you need:
+- Customized data for specific test cases
+- Multiple unique instances
+- To override specific properties while keeping defaults
+
+### When to Use Which?
+
+| Scenario | Use |
+|----------|-----|
+| Need consistent "Published Post" across tests | **Fixture**: `PUBLISHED_POST` |
+| Testing with well-known "Unpublished Post" | **Fixture**: `UNPUBLISHED_POST` |
+| Need 5 different posts with varying data | **Factory**: Build 5 times with different params |
+| MSW server needs consistent response data | **Fixture**: Use exported fixture constants |
+| Component test needs one-off custom data | **Factory**: Build with custom params |
+| Creating a new shared test fixture | **Fixture**: Build with factory, export as constant |

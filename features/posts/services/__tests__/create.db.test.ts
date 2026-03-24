@@ -5,12 +5,14 @@ import { NextRequest } from 'next/server'
 import { ZodError } from 'zod'
 
 import {
+  BAD_REQUEST,
   CREATED,
   FORBIDDEN,
   UNAUTHORIZED,
   UNPROCESSABLE_CONTENT,
 } from '@/globals/constants'
 import { PrismaError } from '@/lib/errors'
+import { LEXICAL_EDITOR_JSON } from '@/test/fixtures'
 import {
   mockServerSession,
   mockServerSessionAsync,
@@ -98,7 +100,7 @@ describe('CreatePostService', () => {
         const service = new CreatePostService(
           new NextRequest('http://nothing.greeny', {
             body: JSON.stringify({
-              content: {},
+              content: LEXICAL_EDITOR_JSON,
               publishedAt: null,
               title: faker.book.title(),
             }),
@@ -115,6 +117,32 @@ describe('CreatePostService', () => {
         )
         tryInsertPostSpy.mockRestore()
       })
+
+      it('should return a bad request status when tryInsertPost returns a validation error', async () => {
+        const validationError = new Error('Post content validation failed')
+        const tryInsertPostSpy = vi
+          .spyOn(postUtils, 'tryInsertPost')
+          .mockResolvedValueOnce(validationError)
+        const service = new CreatePostService(
+          new NextRequest('http://nothing.greeny', {
+            body: JSON.stringify({
+              content: LEXICAL_EDITOR_JSON,
+              publishedAt: null,
+              title: faker.book.title(),
+            }),
+            method: 'POST',
+          }),
+        )
+        const result = await service.createPost()
+        expect(result).toEqual(
+          new Err({
+            details: validationError,
+            status: BAD_REQUEST,
+            type: 'insert',
+          }),
+        )
+        tryInsertPostSpy.mockRestore()
+      })
     })
 
     describe('ok', () => {
@@ -125,7 +153,11 @@ describe('CreatePostService', () => {
         const title = faker.book.title()
         const service = new CreatePostService(
           new NextRequest('http://nothing.greeny', {
-            body: JSON.stringify({ content: {}, publishedAt: null, title }),
+            body: JSON.stringify({
+              content: LEXICAL_EDITOR_JSON,
+              publishedAt: null,
+              title,
+            }),
             method: 'POST',
           }),
         )
