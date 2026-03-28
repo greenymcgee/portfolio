@@ -28,7 +28,6 @@ export default defineConfig({
       // },
     },
     globals: true,
-    setupFiles: ['./vitest.setup.tsx'],
     projects: [
       {
         extends: true,
@@ -37,6 +36,7 @@ export default defineConfig({
           name: 'db',
           include: ['**/*.db.test.ts', '**/*.db.test.tsx'],
           maxWorkers: 1,
+          setupFiles: ['./vitest.setup.tsx'],
         },
       },
       {
@@ -50,6 +50,7 @@ export default defineConfig({
             '**/*.db.test.ts',
             '**/*.db.test.tsx',
           ],
+          setupFiles: ['./vitest.setup.tsx', './test/mocks/prisma-mock.ts'],
         },
       },
     ],

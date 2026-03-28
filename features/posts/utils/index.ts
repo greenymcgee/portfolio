@@ -1,5 +1,3 @@
 export * from './getPostCreateFormValues'
-export * from './tryCollectPosts'
-export * from './tryCountPosts'
 export * from './tryInsertPost'
 export * from './tryPostNewPost'

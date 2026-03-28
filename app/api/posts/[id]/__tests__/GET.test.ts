@@ -8,29 +8,28 @@ import {
   SUCCESS,
 } from '@/globals/constants'
 import { createResponse } from '@/lib/db'
-import { POSTS } from '@/test/fixtures'
+import { PUBLISHED_POST } from '@/test/fixtures'
 
 import { GET } from '../route'
 
-type FindAndCountReturn = Awaited<ReturnType<typeof PostService.findAndCount>>
+type FindOneReturn = Awaited<ReturnType<typeof PostService.findOne>>
 
-let findAndCountSpy: ReturnType<typeof vi.spyOn>
+let findOneSpy: ReturnType<typeof vi.spyOn>
 
 beforeEach(() => {
-  findAndCountSpy = vi.spyOn(PostService, 'findAndCount')
+  findOneSpy = vi.spyOn(PostService, 'findOne')
 })
 
-afterAll(() => {
+afterEach(() => {
   vi.restoreAllMocks()
 })
 
-describe('GET:/api/posts/', () => {
-  it('should return an bad request response for invalid params', async () => {
-    const params = new URLSearchParams()
-    params.append('page', 'page not a number')
-    params.append('limit', 'limit not a number')
-    const url = new URL(`http://nothing.greeny?${params}`)
-    const result = await GET(new Request(url))
+describe('GET:/api/posts/[id]', () => {
+  it('should return an bad request response for an invalid id', async () => {
+    const url = new URL('http://nothing.greeny/posts')
+    const result = await GET(new Request(url), {
+      params: Promise.resolve({ id: 'invalid' }),
+    })
     expect(result).toEqual(
       createResponse({
         body: { type: 'dto' },
@@ -41,17 +40,18 @@ describe('GET:/api/posts/', () => {
     )
   })
 
-  it('should return an expected status for an entity error', async () => {
+  it('should return an expected status for a query error', async () => {
     const url = new URL('http://nothing.greeny')
     const error = { details: {}, status: BAD_REQUEST, type: 'entity' }
-    findAndCountSpy.mockResolvedValueOnce(
-      errAsync(error) as unknown as FindAndCountReturn,
+    findOneSpy.mockResolvedValueOnce(
+      errAsync(error) as unknown as FindOneReturn,
     )
-    const result = await GET(new Request(url))
+    const result = await GET(new Request(url), {
+      params: Promise.resolve({ id: '1' }),
+    })
     expect(result).toEqual(
       createResponse({
         body: { type: 'entity' },
-        message: expect.any(String),
         status: BAD_REQUEST,
         url: url.toString(),
       }),
@@ -61,31 +61,32 @@ describe('GET:/api/posts/', () => {
   it('should return an internal server error response for any unexpected errors', async () => {
     const url = new URL('http://nothing.greeny')
     const error = { details: {}, status: 418 }
-    findAndCountSpy.mockResolvedValueOnce(
-      errAsync(error) as unknown as FindAndCountReturn,
+    findOneSpy.mockResolvedValueOnce(
+      errAsync(error) as unknown as FindOneReturn,
     )
-    const result = await GET(new Request(url))
+    const result = await GET(new Request(url), {
+      params: Promise.resolve({ id: '1' }),
+    })
     expect(result).toEqual(
       createResponse({ status: INTERNAL_SERVER_ERROR, url: url.toString() }),
     )
   })
 
   it('should return a success response with the posts for a valid request', async () => {
-    const totalPages = 10
-    findAndCountSpy.mockResolvedValueOnce(
+    findOneSpy.mockResolvedValueOnce(
       okAsync({
-        posts: POSTS,
+        post: PUBLISHED_POST,
         status: SUCCESS,
-        totalPages,
-      }) as unknown as FindAndCountReturn,
+      }) as unknown as FindOneReturn,
     )
     const request = new Request(new URL('http://nothing.greeny/api/posts'))
-    const result = await GET(request)
+    const result = await GET(request, {
+      params: Promise.resolve({ id: String(PUBLISHED_POST.id) }),
+    })
     const json = await result.json()
     expect(json).toEqual({
       message: HTTP_TEXT_BY_STATUS[SUCCESS],
-      posts: JSON.parse(JSON.stringify(POSTS)),
-      totalPages,
+      post: JSON.parse(JSON.stringify(PUBLISHED_POST)),
     })
   })
 })
