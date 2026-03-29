@@ -1,7 +1,7 @@
+/* eslint-disable neverthrow/must-use-result */
 import { errAsync } from 'neverthrow'
-import { getServerSession } from 'next-auth/next'
 
-import * as postServices from '@/features/posts/services'
+import { PostService } from '@/features/posts/post.service'
 import {
   CREATED,
   FORBIDDEN,
@@ -10,75 +10,106 @@ import {
   UNAUTHORIZED,
   UNPROCESSABLE_CONTENT,
 } from '@/globals/constants'
+import { PrismaError } from '@/lib/errors'
+import { postFactory } from '@/test/factories'
 import { LEXICAL_EDITOR_JSON } from '@/test/fixtures'
-import { mockServerSessionAsync, setupTestDatabase } from '@/test/helpers/utils'
+import {
+  mockServerSession,
+  mockServerSessionAsync,
+  setupTestDatabase,
+} from '@/test/helpers/utils'
 
 import { POST } from '../route'
 
+let createSpy: ReturnType<typeof vi.fn>
+
 beforeEach(() => {
-  vi.mocked(getServerSession).mockResolvedValue(null)
+  createSpy = vi.spyOn(PostService, 'create') as ReturnType<typeof vi.spyOn>
+})
+
+afterEach(() => {
+  createSpy.mockRestore()
 })
 
 describe('POST:/api/posts/', () => {
   describe('unauthorized', () => {
     it('should return an unauthorized response when no user is logged in', async () => {
       const result = await POST(new Request(new URL('http://nothing.greeny')))
-      expect(result.status).toEqual(UNAUTHORIZED)
+      expect(await result.json()).toEqual({
+        message: HTTP_TEXT_BY_STATUS[UNAUTHORIZED],
+      })
     })
   })
 
   describe('authorized', () => {
-    setupTestDatabase({ withUsers: true })
-
     it('should return a forbidden response when a non-admin user is logged in', async () => {
-      await mockServerSessionAsync('USER')
+      mockServerSession('USER')
       const result = await POST(new Request(new URL('http://nothing.greeny')))
-      expect(result.status).toEqual(FORBIDDEN)
+      expect(await result.json()).toEqual({
+        message: HTTP_TEXT_BY_STATUS[FORBIDDEN],
+      })
     })
 
-    it('should return an expected response for any of the errors containing details', async () => {
-      await mockServerSessionAsync('ADMIN')
-      const result = await POST(new Request(new URL('http://nothing.greeny')))
-      expect(result.status).toEqual(UNPROCESSABLE_CONTENT)
+    it('should return an entity error when provided', async () => {
+      mockServerSession('ADMIN')
+      const error = new PrismaError(new Error('Bad'))
+      const url = new URL('http://nothing.greeny/posts')
+      createSpy.mockResolvedValueOnce(
+        errAsync({
+          details: error.details,
+          status: error.status,
+          type: 'entity',
+        }),
+      )
+      const result = await POST(new Request(url))
+      expect(await result.json()).toEqual({
+        message: HTTP_TEXT_BY_STATUS[error.status],
+        type: 'entity',
+      })
     })
 
-    it('should return an unprocessable content response when a zod error occurs', async () => {
-      await mockServerSessionAsync('ADMIN')
+    it('should return a dto error when provided', async () => {
+      mockServerSession('ADMIN')
+      const url = new URL('http://nothing.greeny/posts')
       const params = {
         publishedAt: null,
         title: 123,
       }
       const result = await POST(
-        new Request(new URL('http://nothing.greeny'), {
-          body: JSON.stringify(params),
-          method: 'POST',
-        }),
+        new Request(url, { body: JSON.stringify(params), method: 'POST' }),
       )
-      expect(result.status).toEqual(UNPROCESSABLE_CONTENT)
+      expect(await result.json()).toEqual({
+        message: HTTP_TEXT_BY_STATUS[UNPROCESSABLE_CONTENT],
+        type: 'dto',
+      })
     })
 
     it('should return an internal server error response for any unexpected errors', async () => {
-      await mockServerSessionAsync('ADMIN')
+      mockServerSession('ADMIN')
+      const url = new URL('http://nothing.greeny/posts')
       const error = { details: {}, status: 418 }
-      vi.spyOn(postServices, 'CreatePostService').mockImplementationOnce(
-        class {
-          createPost = () => errAsync(error)
-        } as unknown as typeof postServices.CreatePostService,
-      )
-      const result = await POST(new Request(new URL('http://nothing.greeny')))
-      expect(result.status).toEqual(INTERNAL_SERVER_ERROR)
-      vi.restoreAllMocks()
+      createSpy.mockResolvedValueOnce(errAsync({ error }))
+      const result = await POST(new Request(url))
+      expect(await result.json()).toEqual({
+        message: HTTP_TEXT_BY_STATUS[INTERNAL_SERVER_ERROR],
+      })
     })
+  })
+
+  describe('integration', () => {
+    setupTestDatabase({ mutatesData: true, withPosts: true, withUsers: true })
 
     it('should return a success response with the post for a valid request', async () => {
-      const { user } = await mockServerSessionAsync('ADMIN')
+      const url = new URL('http://nothing.greeny/posts')
       const params = {
         content: LEXICAL_EDITOR_JSON,
-        publishedAt: null,
+        publishedAt: new Date(),
         title: 'Hello',
       }
+      const { user } = await mockServerSessionAsync('ADMIN')
+      const post = postFactory.associations({ authorId: user.id }).build(params)
       const result = await POST(
-        new Request(new URL('http://nothing.greeny'), {
+        new Request(url, {
           body: JSON.stringify(params),
           method: 'POST',
         }),
@@ -86,12 +117,18 @@ describe('POST:/api/posts/', () => {
       const json = await result.json()
       expect(json).toEqual({
         message: HTTP_TEXT_BY_STATUS[CREATED],
-        post: expect.objectContaining({
-          ...params,
+        post: {
           authorId: user.id,
-        }),
+          content: post.content,
+          createdAt: expect.any(String),
+          id: expect.any(Number),
+          publishedAt: post.publishedAt?.toISOString(),
+          title: post.title,
+          updatedAt: expect.any(String),
+        },
       })
-      expect(result.status).toEqual(CREATED)
     })
   })
 })
+
+/* eslint-enable neverthrow/must-use-result */
