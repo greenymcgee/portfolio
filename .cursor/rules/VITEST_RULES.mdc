@@ -8,7 +8,7 @@ Before writing any test file:
 1. Read vitest.setup.ts to understand available mocks and globals
 2. Read vitest.config.ts to understand import path resolution
 3. Check test/helpers/utils/ for available test utilities.
-`renderWithProviders`, and `getApiUrl` are crucial helpers used throughout the app.
+`mockServerSession`, `mockServerSessionAsync`, `renderWithProviders`, and `getApiUrl` are crucial helpers used throughout the app.
 4. **ALWAYS check test/factories/ for relevant factories BEFORE creating test data manually**
    - Factories use Fishery and should ALWAYS be preferred over manually creating objects
    - Import from the barrel export: `@/test/factories`

@@ -1,8 +1,6 @@
-import { prettifyError } from 'zod/v4/core'
-
+import { CreatePostDto } from '@/features/posts/dto/create-post.dto'
 import { FindAndCountPostsDto } from '@/features/posts/dto/find-and-count-posts.dto'
 import { PostService } from '@/features/posts/post.service'
-import { CreatePostService } from '@/features/posts/services'
 import { INTERNAL_SERVER_ERROR } from '@/globals/constants'
 import { createResponse } from '@/lib/db'
 import { logger } from '@/lib/logger'
@@ -24,7 +22,6 @@ export async function GET(request: Request) {
         case 'dto':
           return createResponse({
             body: { type: error.type },
-            message: prettifyError(error.details),
             status: error.status,
             url: request.url,
           })
@@ -51,8 +48,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const service = new CreatePostService(request)
-  const result = await service.createPost()
+  const result = await PostService.create(new CreatePostDto(request))
   return result.match(
     (response) => {
       return createResponse({
@@ -66,15 +62,13 @@ export async function POST(request: Request) {
         case 'unauthorized':
         case 'forbidden':
           return createResponse({ status: error.status, url: request.url })
-        case 'zod':
+        case 'dto':
           return createResponse({
             body: { type: error.type },
-            message: prettifyError(error.details),
             status: error.status,
             url: request.url,
           })
-        case 'json':
-        case 'insert': {
+        case 'entity': {
           return createResponse({
             body: { type: error.type },
             status: error.status,

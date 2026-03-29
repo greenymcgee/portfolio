@@ -1,14 +1,97 @@
+import { faker } from '@faker-js/faker'
 import { ZodError } from 'zod'
 
 import { HTTP_TEXT_BY_STATUS, NOT_FOUND } from '@/globals/constants'
-import { PrismaError } from '@/lib/errors'
-import { POSTS, PUBLISHED_POST } from '@/test/fixtures'
+import { PrismaError, RequestJSONError } from '@/lib/errors'
+import { postFactory } from '@/test/factories'
+import {
+  ADMIN_USER,
+  LEXICAL_EDITOR_JSON,
+  POSTS,
+  PUBLISHED_POST,
+} from '@/test/fixtures'
 import { prismaMock } from '@/test/mocks/prisma-mock'
 
 import { FindAndCountPostsDto, FindPostDto } from '../dto'
+import { CreatePostDto } from '../dto/create-post.dto'
 import { PostRepository } from '../post.repository'
 
 describe('PostRepository', () => {
+  describe('create', () => {
+    it('should return a json error', async () => {
+      const request = new Request('http://greeny.no/posts', {
+        body: '{',
+        method: 'POST',
+      })
+      const dto = new CreatePostDto(request)
+      const result = await PostRepository.create(dto, ADMIN_USER)
+      expect(result).toEqual(expect.any(RequestJSONError))
+    })
+
+    it('should return a Zod error', async () => {
+      const params = {
+        content: 1,
+        publishedAt: null,
+        title: faker.book.title(),
+      }
+      const request = new Request('http://greeny.no/posts', {
+        body: JSON.stringify(params),
+        method: 'POST',
+      })
+      const dto = new CreatePostDto(request)
+      const result = await PostRepository.create(dto, ADMIN_USER)
+      expect(result).toEqual(expect.any(ZodError))
+    })
+
+    it('should return a Lexical validation error', async () => {
+      const request = new Request('http://greeny.no/posts', {
+        body: JSON.stringify({
+          content: 'not-json',
+          publishedAt: null,
+          title: faker.book.title(),
+        }),
+        method: 'POST',
+      })
+      const dto = new CreatePostDto(request)
+      const result = await PostRepository.create(dto, ADMIN_USER)
+      expect(result).toEqual(new Error('Post content validation failed'))
+    })
+
+    it('should return a Prisma error', async () => {
+      const error = new Error('Bad')
+      prismaMock.post.create.mockRejectedValueOnce(error)
+      const params = {
+        content: LEXICAL_EDITOR_JSON,
+        publishedAt: null,
+        title: faker.book.title(),
+      }
+      const request = new Request('http://greeny.no/posts', {
+        body: JSON.stringify(params),
+        method: 'POST',
+      })
+      const dto = new CreatePostDto(request)
+      const result = await PostRepository.create(dto, ADMIN_USER)
+      expect(result).toEqual(new PrismaError(error))
+    })
+
+    it('should return the created post', async () => {
+      const created = postFactory.build()
+      prismaMock.post.create.mockResolvedValueOnce(created)
+      const params = {
+        content: LEXICAL_EDITOR_JSON,
+        publishedAt: null,
+        title: faker.book.title(),
+      }
+      const request = new Request('http://greeny.no/posts', {
+        body: JSON.stringify(params),
+        method: 'POST',
+      })
+      const dto = new CreatePostDto(request)
+      const result = await PostRepository.create(dto, ADMIN_USER)
+      expect(result).toBe(created)
+    })
+  })
+
   describe('findAndCount', () => {
     it('should return a dto error', async () => {
       const result = await PostRepository.findAndCount(
