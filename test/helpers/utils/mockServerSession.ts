@@ -11,7 +11,7 @@ import { createJWTMock } from './createJWTMock'
  */
 export function mockServerSession(role: OneOf<User['roles']> | null) {
   if (role === null) {
-    vi.mocked(getServerSession).mockResolvedValue(null)
+    vi.mocked(getServerSession).mockResolvedValueOnce(null)
     return { token: null, user: null }
   }
 
@@ -29,6 +29,6 @@ export function mockServerSession(role: OneOf<User['roles']> | null) {
       username: user.username,
     },
   }
-  vi.mocked(getServerSession).mockResolvedValue(result)
+  vi.mocked(getServerSession).mockResolvedValueOnce(result)
   return result
 }

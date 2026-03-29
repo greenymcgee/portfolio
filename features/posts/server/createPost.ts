@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation'
 
 import { FORBIDDEN, ROUTES, UNAUTHORIZED } from '@/globals/constants'
 
-import { postCreateSchema } from '../schemas'
+import { createPostSchema } from '../schemas'
 import { PostCreateState } from '../types'
 import { getPostCreateFormValues, tryPostNewPost } from '../utils'
 
@@ -13,7 +13,7 @@ type State = PostCreateState
 
 export async function createPost(_: State, formData: FormData): Promise<State> {
   const formValues = getPostCreateFormValues(formData)
-  const validate = postCreateSchema.safeParse(formValues)
+  const validate = createPostSchema.safeParse(formValues)
   if (validate.error) {
     return { ...formValues, error: validate.error, status: 'ERROR' }
   }

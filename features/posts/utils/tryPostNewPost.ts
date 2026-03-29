@@ -1,10 +1,10 @@
 import { tryCatch } from '@greenymcgee/typescript-utils'
 
 import { postPostCreateRequest } from '../requests'
-import type { PostCreateParams } from '../schemas'
+import type { CreatePostParams } from '../schemas'
 import { PostCreateError, PostCreateResponse } from '../types'
 
-export function tryPostNewPost(params: PostCreateParams, cookie: string) {
+export function tryPostNewPost(params: CreatePostParams, cookie: string) {
   return tryCatch<PostCreateResponse, PostCreateError>(
     postPostCreateRequest(params, cookie),
   )
