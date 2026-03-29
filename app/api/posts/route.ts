@@ -1,13 +1,16 @@
 import { prettifyError } from 'zod/v4/core'
 
-import { CreatePostService, GetPostsService } from '@/features/posts/services'
+import { FindAndCountPostsDto } from '@/features/posts/dto/find-and-count-posts.dto'
+import { PostService } from '@/features/posts/post.service'
+import { CreatePostService } from '@/features/posts/services'
 import { INTERNAL_SERVER_ERROR } from '@/globals/constants'
 import { createResponse } from '@/lib/db'
 import { logger } from '@/lib/logger'
 
 export async function GET(request: Request) {
-  const service = new GetPostsService(request)
-  const result = await service.getPosts()
+  const result = await PostService.findAndCount(
+    new FindAndCountPostsDto(request),
+  )
   return result.match(
     (response) => {
       return createResponse({
@@ -18,15 +21,14 @@ export async function GET(request: Request) {
     },
     (error) => {
       switch (error.type) {
-        case 'zod':
+        case 'dto':
           return createResponse({
             body: { type: error.type },
             message: prettifyError(error.details),
             status: error.status,
             url: request.url,
           })
-        case 'query':
-        case 'count': {
+        case 'entity': {
           return createResponse({
             body: { type: error.type },
             status: error.status,
