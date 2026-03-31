@@ -1,5 +1,3 @@
-import { prettifyError } from 'zod'
-
 import { FindPostDto } from '@/features/posts/dto/find-post.dto'
 import { PostService } from '@/features/posts/post.service'
 import { INTERNAL_SERVER_ERROR } from '@/globals/constants'
@@ -23,7 +21,6 @@ export async function GET(request: Request, context: GETContext) {
         case 'dto': {
           return createResponse({
             body: { type: error.type },
-            message: prettifyError(error.details),
             status: error.status,
             url: request.url,
           })

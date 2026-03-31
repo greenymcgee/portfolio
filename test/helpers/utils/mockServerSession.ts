@@ -11,7 +11,7 @@ import { createJWTMock } from './createJWTMock'
  */
 export function mockServerSession(role: OneOf<User['roles']> | null) {
   if (role === null) {
-    vi.mocked(getServerSession).mockResolvedValue(null)
+    vi.mocked(getServerSession).mockResolvedValueOnce(null)
     return { token: null, user: null }
   }
 

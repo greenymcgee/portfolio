@@ -1,16 +1,16 @@
 import { API_ROUTES } from '@/globals/constants'
 import { baseAPI } from '@/lib/baseAPI'
 
-import type { PostCreateParams } from '../schemas'
+import type { CreatePostParams } from '../schemas'
 import type { PostCreateError, PostCreateResponseData } from '../types'
 
 export function postPostCreateRequest(
-  params: PostCreateParams,
+  params: CreatePostParams,
   cookie: string,
 ) {
   return baseAPI.post<
     PostCreateResponseData,
-    PostCreateParams,
+    CreatePostParams,
     PostCreateError
   >(API_ROUTES.posts, {
     body: params,
