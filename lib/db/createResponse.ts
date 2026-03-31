@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 
-import { HTTP_TEXT_BY_STATUS } from '@/globals/constants'
+import { HTTP_TEXT_BY_STATUS, NO_CONTENT } from '@/globals/constants'
 
 type JSONOptions = Omit<
   NonNullable<SecondParameterOf<typeof NextResponse.json>>,
@@ -46,6 +46,16 @@ export function createResponse<Body extends Record<string, unknown>>({
   nextConfig,
   url,
 }: Params<Body>) {
+  if (status === NO_CONTENT) {
+    return new NextResponse(null, {
+      headers,
+      nextConfig,
+      status,
+      statusText,
+      url,
+    })
+  }
+
   return NextResponse.json<Body & { message: string }>(
     { message, ...body } as Body & { message: string },
     { headers, nextConfig, status, statusText, url },

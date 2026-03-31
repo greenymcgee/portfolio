@@ -2,8 +2,8 @@ import { tryCatch } from '@greenymcgee/typescript-utils'
 import type { Session } from 'next-auth'
 import { ZodError } from 'zod'
 
-import { HTTP_TEXT_BY_STATUS, NOT_FOUND } from '@/globals/constants'
-import { PrismaError, RequestJSONError } from '@/lib/errors'
+import { NO_CONTENT } from '@/globals/constants'
+import { NotFoundError, PrismaError, RequestJSONError } from '@/lib/errors'
 import { createHeadlessBlogEditor } from '@/lib/lexical'
 import { logger } from '@/lib/logger'
 import { prisma } from '@/lib/prisma'
@@ -49,6 +49,20 @@ export class PostRepository {
     return post
   }
 
+  public static async delete(dto: FindPostDto) {
+    const id = await dto.getId()
+    if (id instanceof ZodError) return id
+
+    const { error, response } = await tryCatch(
+      prisma.post.delete({ where: { id } }),
+    )
+    if (error) return new PrismaError(error)
+
+    if (response === null) return new NotFoundError(id, 'Post')
+
+    return { status: NO_CONTENT } as const
+  }
+
   public static async findAndCount(dto: FindAndCountPostsDto) {
     const { params } = dto
     if (params instanceof ZodError) return params
@@ -74,18 +88,14 @@ export class PostRepository {
     if (id instanceof ZodError) return id
 
     const { error, response: post } = await tryCatch(
-      prisma.post.findFirst({
+      prisma.post.findUnique({
         include: { author: { select: { firstName: true, lastName: true } } },
         where: { id },
       }),
     )
     if (error) return new PrismaError(error)
 
-    if (post === null) {
-      return new Error(HTTP_TEXT_BY_STATUS[NOT_FOUND], {
-        cause: { status: NOT_FOUND },
-      })
-    }
+    if (post === null) return new NotFoundError(id, 'Post')
 
     return post
   }

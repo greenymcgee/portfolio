@@ -1,10 +1,11 @@
 import { faker } from '@faker-js/faker'
-import { NextResponse } from 'next/server'
+import * as NextServer from 'next/server'
 
-import { HTTP_TEXT_BY_STATUS, SUCCESS } from '@/globals/constants'
+import { HTTP_TEXT_BY_STATUS, NO_CONTENT, SUCCESS } from '@/globals/constants'
 
 import { createResponse } from '..'
 
+const { NextResponse } = NextServer
 const PARAMS: FirstParameterOf<typeof createResponse> = {
   status: SUCCESS,
   url: 'http://test-greeny.no',
@@ -13,8 +14,11 @@ const STATUS_TEXT = HTTP_TEXT_BY_STATUS[PARAMS.status]
 
 vi.mock('next/server', async () => {
   const actual = await vi.importActual('next/server')
-  // @ts-expect-error: this is doing what we need it to
-  return { ...actual, NextResponse: { ...actual.NextResponse, json: vi.fn() } }
+  const MockNextResponse = vi.fn(function (this: unknown) {
+    return {}
+  })
+  Object.assign(MockNextResponse, actual.NextResponse, { json: vi.fn() })
+  return { ...actual, NextResponse: MockNextResponse }
 })
 
 describe('createResponse', () => {
@@ -79,5 +83,14 @@ describe('createResponse', () => {
         url: PARAMS.url,
       },
     )
+  })
+
+  it('should handle a not found response', () => {
+    createResponse({ ...PARAMS, status: NO_CONTENT })
+    expect(NextResponse).toHaveBeenCalledWith(null, {
+      status: NO_CONTENT,
+      statusText: HTTP_TEXT_BY_STATUS[NO_CONTENT],
+      url: PARAMS.url,
+    })
   })
 })

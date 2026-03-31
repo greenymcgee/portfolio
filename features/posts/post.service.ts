@@ -6,13 +6,12 @@ import {
   BAD_REQUEST,
   CREATED,
   FORBIDDEN,
-  NOT_FOUND,
   SUCCESS,
   UNAUTHORIZED,
   UNPROCESSABLE_CONTENT,
 } from '@/globals/constants'
 import { authenticateAPISession } from '@/lib/auth'
-import { PrismaError, RequestJSONError } from '@/lib/errors'
+import { NotFoundError, PrismaError, RequestJSONError } from '@/lib/errors'
 import { logger } from '@/lib/logger'
 import { hasPermission } from '@/lib/permissions'
 
@@ -26,7 +25,7 @@ export class PostService {
     const user = await authenticateAPISession()
     if (user === null) return this.respondWithUnauthorizedError()
 
-    const authorizedUser = this.authorizeUser(user)
+    const authorizedUser = this.authorizeUser(user, 'create')
     if (authorizedUser === null) return this.respondWithForbiddenError()
 
     const post = await PostRepository.create(dto, user)
@@ -53,14 +52,37 @@ export class PostService {
     return okAsync({ post, status: CREATED } as const)
   }
 
-  public static async findAndCount(dto: FindAndCountPostsDto) {
-    const response = await PostRepository.findAndCount(dto)
+  public static async delete(dto: FindPostDto) {
+    const user = await authenticateAPISession()
+    if (user === null) return this.respondWithUnauthorizedError()
+
+    const authorizedUser = this.authorizeUser(user, 'delete')
+    if (authorizedUser === null) return this.respondWithForbiddenError()
+
+    const response = await PostRepository.delete(dto)
     if (response instanceof PrismaError) {
-      return PostService.respondWithPrismaError(response, 'findAndCount')
+      return this.respondWithPrismaError(response, 'delete')
     }
 
     if (response instanceof ZodError) {
-      return PostService.respondWithZodError(response, 'findAndCount')
+      return this.respondWithZodError(response, 'delete')
+    }
+
+    if (response instanceof NotFoundError) {
+      return this.respondWithNotFoundError(response, 'delete')
+    }
+
+    return okAsync({ status: response.status } as const)
+  }
+
+  public static async findAndCount(dto: FindAndCountPostsDto) {
+    const response = await PostRepository.findAndCount(dto)
+    if (response instanceof PrismaError) {
+      return this.respondWithPrismaError(response, 'findAndCount')
+    }
+
+    if (response instanceof ZodError) {
+      return this.respondWithZodError(response, 'findAndCount')
     }
 
     return okAsync({
@@ -73,24 +95,27 @@ export class PostService {
   public static async findOne(dto: FindPostDto) {
     const post = await PostRepository.findOne(dto)
     if (post instanceof PrismaError) {
-      return PostService.respondWithPrismaError(post, 'findOne')
+      return this.respondWithPrismaError(post, 'findOne')
     }
 
     if (post instanceof ZodError) {
-      return PostService.respondWithZodError(post, 'findOne')
+      return this.respondWithZodError(post, 'findOne')
     }
 
-    if (post instanceof Error) {
-      return PostService.respondWithNotFoundError(post)
+    if (post instanceof NotFoundError) {
+      return this.respondWithNotFoundError(post, 'findOne')
     }
 
     return okAsync({ post, status: SUCCESS } as const)
   }
 
-  private static authorizeUser(user: Session['user']) {
-    if (hasPermission(user, 'posts', 'create')) return user
+  private static authorizeUser(
+    user: Session['user'],
+    action: 'create' | 'delete',
+  ) {
+    if (hasPermission(user, 'posts', action)) return user
 
-    logger.error({ userId: user.id }, 'PostService auth error:')
+    logger.error({ userId: user.id }, 'PostService permission error:')
     return null
   }
 
@@ -101,19 +126,21 @@ export class PostService {
     } as const)
   }
 
-  private static respondWithNotFoundError(error: Error) {
-    logger.error({ error }, 'PostService not found error:')
-    const { cause } = error as Error & { cause: { status: typeof NOT_FOUND } }
+  private static respondWithNotFoundError(
+    error: NotFoundError,
+    method: 'findOne' | 'delete',
+  ) {
+    logger.error({ error }, `PostService not found error: ${method}`)
     return errAsync({
       details: error,
-      status: cause.status,
+      status: error.status,
       type: 'entity' as const,
     } as const)
   }
 
   private static respondWithPrismaError<Err extends Error>(
     error: PrismaError<Err>,
-    method: 'create' | 'findAndCount' | 'findOne',
+    method: 'create' | 'delete' | 'findAndCount' | 'findOne',
   ) {
     logger.error({ error }, `PostService Prisma error: ${method}`)
     return errAsync({
@@ -144,7 +171,7 @@ export class PostService {
 
   private static respondWithZodError(
     error: ZodError,
-    method: 'create' | 'findAndCount' | 'findOne',
+    method: 'create' | 'delete' | 'findAndCount' | 'findOne',
   ) {
     logger.error({ error }, `PostService Zod error: ${method}`)
     return errAsync({

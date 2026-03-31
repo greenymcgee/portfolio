@@ -7,13 +7,13 @@ import {
   BAD_REQUEST,
   CREATED,
   FORBIDDEN,
-  HTTP_TEXT_BY_STATUS,
+  NO_CONTENT,
   NOT_FOUND,
   SUCCESS,
   UNAUTHORIZED,
   UNPROCESSABLE_CONTENT,
 } from '@/globals/constants'
-import { PrismaError, RequestJSONError } from '@/lib/errors'
+import { NotFoundError, PrismaError, RequestJSONError } from '@/lib/errors'
 import { LEXICAL_EDITOR_JSON, POSTS, PUBLISHED_POST } from '@/test/fixtures'
 import { mockServerSession } from '@/test/helpers/utils'
 
@@ -23,7 +23,12 @@ import { PostRepository } from '../post.repository'
 import { PostService } from '../post.service'
 
 vi.mock('../post.repository', () => ({
-  PostRepository: { create: vi.fn(), findAndCount: vi.fn(), findOne: vi.fn() },
+  PostRepository: {
+    create: vi.fn(),
+    delete: vi.fn(),
+    findAndCount: vi.fn(),
+    findOne: vi.fn(),
+  },
 }))
 
 describe('PostService', () => {
@@ -143,6 +148,56 @@ describe('PostService', () => {
     })
   })
 
+  describe('delete', () => {
+    it('should return a PrismaError returned by the repository', async () => {
+      const error = new PrismaError(new Error('bad'))
+      vi.mocked(PostRepository.delete).mockResolvedValueOnce(error)
+      const result = await PostService.delete(
+        new FindPostDto({ params: Promise.resolve({ id: '1' }) }),
+      )
+      expect(result).toEqual(
+        new Err({
+          details: error.details,
+          status: error.status,
+          type: 'entity',
+        }),
+      )
+    })
+
+    it('should return a ZodError returned by the repository', async () => {
+      const error = new ZodError([])
+      vi.mocked(PostRepository.delete).mockResolvedValue(
+        error as ZodError<number>,
+      )
+      const result = await PostService.delete(
+        new FindPostDto({ params: Promise.resolve({ id: 'invalid' }) }),
+      )
+      expect(result).toEqual(
+        new Err({ details: error, status: UNPROCESSABLE_CONTENT, type: 'dto' }),
+      )
+    })
+
+    it('should return a NotFoundError returned by the repository', async () => {
+      const id = 1
+      const error = new NotFoundError(id, 'Post')
+      vi.mocked(PostRepository.delete).mockResolvedValue(error)
+      const result = await PostService.delete(
+        new FindPostDto({ params: Promise.resolve({ id: id.toString() }) }),
+      )
+      expect(result).toEqual(
+        new Err({ details: error, status: NOT_FOUND, type: 'entity' }),
+      )
+    })
+
+    it('should return the given status upon success', async () => {
+      vi.mocked(PostRepository.delete).mockResolvedValue({ status: NO_CONTENT })
+      const result = await PostService.delete(
+        new FindPostDto({ params: Promise.resolve({ id: '1' }) }),
+      )
+      expect(result).toEqual(new Ok({ status: NO_CONTENT }))
+    })
+  })
+
   describe('findAndCount', () => {
     it('should return a PrismaError', async () => {
       const error = new PrismaError(new Error('bad'))
@@ -216,13 +271,12 @@ describe('PostService', () => {
       )
     })
 
-    it('should return a not found error', async () => {
-      const error = new Error(HTTP_TEXT_BY_STATUS[NOT_FOUND], {
-        cause: { status: NOT_FOUND },
-      })
+    it('should return a NotFoundError returned by the repository', async () => {
+      const id = 1
+      const error = new NotFoundError(id, 'Post')
       vi.mocked(PostRepository.findOne).mockResolvedValue(error)
       const result = await PostService.findOne(
-        new FindPostDto({ params: Promise.resolve({ id: '1' }) }),
+        new FindPostDto({ params: Promise.resolve({ id: id.toString() }) }),
       )
       expect(result).toEqual(
         new Err({ details: error, status: NOT_FOUND, type: 'entity' }),
