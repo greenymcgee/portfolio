@@ -1,8 +1,8 @@
 import { faker } from '@faker-js/faker'
 import { ZodError } from 'zod'
 
-import { HTTP_TEXT_BY_STATUS, NOT_FOUND } from '@/globals/constants'
-import { PrismaError, RequestJSONError } from '@/lib/errors'
+import { NO_CONTENT } from '@/globals/constants'
+import { NotFoundError, PrismaError, RequestJSONError } from '@/lib/errors'
 import { postFactory } from '@/test/factories'
 import {
   ADMIN_USER,
@@ -92,6 +92,43 @@ describe('PostRepository', () => {
     })
   })
 
+  describe('delete', () => {
+    it('should return a dto error for an invalid id', async () => {
+      const result = await PostRepository.delete(
+        new FindPostDto({ params: Promise.resolve({ id: 'invalid' }) }),
+      )
+      expect(result).toEqual(expect.any(ZodError))
+    })
+
+    it('should return a PrismaError when the delete errors', async () => {
+      const error = new Error('bad')
+      prismaMock.post.delete.mockRejectedValueOnce(error)
+      const result = await PostRepository.delete(
+        new FindPostDto({ params: Promise.resolve({ id: '1' }) }),
+      )
+      expect(result).toEqual(new PrismaError(error))
+    })
+
+    it('should return a NotFoundError for a null response', async () => {
+      const id = 1
+      prismaMock.post.delete.mockRejectedValueOnce(null)
+      const result = await PostRepository.delete(
+        new FindPostDto({ params: Promise.resolve({ id: id.toString() }) }),
+      )
+      expect(result).toEqual(new NotFoundError(id, 'Post'))
+    })
+
+    it('should return a No Content response upon success', async () => {
+      prismaMock.post.delete.mockResolvedValueOnce(PUBLISHED_POST)
+      const result = await PostRepository.delete(
+        new FindPostDto({
+          params: Promise.resolve({ id: String(PUBLISHED_POST.id) }),
+        }),
+      )
+      expect(result).toEqual({ status: NO_CONTENT })
+    })
+  })
+
   describe('findAndCount', () => {
     it('should return a dto error', async () => {
       const result = await PostRepository.findAndCount(
@@ -140,27 +177,24 @@ describe('PostRepository', () => {
 
     it('should return a prisma error', async () => {
       const error = new Error('Bad')
-      prismaMock.post.findFirst.mockRejectedValueOnce(error)
+      prismaMock.post.findUnique.mockRejectedValueOnce(error)
       const result = await PostRepository.findOne(
         new FindPostDto({ params: Promise.resolve({ id: '1' }) }),
       )
       expect(result).toEqual(new PrismaError(error))
     })
 
-    it('should return a not found error', async () => {
-      prismaMock.post.findFirst.mockResolvedValueOnce(null)
+    it('should return a NotFoundError for a null response', async () => {
+      const id = 1
+      prismaMock.post.findUnique.mockResolvedValueOnce(null)
       const result = await PostRepository.findOne(
-        new FindPostDto({ params: Promise.resolve({ id: '1' }) }),
+        new FindPostDto({ params: Promise.resolve({ id: id.toString() }) }),
       )
-      expect(result).toEqual(
-        new Error(HTTP_TEXT_BY_STATUS[NOT_FOUND], {
-          cause: { status: NOT_FOUND },
-        }),
-      )
+      expect(result).toEqual(new NotFoundError(id, 'Post'))
     })
 
     it('should return the post', async () => {
-      prismaMock.post.findFirst.mockResolvedValueOnce(PUBLISHED_POST)
+      prismaMock.post.findUnique.mockResolvedValueOnce(PUBLISHED_POST)
       const result = await PostRepository.findOne(
         new FindPostDto({
           params: Promise.resolve({ id: String(PUBLISHED_POST.id) }),

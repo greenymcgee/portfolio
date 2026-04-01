@@ -485,6 +485,7 @@ export type PrismaHTTPErrorCodeKey = Extract<
   | 'P2018'
   | 'P2019'
   | 'P2020'
+  | 'P2025'
   | 'P2033'
   | 'P2034'
 >

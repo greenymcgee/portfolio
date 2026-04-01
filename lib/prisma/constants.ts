@@ -23,6 +23,7 @@ export const PRISMA_ERROR_CODE_TO_HTTP_STATUS: Record<
   P2018: 404,
   P2019: 400,
   P2020: 422,
+  P2025: 404,
   P2033: 422,
   P2034: 422,
 }

@@ -1,23 +1,30 @@
 export const dynamic = 'force-dynamic' // This disables SSG and ISR
 
+import { tryCatch } from '@greenymcgee/typescript-utils'
+import { headers } from 'next/headers'
 import { notFound, redirect } from 'next/navigation'
 
+import { fetchPost } from '@/features/posts/requests'
 import { RichTextEditor } from '@/globals/components'
-import { prisma } from '@/lib/prisma'
+import { API_ROUTES } from '@/globals/constants'
+import { baseAPI } from '@/lib/baseAPI'
 
-export default async function Post({
-  params,
-}: {
+type Props = {
   params: Promise<{ id: string }>
-}) {
+}
+
+export default async function PostPage({ params }: Props) {
   const { id } = await params
   const postId = parseInt(id)
+  const headersList = await headers()
+  const cookie = headersList.get('cookie') ?? ''
+  const { error, response } = await tryCatch(fetchPost(postId))
 
-  const post = await prisma.post.findUnique({
-    include: { author: true },
-    where: { id: postId },
-  })
+  if (error) return error.message
 
+  const {
+    data: { post },
+  } = response
   if (!post) {
     notFound()
   }
@@ -26,12 +33,9 @@ export default async function Post({
   async function deletePost() {
     'use server'
 
-    await prisma.post.delete({
-      where: {
-        id: postId,
-      },
+    await baseAPI.delete(API_ROUTES.post(postId), {
+      headers: { Cookie: cookie },
     })
-
     redirect('/posts')
   }
 
