@@ -1,5 +1,3 @@
-export const dynamic = 'force-dynamic' // This disables SSG and ISR
-
 import Form from 'next/form'
 import { redirect } from 'next/navigation'
 
@@ -22,7 +20,7 @@ export default function NewUser() {
   }
 
   return (
-    <div className="mx-auto mt-12 max-w-2xl rounded-lg bg-white p-6 shadow-md">
+    <main className="mx-auto mt-12 max-w-2xl rounded-lg bg-white p-6 shadow-md">
       <h1 className="mb-6 text-3xl font-bold">Create New User</h1>
       <Form action={createUser} className="space-y-6">
         <div>
@@ -102,6 +100,6 @@ export default function NewUser() {
           Create User
         </button>
       </Form>
-    </div>
+    </main>
   )
 }

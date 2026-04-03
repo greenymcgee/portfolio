@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import clsx from 'clsx'
 
 import { RichTextEditor } from '@/globals/components'
@@ -54,12 +55,14 @@ export function CreatePostFormBody({
           type="hidden"
           value={content ?? ''}
         />
-        <RichTextEditor
-          data-testid="content-editor"
-          editing
-          initialState={content}
-          onChange={onContentChange}
-        />
+        <Suspense>
+          <RichTextEditor
+            data-testid="content-editor"
+            editing
+            initialState={content}
+            onChange={onContentChange}
+          />
+        </Suspense>
       </div>
       <button
         className={clsx(

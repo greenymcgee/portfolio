@@ -1,7 +1,7 @@
 import { HTMLAttributes } from 'react'
 import clsx from 'clsx'
 
-interface Props extends HTMLAttributes<HTMLUListElement> {
+interface Props extends HTMLAttributes<HTMLDivElement> {
   classNameOverrides?: { display?: string; gap?: string }
 }
 
@@ -12,7 +12,7 @@ export function CardGroup({
   ...options
 }: Props) {
   return (
-    <ul
+    <div
       className={clsx('group', className, {
         'flex flex-col': !classNameOverrides?.display,
         'gap-8': !classNameOverrides?.gap,
@@ -20,6 +20,6 @@ export function CardGroup({
       {...options}
     >
       {children}
-    </ul>
+    </div>
   )
 }

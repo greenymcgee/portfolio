@@ -73,7 +73,7 @@ export default function RootLayout({ children }: Props) {
                   <ClientSiteNavbar />
                 </Suspense>
               </header>
-              <main>{children}</main>
+              {children}
             </div>
             <Rainbow
               aria-hidden

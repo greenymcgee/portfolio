@@ -43,5 +43,5 @@ export const TEST_LEXICAL_CONFIG: InitialConfigType = {
   editable: true,
   namespace: 'toolbar-plugin-test',
   nodes: [HeadingNode, ParagraphNode, TextNode],
-  onError: vi.fn(),
+  onError: typeof vi === 'undefined' ? () => null : vi.fn(),
 }

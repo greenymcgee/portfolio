@@ -5,7 +5,13 @@ import { setupServer } from 'msw/node'
 import { CREATED, HTTP_TEXT_BY_STATUS, SUCCESS } from '@/globals/constants'
 import { User } from '@/prisma/generated/client'
 
-import { ADMIN_USER, BASIC_USER, UNPUBLISHED_POST } from '../fixtures'
+import {
+  ADMIN_USER,
+  BASIC_USER,
+  POSTS,
+  POSTS_SECOND_PAGE,
+  UNPUBLISHED_POST,
+} from '../fixtures'
 import { createJWTMock, getApiUrl } from '../helpers/utils'
 
 type ResponseOptions = {
@@ -20,6 +26,18 @@ const EXPIRES = faker.date.future()
 const TOKEN = createJWTMock(ADMIN_USER, { exp: EXPIRES.getTime() / 1000 })
 
 const handlers = [
+  http.get(getApiUrl('posts'), ({ request: { url } }) => {
+    const params = new URL(url).searchParams
+    const page = params.get('page')
+    return HttpResponse.json(
+      {
+        message: HTTP_TEXT_BY_STATUS[SUCCESS],
+        posts: page === '0' ? POSTS : POSTS_SECOND_PAGE,
+        totalPages: 10,
+      },
+      { status: SUCCESS },
+    )
+  }),
   http.post(getApiUrl('posts'), () =>
     HttpResponse.json(
       { message: HTTP_TEXT_BY_STATUS[CREATED], post: UNPUBLISHED_POST },
@@ -35,6 +53,21 @@ const handlers = [
 ]
 
 export const postsServer = setupServer(...handlers)
+
+export function mockGetPostsResponse(options: ResponseOptions = {}) {
+  const {
+    body,
+    message = HTTP_TEXT_BY_STATUS[SUCCESS],
+    status = SUCCESS,
+  } = {
+    ...options,
+  }
+  postsServer.use(
+    http.get(getApiUrl('posts'), () =>
+      HttpResponse.json({ message, ...body }, { status }),
+    ),
+  )
+}
 
 export function mockPostsCreateResponse(options: ResponseOptions = {}) {
   const {

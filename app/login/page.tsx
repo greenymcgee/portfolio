@@ -4,7 +4,7 @@ import { LoginForm } from '@/features/login/components'
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
+    <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
       <div className="w-full max-w-md space-y-8">
         <header className="mb-6">
           <h1 className="text-center text-3xl font-extrabold text-gray-900">
@@ -54,6 +54,6 @@ export default function LoginPage() {
           </LoginForm>
         </Suspense>
       </div>
-    </div>
+    </main>
   )
 }
