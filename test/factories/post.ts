@@ -14,7 +14,9 @@ export const postFactory = Factory.define<Post>(
     createdAt: params.createdAt ?? faker.date.past(),
     id: sequence,
     publishedAt: params.publishedAt ?? null,
-    title: params.title ?? faker.book.title(),
+    title:
+      params.title ??
+      `${faker.book.title()} ${faker.science.chemicalElement().name}`,
     updatedAt: params.updatedAt ?? faker.date.past(),
   }),
 )

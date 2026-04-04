@@ -19,9 +19,9 @@ describe('<LatestPosts />', () => {
 
   it('should render links to post pages', async () => {
     await act(() => render(<LatestPosts />))
-    await screen.findByTestId(`post-card-${POSTS.at(0)?.id}`)
-    POSTS.forEach(({ id }) => {
-      expect(screen.getByTestId(`post-card-${id}`)).toHaveAttribute(
+    await screen.findByTestId(`card-${POSTS.at(0)?.id}`)
+    POSTS.forEach(({ id, title }) => {
+      expect(screen.getByRole('link', { name: title })).toHaveAttribute(
         'href',
         ROUTES.post(id),
       )

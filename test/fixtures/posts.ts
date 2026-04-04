@@ -49,28 +49,24 @@ export const UNPUBLISHED_POST = postFactory
   .build({
     content: CONTENT,
     publishedAt: null,
-    title: faker.book.title(),
   })
 export const PUBLISHED_POST = postFactory
   .associations({ authorId: ADMIN_USER.id })
   .build({
     content: CONTENT,
     publishedAt: faker.date.past(),
-    title: faker.book.title(),
   })
 export const WILL_BE_PUBLISHED_POST = postFactory
   .associations({ authorId: ADMIN_USER.id })
   .build({
     content: CONTENT,
     publishedAt: faker.date.future(),
-    title: faker.book.title(),
   })
 
 const GENERATED_POSTS = Array.from(Array(15)).map((_, index) => {
   return postFactory.associations({ authorId: ADMIN_USER.id }).build({
     content: CONTENT,
     publishedAt: getDate(index),
-    title: faker.book.title(),
   })
 })
 
