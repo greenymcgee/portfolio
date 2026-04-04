@@ -10,6 +10,9 @@
   --background-image-computer-xs: url('/images/computer-xs.png');
   --background-image-computer-md: url('/images/computer-md.png');
   --background-image-computer-lg: url('/images/computer-lg.png');
+  --background-image-typewriter-xs: url('/images/typewriter-xs.png');
+  --background-image-typewriter-md: url('/images/typewriter-md.png');
+  --background-image-typewriter-lg: url('/images/typewriter-lg.png');
 
   /* Colors */
   --color-app-surface: #1b1b1b;

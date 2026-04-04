@@ -16,7 +16,7 @@ type Props = {
 }
 
 export function Card({
-  as: As = 'li',
+  as: As = 'article',
   description,
   endDate,
   id,

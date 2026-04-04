@@ -20,12 +20,12 @@ export default defineConfig({
         'components/svgs/**',
         'globals/constants/**',
       ],
-      // thresholds: {
-      //   branches: 97,
-      //   functions: 99,
-      //   lines: 99,
-      //   statements: 99,
-      // },
+      thresholds: {
+        branches: 90,
+        functions: 95,
+        lines: 90,
+        statements: 90,
+      },
     },
     globals: true,
     projects: [

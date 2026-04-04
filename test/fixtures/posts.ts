@@ -81,4 +81,6 @@ export const POSTS = [
   ...GENERATED_POSTS,
 ]
 
+export const POSTS_SECOND_PAGE = postFactory.buildList(3)
+
 /* eslint-enable sort-keys */
