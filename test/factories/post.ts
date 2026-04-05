@@ -12,6 +12,9 @@ export const postFactory = Factory.define<Post>(
     authorId: associations.authorId ?? DEFAULT_AUTHOR.id,
     content: params.content ?? {},
     createdAt: params.createdAt ?? faker.date.past(),
+    description:
+      params.description ??
+      faker.lorem.sentence({ max: 25, min: 10 }).slice(0, 100),
     id: sequence,
     publishedAt: params.publishedAt ?? null,
     title:

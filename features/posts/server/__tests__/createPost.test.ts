@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker'
 import { redirect } from 'next/navigation'
 import { ZodError } from 'zod'
 
@@ -23,13 +24,15 @@ afterAll(() => postsServer.close())
 
 const FORM_DATA = new FormData()
 FORM_DATA.set('content', '{}')
-FORM_DATA.set('title', 'Title')
+FORM_DATA.set('description', faker.lorem.word())
+FORM_DATA.set('title', faker.book.title())
 
 describe('createPost', () => {
   it('should return a Zod validation error', async () => {
     const result = await createPost({ status: 'IDLE' }, new FormData())
     expect(result).toEqual({
       content: null,
+      description: null,
       error: expect.any(ZodError),
       publishedAt: null,
       status: 'ERROR',
@@ -75,6 +78,7 @@ describe('createPost', () => {
     const result = await createPost({ status: 'IDLE' }, FORM_DATA)
     expect(result).toEqual({
       content: FORM_DATA.get('content'),
+      description: FORM_DATA.get('description'),
       publishedAt: FORM_DATA.get('publishedAt'),
       status: 'ERROR',
       title: FORM_DATA.get('title'),
