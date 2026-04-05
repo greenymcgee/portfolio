@@ -1,7 +1,6 @@
 import { use } from 'react'
-import Link from 'next/link'
 
-import { CardGroup } from '@/globals/components'
+import { Card, CardGroup } from '@/globals/components'
 import { ROUTES } from '@/globals/constants'
 
 import { PaginatedPostsQuery } from '../../types'
@@ -18,13 +17,13 @@ export function PostCards({ promise }: Props) {
   return (
     <CardGroup>
       {data.posts.map((post) => (
-        <Link
-          data-testid={`post-card-${post.id}`}
-          href={ROUTES.post(post.id)}
+        <Card
+          description="description"
+          id={String(post.id)}
           key={post.id}
-        >
-          {post.title}
-        </Link>
+          link={ROUTES.post(post.id)}
+          title={post.title}
+        />
       ))}
     </CardGroup>
   )

@@ -9,4 +9,9 @@ describe('<Projects />', () => {
     render(<Projects />)
     expect(screen.getByTestId(`card-${id}`)).toBeVisible()
   })
+
+  it('should render tools', () => {
+    render(<Projects />)
+    expect(screen.getAllByTestId('card-tools')).toHaveLength(PROJECTS.length)
+  })
 })

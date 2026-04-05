@@ -21,10 +21,10 @@ export default defineConfig({
         'globals/constants/**',
       ],
       thresholds: {
-        branches: 90,
+        branches: 95,
         functions: 95,
-        lines: 90,
-        statements: 90,
+        lines: 94,
+        statements: 94,
       },
     },
     globals: true,

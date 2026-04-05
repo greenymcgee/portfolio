@@ -1,31 +1,28 @@
-import { ElementType } from 'react'
+import { ElementType, PropsWithChildren, ReactElement } from 'react'
 import clsx from 'clsx'
 import { SquareArrowOutUpRight } from 'lucide-react'
 import Link from 'next/link'
 
 type Props = {
-  as?: ElementType
+  as?: Exclude<ElementType, 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h5'>
   description: string
-  endDate?: string
+  external?: boolean
   id: string
   link: string
-  name: string
-  startDate?: string
-  title?: string
-  tools: SoftwareTool[]
+  subtitle?: string
+  title: ReactElement | string
 }
 
 export function Card({
   as: As = 'article',
+  children,
   description,
-  endDate,
+  external = false,
   id,
   link,
-  name,
-  startDate,
+  subtitle,
   title,
-  tools,
-}: Props) {
+}: PropsWithChildren<Props>) {
   return (
     <As
       className={clsx(
@@ -43,52 +40,31 @@ export function Card({
       <div className="mb-2 flex items-center justify-between gap-1">
         <header className="w-full">
           <div className="flex items-center justify-between gap-1">
-            <div className="flex items-center gap-2">
-              <Link
-                className="after:absolute after:inset-0 after:content-[''] focus-visible:outline-0"
-                href={link}
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                <h3 className="text-primary font-semibold">{name}</h3>
-              </Link>
-              {startDate ? (
-                <p className="text-subtle flex items-center text-sm">
-                  {startDate}
-                  {endDate ? (
-                    <>
-                      <span
-                        aria-label="to"
-                        className="border-subtle mx-1 w-3 border-b"
-                      />
-                      {endDate}
-                    </>
-                  ) : null}
-                </p>
-              ) : null}
-            </div>
-            <SquareArrowOutUpRight
-              aria-hidden
-              className={clsx(
-                'text-primary inline h-[1em] w-[1em] text-lg',
-                'transition-[font-size] group-hover:text-[1.25rem]',
-              )}
-            />
+            <Link
+              className="after:absolute after:inset-0 after:content-[''] focus-visible:outline-0"
+              href={link}
+              rel={external ? 'noopener noreferrer' : undefined}
+              target={external ? '_blank' : undefined}
+            >
+              <h3 className="text-primary flex items-center gap-2 font-semibold">
+                {title}
+              </h3>
+            </Link>
+            {external ? (
+              <SquareArrowOutUpRight
+                aria-hidden
+                className={clsx(
+                  'text-primary inline h-[1em] w-[1em] text-lg',
+                  'transition-[font-size] group-hover:text-[1.25rem]',
+                )}
+              />
+            ) : null}
           </div>
-          {title ? <p className="pt-2 text-sm">{title}</p> : null}
+          {subtitle ? <p className="pt-2 text-sm">{subtitle}</p> : null}
         </header>
       </div>
       <p className="text-subtle mb-6">{description}</p>
-      <ul className="grid grid-cols-2 grid-rows-2 gap-2 sm:flex">
-        {tools.map((tool) => (
-          <li
-            className="bg-primary/10 text-primary rounded-full border px-2 py-1 text-sm"
-            key={tool}
-          >
-            {tool}
-          </li>
-        ))}
-      </ul>
+      {children}
     </As>
   )
 }
