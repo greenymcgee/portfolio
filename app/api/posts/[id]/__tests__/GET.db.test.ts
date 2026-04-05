@@ -87,6 +87,7 @@ describe('GET:/api/posts/[id]', () => {
           authorId: post?.authorId,
           content: post?.content,
           createdAt: post?.createdAt.toISOString(),
+          description: post?.description,
           id: post?.id,
           publishedAt: post?.publishedAt?.toISOString(),
           title: post?.title,

@@ -6,6 +6,7 @@ import { Post } from '@/prisma/generated/client'
 
 export interface PostCreateState extends ActionState {
   content?: FormDataEntryValue | null
+  description?: FormDataEntryValue | null
   error?: ZodError
   response?: { message: string; post: Post }
   publishedAt?: FormDataEntryValue | null

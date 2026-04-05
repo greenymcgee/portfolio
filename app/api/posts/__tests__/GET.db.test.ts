@@ -83,6 +83,7 @@ describe('GET:/api/posts/', () => {
           authorId: expect.any(String),
           content: expect.any(String),
           createdAt: expect.any(String),
+          description: expect.any(String),
           id: expect.any(Number),
           publishedAt: expect.toBeOneOf([null, expect.any(String)]),
           title: expect.any(String),

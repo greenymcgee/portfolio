@@ -1,4 +1,5 @@
 /* eslint-disable neverthrow/must-use-result */
+import { faker } from '@faker-js/faker'
 import { errAsync } from 'neverthrow'
 
 import { PostService } from '@/features/posts/post.service'
@@ -103,8 +104,9 @@ describe('POST:/api/posts/', () => {
       const url = new URL('http://nothing.greeny/posts')
       const params = {
         content: LEXICAL_EDITOR_JSON,
+        description: faker.lorem.word(),
         publishedAt: new Date(),
-        title: 'Hello',
+        title: faker.book.title(),
       }
       const { user } = await mockServerSessionAsync('ADMIN')
       const post = postFactory.associations({ authorId: user.id }).build(params)
@@ -121,6 +123,7 @@ describe('POST:/api/posts/', () => {
           authorId: user.id,
           content: post.content,
           createdAt: expect.any(String),
+          description: params.description,
           id: expect.any(Number),
           publishedAt: post.publishedAt?.toISOString(),
           title: post.title,

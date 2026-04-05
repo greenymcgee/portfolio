@@ -5,6 +5,7 @@ import { RichTextEditor } from '@/globals/components'
 
 type Props = {
   content: string | null
+  defaultDescription: FormDataEntryValue | null | undefined
   defaultTitle: FormDataEntryValue | null | undefined
   errorMessage: string
   onContentChange: NonNullable<PropsOf<typeof RichTextEditor>['onChange']>
@@ -13,6 +14,7 @@ type Props = {
 
 export function CreatePostFormBody({
   content,
+  defaultDescription,
   defaultTitle,
   errorMessage,
   onContentChange,
@@ -31,18 +33,27 @@ export function CreatePostFormBody({
       ) : null}
       <div>
         <label className="mb-2 text-lg font-medium" htmlFor="title">
-          Title{' '}
-          <span aria-label="Required" className="">
-            *
-          </span>
+          Title <span aria-label="Required">*</span>
         </label>
         <input
           className="w-full rounded-lg border px-4 py-2"
-          defaultValue={defaultTitle ? String(defaultTitle) : undefined}
+          defaultValue={defaultTitle ? String(defaultTitle) : ''}
           id="title"
           name="title"
           required
           type="text"
+        />
+      </div>
+      <div>
+        <label className="mb-2 text-lg font-medium" htmlFor="description">
+          Description
+        </label>
+        <textarea
+          className="w-full rounded-lg border px-4 py-2"
+          defaultValue={defaultDescription ? String(defaultDescription) : ''}
+          id="description"
+          maxLength={100}
+          name="description"
         />
       </div>
       <div>

@@ -79,8 +79,9 @@ describe('PostRepository', () => {
       prismaMock.post.create.mockResolvedValueOnce(created)
       const params = {
         content: LEXICAL_EDITOR_JSON,
-        publishedAt: null,
-        title: faker.book.title(),
+        description: created.description,
+        publishedAt: created.publishedAt,
+        title: created.title,
       }
       const request = new Request('http://greeny.no/posts', {
         body: JSON.stringify(params),

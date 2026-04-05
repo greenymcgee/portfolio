@@ -32,6 +32,7 @@ export class PostRepository {
         data: {
           authorId: user.id,
           content: params.content.toString(),
+          description: params.description,
           publishedAt: params.publishedAt,
           title: params.title,
         },

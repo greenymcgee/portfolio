@@ -41,6 +41,9 @@ export function CreatePostForm() {
     setContent(JSON.stringify(editorState.toJSON()))
   }, [])
 
+  /**
+   * Redirect Users without permission to the home page.
+   */
   useLayoutEffect(() => {
     if (permitted || status === 'loading' || pathname === ROUTES.home) return
 
@@ -51,6 +54,7 @@ export function CreatePostForm() {
     <Form action={action} className="space-y-6" data-testid="create-post-form">
       <CreatePostFormBody
         content={content}
+        defaultDescription={state.description}
         defaultTitle={state.title}
         errorMessage={errorMessage}
         onContentChange={handleContentChange}

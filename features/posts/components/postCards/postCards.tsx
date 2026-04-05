@@ -18,7 +18,7 @@ export function PostCards({ promise }: Props) {
     <CardGroup>
       {data.posts.map((post) => (
         <Card
-          description="description"
+          description={post.description}
           id={String(post.id)}
           key={post.id}
           link={ROUTES.post(post.id)}

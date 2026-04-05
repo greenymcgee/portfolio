@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { EditorState } from 'lexical'
@@ -31,6 +32,8 @@ vi.mock('@/globals/components', async (importActual) => {
     RichTextEditor: function RichTextEditorMock({
       onChange,
       editing,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      initialState,
       ...rest
     }: PropsOf<typeof RichTextEditor>) {
       React.useEffect(() => {
@@ -73,7 +76,11 @@ describe('<CreatePostForm />', () => {
   it('should render a form that calls the createPost action', async () => {
     await mockCookieHeader()
     renderWithProviders(<CreatePostForm />)
-    await userEvent.type(screen.getByLabelText(/Title/), 'title')
+    await userEvent.type(screen.getByLabelText(/Title/), faker.book.title())
+    await userEvent.type(
+      screen.getByLabelText(/Description/),
+      faker.lorem.word(),
+    )
     const editor = screen
       .getByTestId('content-editor')
       .querySelector('[role="textbox"]') as Element
