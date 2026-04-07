@@ -7,12 +7,15 @@ import { User } from '@/prisma/generated/client'
 
 import {
   ADMIN_USER,
-  BASIC_USER,
   POSTS,
   POSTS_SECOND_PAGE,
   UNPUBLISHED_POST,
 } from '../fixtures'
-import { createJWTMock, getApiUrl } from '../helpers/utils'
+import {
+  createJWTMock,
+  getApiUrl,
+  mockAuthSessionResponse,
+} from '../helpers/utils'
 
 type ResponseOptions = {
   body?: Record<string, unknown>
@@ -50,6 +53,7 @@ const handlers = [
       { status: SUCCESS },
     ),
   ),
+  http.post(getApiUrl('authLog'), () => HttpResponse.json({ status: SUCCESS })),
 ]
 
 export const postsServer = setupServer(...handlers)
@@ -84,34 +88,8 @@ export function mockPostsCreateResponse(options: ResponseOptions = {}) {
   )
 }
 
-export function mockPostsAuthSession(options: ResponseOptions = {}) {
-  const {
-    body,
-    role = 'USER',
-    signedIn = true,
-    status = SUCCESS,
-  } = {
-    ...options,
-  }
-  if (signedIn) {
-    const expires = faker.date.future()
-    const user = role === 'ADMIN' ? ADMIN_USER : BASIC_USER
-    const token = createJWTMock(user, { exp: expires.getTime() / 1000 })
-    postsServer.use(
-      http.get(getApiUrl('authSession'), () =>
-        HttpResponse.json(
-          { expires: expires.toISOString(), token, user, ...body },
-          { status },
-        ),
-      ),
-    )
-    return { token, user }
-  }
-
-  postsServer.use(
-    http.get(getApiUrl('authSession'), () =>
-      HttpResponse.json({}, { status: 401 }),
-    ),
-  )
-  return { token: null, user: null }
+export function mockPostsAuthSession(
+  options?: SecondParameterOf<typeof mockAuthSessionResponse>,
+) {
+  mockAuthSessionResponse(postsServer, options)
 }
