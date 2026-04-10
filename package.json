@@ -9,7 +9,7 @@
     "dev:db:reset": "set -a && . ./.env && npx prisma migrate reset",
     "build": "npx prisma migrate deploy && next build",
     "start": "next start",
-    "lint": "eslint .",
+    "lint": "eslint . --max-warnings=0",
     "postinstall": "npx prisma generate",
     "spellcheck": "cspell \"/**/*.*\"",
     "test": "set -a && . ./.env.test && vitest",

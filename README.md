@@ -116,6 +116,20 @@ SELECT p.*, u."firstName", u."lastName", u.email
   LIMIT 10;
 ```
 
+## Context
+
+Context for this project can be found in the
+[providers](https://github.com/greenymcgee/portfolio/blob/main/providers/)
+directory. We'll list the custom contexts below:
+
+- [AdminMenuProvider](https://github.com/greenymcgee/portfolio/blob/main/globals/providers/adminMenu/)
+  - This context is for injecting content dynamically into the
+  [AdminMenu](https://github.com/greenymcgee/portfolio/blob/main/globals/components/adminMenu/adminMenu.tsx)
+  component.
+  - For an example, see the
+  [PostsAdminMenuSetter](https://github.com/greenymcgee/portfolio/blob/main/features/posts/components/adminMenuContentSetter/adminMenuContentSetter.tsx)
+  component.
+
 ## Test Utils
 
 - [createJWTMock](https://github.com/greenymcgee/portfolio/blob/main/test/helpers/utils/createJWTMock.ts)
@@ -183,6 +197,63 @@ import { createJWTMock } from '@/test/helpers/utils'
 
 const user = userFactory.build()
 const token = createJWTMock(user)
+```
+
+### mockCookieHeader
+
+A util for mocking a cookie header when testing against useSession.
+
+```ts
+import { mockCookieHeader } from '@/test/helpers/utils'
+
+it('should redirect to the login page when the response is unauthorized', async () => {
+  // mocks the cookie required for any request to the API
+  await mockCookieHeader()
+  mockPostsCreateResponse({
+    message: HTTP_TEXT_BY_STATUS[UNAUTHORIZED],
+    status: UNAUTHORIZED,
+  })
+  await createPost({ status: 'IDLE' }, FORM_DATA)
+  expect(redirect).toHaveBeenCalledWith(
+    ROUTES.loginWithRedirect(ROUTES.newPost),
+  )
+})
+```
+
+### mockAuthSessionResponse
+
+A util for mocking an authenticated user session response using msw.
+
+```ts
+import { mockAuthSessionResponse } from '@/test/helpers/utils'
+
+const server = setupServer()
+
+it('should render for an admin user', async () => {
+  const { user } = mockAuthSessionResponse(server, { role: 'ADMIN' })
+  renderWithProviders(<AnyComponent />)
+  expect(screen.getByText(user.firstName)).toBeVisible()
+})
+```
+
+### SessionStatus
+
+A component for displaying the status of the session only in test environments.
+This is useful when there's a need to load something for an admin, but we don't
+want to indicate anything is loading visually.
+
+```tsx
+import { SessionStatus } from '@/globals/components'
+
+function AnyComponent() {
+  const { data: session, status } = useSession()
+
+  if (status === 'loading' || !hasPermission(session?.user, 'adminMenu', 'view')) {
+    return <SessionStatus status={status} />
+  }
+
+  return <div>AnyComponent</div>
+}
 ```
 
 ## Unit Testing Database Code

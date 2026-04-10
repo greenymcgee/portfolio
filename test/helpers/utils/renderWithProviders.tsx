@@ -7,11 +7,11 @@ type Options = SecondParameterOf<typeof render> & PropsOf<typeof TestProviders>
 
 export function renderWithProviders(
   jsx: ReactElement,
-  { wrapper: OptionalWrapper, ...rest }: Options = {},
+  { initialAdminMenuContent, wrapper: OptionalWrapper, ...rest }: Options = {},
 ) {
   function Wrapper({ children }: PropsWithChildren) {
     return (
-      <TestProviders>
+      <TestProviders initialAdminMenuContent={initialAdminMenuContent}>
         {OptionalWrapper ? (
           <OptionalWrapper>{children}</OptionalWrapper>
         ) : (
