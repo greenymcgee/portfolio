@@ -2,6 +2,7 @@ import { Policies } from './types'
 
 export const POLICIES = {
   ADMIN: {
+    adminMenu: { view: true },
     posts: {
       create: true,
       delete: true,
@@ -18,6 +19,7 @@ export const POLICIES = {
     },
   },
   USER: {
+    adminMenu: { view: false },
     posts: {
       create: false,
       delete: false,

@@ -1,6 +1,7 @@
 import { Post, User } from '@/prisma/generated/client'
 
 export interface PortfolioPermissions {
+  adminMenu: { action: 'view'; type: null }
   posts: {
     action: 'create' | 'delete' | 'publish' | 'update' | 'view'
     type: Post

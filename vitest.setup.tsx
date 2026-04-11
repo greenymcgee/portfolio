@@ -113,6 +113,10 @@ beforeAll(() => {
 beforeAll(() => {
   if (typeof HTMLDialogElement === 'undefined') return
 
+  HTMLDialogElement.prototype.hidePopover = vi.fn(function mock(
+    this: HTMLDialogElement,
+  ) {})
+
   HTMLDialogElement.prototype.show = vi.fn(function mock(
     this: HTMLDialogElement,
   ) {
@@ -124,6 +128,10 @@ beforeAll(() => {
   ) {
     this.open = true
   })
+
+  HTMLDialogElement.prototype.showPopover = vi.fn(function mock(
+    this: HTMLDialogElement,
+  ) {})
 
   HTMLDialogElement.prototype.close = vi.fn(function mock(
     this: HTMLDialogElement,

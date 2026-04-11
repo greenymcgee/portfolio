@@ -14,7 +14,7 @@ import {
   SmallRainbow,
 } from '@/globals/components'
 import { ROUTES } from '@/globals/constants'
-import { Providers } from '@/lib/components'
+import { ProviderTree } from '@/providers'
 
 type Props = {
   children: ReactNode
@@ -55,7 +55,7 @@ export default function RootLayout({ children }: Props) {
           'overscroll-behavior-none',
         )}
       >
-        <Providers>
+        <ProviderTree>
           <div className="relative flex min-h-screen justify-between gap-6">
             <Grunge
               aria-hidden
@@ -86,7 +86,7 @@ export default function RootLayout({ children }: Props) {
               preserveAspectRatio="none"
             />
           </div>
-        </Providers>
+        </ProviderTree>
       </body>
     </html>
   )

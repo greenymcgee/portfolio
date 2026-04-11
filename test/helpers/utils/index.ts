@@ -1,5 +1,6 @@
 export * from './createJWTMock'
 export * from './getApiUrl'
+export * from './mockAuthSessionResponse'
 export * from './mockCookieHeader'
 export * from './mockServerSession'
 export * from './mockServerSessionAsync'

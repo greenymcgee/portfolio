@@ -16,7 +16,6 @@ export default defineConfig({
         'lib/logger.ts',
         'lib/prisma/errorClasses.ts',
         'lib/prisma/client.ts',
-        'lib/components/providers.tsx',
         'components/svgs/**',
         'globals/constants/**',
       ],
