@@ -28,9 +28,9 @@ export function Card({
       className={clsx(
         'relative rounded-md pr-6',
         'group transition-[color,opacity,padding]',
-        'hover:bg-app-surface-alt hover:border hover:p-3',
-        'focus-within:bg-app-surface-alt focus-within:border focus-within:p-3',
-        'active:bg-app-surface-alt active:border active:p-3',
+        'hover:bg-muted hover:border hover:p-3',
+        'focus-within:bg-muted focus-within:border focus-within:p-3',
+        'active:bg-muted active:border active:p-3',
         'group-hover:opacity-50 hover:opacity-100!',
         'group-focus-within:opacity-50 focus-within:opacity-100!',
       )}

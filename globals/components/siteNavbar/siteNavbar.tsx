@@ -27,13 +27,13 @@ export function SiteNavbar({ pathname }: Props) {
       </Suspense>
       <div
         className={clsx(
-          'text-on-app-surface-alt bg-app-surface-alt relative',
+          'text-muted-foreground bg-muted relative',
           'rounded-full border',
         )}
       >
         <div
           className={clsx(
-            'bg-on-app-surface-alt absolute top-0 left-0 h-10.5 rounded-full border',
+            'bg-muted-foreground absolute top-0 left-0 h-10.5 rounded-full border',
             'transition-all duration-200 ease-out',
             {
               'w-16 translate-x-full': pathname !== ROUTES.home,
