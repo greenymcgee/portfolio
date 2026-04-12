@@ -80,7 +80,7 @@ export function AdminMenuDialog({ content }: Props) {
         <Menu aria-hidden className="h-[1em] w-[1em]" />
       </button>
       <dialog
-        className="bg-on-app-surface-alt text-app-surface-alt absolute top-[anchor(bottom)] right-[anchor(right)] left-auto rounded-sm px-4 py-2"
+        className="text-muted bg-muted-foreground absolute top-[anchor(bottom)] right-[anchor(right)] left-auto rounded-sm px-4 py-2"
         id="admin-menu-popover"
         onPointerEnter={showPopover}
         onPointerLeave={hidePopover}
