@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 
 import { RichTextEditor } from '@/globals/components'
-import { Button } from '@/globals/components/ui'
+import { Button, Spinner } from '@/globals/components/ui'
 
 type Props = {
   content: string | null
@@ -76,12 +76,15 @@ export function CreatePostFormBody({
         </Suspense>
       </div>
       <Button
-        className="w-full"
+        aria-live="polite"
+        className="ml-auto block"
         data-testid="submit-post-button"
         disabled={pending}
+        size="lg"
         type="submit"
       >
-        Create Post
+        Create Post{' '}
+        {pending ? <Spinner className="inline" data-icon="inline-end" /> : null}
       </Button>
     </>
   )

@@ -39,9 +39,9 @@ export const BUTTON_VARIANTS = cva(
     variants: {
       size: {
         default: [
+          'h-8',
           'gap-1.5',
           'px-2.5',
-          'py-3',
           'in-data-[slot=button-group]:rounded-md',
           'has-data-[icon=inline-end]:pr-2',
           'has-data-[icon=inline-start]:pl-2',
@@ -60,23 +60,24 @@ export const BUTTON_VARIANTS = cva(
           "[&_svg:not([class*='size-'])]:size-3",
         ],
         lg: [
-          'py-3.5',
+          'h-9',
           'gap-1.5',
           'px-2.5',
           'has-data-[icon=inline-end]:pr-2',
           'has-data-[icon=inline-start]:pl-2',
         ],
         sm: [
-          'py-2',
+          'h-7',
           'gap-1',
           'rounded-[min(var(--radius-md),10px)]',
           'px-2.5',
+          'text-sm',
           'in-data-[slot=button-group]:rounded-md',
           'has-data-[icon=inline-end]:pr-1.5',
           'has-data-[icon=inline-start]:pl-1.5',
         ],
         xs: [
-          'py-1',
+          'h-6',
           'gap-1',
           'rounded-[min(var(--radius-md),8px)]',
           'px-2',

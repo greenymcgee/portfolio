@@ -48,18 +48,13 @@ export default function RootLayout({ children }: Props) {
   return (
     <html
       className={clsx(
-        'leading-lg font-open-sans',
+        'leading-lg font-open-sans overscroll-behavior-none',
         porterSansBlock.variable,
         openSans.variable,
       )}
       lang="en"
     >
-      <body
-        className={clsx(
-          'text-foreground bg-background relative h-full',
-          'overscroll-behavior-none',
-        )}
-      >
+      <body className="text-foreground bg-background relative h-full">
         <ProviderTree>
           <div className="relative flex min-h-screen justify-between gap-6">
             <Grunge
