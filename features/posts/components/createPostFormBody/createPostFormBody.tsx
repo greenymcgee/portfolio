@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
-import clsx from 'clsx'
 
 import { RichTextEditor } from '@/globals/components'
+import { Button } from '@/globals/components/ui'
 
 type Props = {
   content: string | null
@@ -75,18 +75,14 @@ export function CreatePostFormBody({
           />
         </Suspense>
       </div>
-      <button
-        className={clsx(
-          'bg-primary text-on-primary w-full cursor-pointer rounded-lg py-3 font-semibold',
-          'transition-[background-color,box-shadow,opacity,outline]',
-          'hover:bg-primary/80 focus-visible:bg-primary/80 disabled:opacity-60',
-        )}
+      <Button
+        className="w-full"
         data-testid="submit-post-button"
         disabled={pending}
         type="submit"
       >
         Create Post
-      </button>
+      </Button>
     </>
   )
 }
