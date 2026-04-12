@@ -46,12 +46,17 @@ const openSans = Open_Sans({
 
 export default function RootLayout({ children }: Props) {
   return (
-    <html className="overscroll-behavior-none" lang="en">
+    <html
+      className={clsx(
+        'leading-lg font-open-sans',
+        porterSansBlock.variable,
+        openSans.variable,
+      )}
+      lang="en"
+    >
       <body
         className={clsx(
-          porterSansBlock.variable,
-          openSans.variable,
-          'font-open-sans text-foreground bg-background leading-lg relative h-full',
+          'text-foreground bg-background relative h-full',
           'overscroll-behavior-none',
         )}
       >
