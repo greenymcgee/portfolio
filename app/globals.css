@@ -36,9 +36,6 @@
   /* Fonts */
   --font-open-sans: 'Open Sans', 'Open Sans Fallback';
   --font-porter-sans-block: 'porterSansBlock', 'porterSansBlock Fallback';
-
-  /* Transitions */
-  --default-transition-duration: 0.2s;
 }
 
 /*
@@ -59,8 +56,8 @@
   }
 
   :focus-visible {
-    box-shadow: 0 0 2px 2px var(--focus-ring-color);
-    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    box-shadow: 0 0 2px 2px var(--color-ring);
+    outline: 2px solid var(--color-ring);
   }
 
   button:not(:disabled),
@@ -145,8 +142,9 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
-
-  /* --shadow-focus-visible: 0 0 2px 2px var(--foreground); */
+  --tw-duration: var(--transition-duration);
+  --tw-ease: var(--transition-timing-function);
+  --tw-shadow-color: var(--ring);
 }
 
 :root {
@@ -154,17 +152,16 @@
   --primary: #3cc0c3;
   --border: #565656;
   --background: #1b1b1b;
-  --focus-ring-color: var(--foreground);
-  --focus-ring-offset-color: var(--muted-foreground);
-  --focus-ring-width: 2px;
   --foreground: #d9d9d9;
   --muted: #252525;
   --muted-foreground: #e2e2e2;
   --primary-foreground: var(--background);
-  --ring: var(--focus-ring-color);
+  --ring: var(--foreground);
   --secondary: var(--foreground);
   --secondary-foreground: var(--background);
   --subtle: #a1a1a1;
+  --transition-duration: 0.2s;
+  --transition-timing-function: ease-out;
 
   /* Defined by shadcn */
   --card: oklch(1 0 0);

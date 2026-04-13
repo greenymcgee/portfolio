@@ -1,5 +1,10 @@
 import { faker } from '@faker-js/faker'
-import { fireEvent, screen, waitFor } from '@testing-library/react'
+import {
+  fireEvent,
+  screen,
+  waitFor,
+  waitForElementToBeRemoved,
+} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { EditorState } from 'lexical'
 import mockRouter from 'next-router-mock'
@@ -69,7 +74,7 @@ describe('<CreatePostForm />', () => {
     await userEvent.type(editor, 'content')
     const submitButton = screen.getByTestId('submit-post-button')
     fireEvent.click(submitButton)
-    await waitFor(() => expect(submitButton).not.toBeDisabled())
+    await waitForElementToBeRemoved(screen.getByRole('status'))
     expect(screen.getByTestId('error-message')).toBeVisible()
   })
 
@@ -87,7 +92,7 @@ describe('<CreatePostForm />', () => {
     await userEvent.type(editor, 'content')
     const submitButton = screen.getByTestId('submit-post-button')
     fireEvent.click(submitButton)
-    await waitFor(() => expect(submitButton).not.toBeDisabled())
+    await waitForElementToBeRemoved(screen.getByRole('status'))
     expect(mockRouter.pathname).toBe(ROUTES.post(UNPUBLISHED_POST.id))
   })
 })
