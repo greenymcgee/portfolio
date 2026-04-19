@@ -1,7 +1,7 @@
 /* eslint-disable sort-keys */
 import { faker } from '@faker-js/faker'
 
-import { postFactory } from '../factories'
+import { authoredPostFactory, postFactory } from '../factories'
 import { ADMIN_USER } from './users'
 
 const CONTENT = JSON.stringify({
@@ -43,6 +43,16 @@ function getDate(index: number) {
 
   return faker.date.past()
 }
+
+export const AUTHORED_POST = authoredPostFactory
+  .associations({
+    author: { firstName: ADMIN_USER.firstName, lastName: ADMIN_USER.lastName },
+    authorId: ADMIN_USER.id,
+  })
+  .build({
+    content: CONTENT,
+    publishedAt: faker.date.past(),
+  })
 
 export const UNPUBLISHED_POST = postFactory
   .associations({ authorId: ADMIN_USER.id })

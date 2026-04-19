@@ -1,28 +1,18 @@
-import { coerce, ZodError } from 'zod'
+import { coerce } from 'zod'
 
 import { logger } from '@/lib/logger'
 
-type FindPostContext = { params: Promise<{ id: string }> }
-
 export class FindPostDto {
-  private context: FindPostContext
+  private param: AuthoredPost['id']
 
-  constructor(context: FindPostContext) {
-    this.context = context
+  constructor(id: AuthoredPost['id']) {
+    this.param = id
   }
 
-  public async getId() {
-    const id = await this.validateId()
-    if (id instanceof ZodError) return id
-
-    return id
-  }
-
-  private async validateId() {
-    const { id } = await this.context.params
-    const { data, error } = coerce.number().min(1).safeParse(id)
+  public get id() {
+    const { data, error } = coerce.number().min(1).safeParse(this.param)
     if (error) {
-      logger.error({ error }, `FindPostDto error: ${id}`)
+      logger.error({ error }, `FindPostDto error: ${this.param}`)
       return error
     }
 
