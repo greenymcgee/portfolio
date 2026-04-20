@@ -51,7 +51,7 @@ export class PostRepository {
   }
 
   public static async delete(dto: FindPostDto) {
-    const id = await dto.getId()
+    const { id } = dto
     if (id instanceof ZodError) return id
 
     const { error, response } = await tryCatch(
@@ -85,7 +85,7 @@ export class PostRepository {
   }
 
   public static async findOne(dto: FindPostDto) {
-    const id = await dto.getId()
+    const { id } = dto
     if (id instanceof ZodError) return id
 
     const { error, response: post } = await tryCatch(

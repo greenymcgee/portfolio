@@ -23,6 +23,8 @@ export default [
     },
     rules: {
       'neverthrow/must-use-result': 'error',
+
+      'vitest/max-expects': 0,
     },
   },
   {

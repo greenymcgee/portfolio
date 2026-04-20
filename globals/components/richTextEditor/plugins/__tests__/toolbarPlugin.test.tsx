@@ -77,7 +77,6 @@ describe('<ToolbarPlugin />', () => {
 
   describe('undo and redo', () => {
     it('should render controls', async () => {
-      /* eslint-disable vitest/max-expects -- one integration flow with multiple waitFor checkpoints */
       const user = userEvent.setup()
       const onReady = vi.fn()
       render(
@@ -109,7 +108,6 @@ describe('<ToolbarPlugin />', () => {
           ].join('|'),
         ).toBe(`${SECOND_PARAGRAPH_TEXT}|true|false`)
       })
-      /* eslint-enable vitest/max-expects */
     })
   })
 })

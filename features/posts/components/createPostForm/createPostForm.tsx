@@ -12,7 +12,7 @@ import Form from 'next/form'
 import { usePathname, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 
-import { createPost } from '@/features/posts/server'
+import { createPost } from '@/features/posts/actions'
 import { ROUTES } from '@/globals/constants'
 import { hasPermission } from '@/lib/permissions'
 

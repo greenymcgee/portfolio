@@ -3,21 +3,19 @@ import { ZodError } from 'zod'
 import { FindPostDto } from '../find-post.dto'
 
 describe('FindPostDto', () => {
-  it('should throw an error for a missing id', async () => {
+  it('should throw an error for a missing id', () => {
     // @ts-expect-error: need to test validation
-    const result = new FindPostDto({ params: Promise.resolve({}) })
-    expect(await result.getId()).toEqual(expect.any(ZodError))
+    const { id } = new FindPostDto(undefined)
+    expect(id).toEqual(expect.any(ZodError))
   })
 
-  it('should throw an error for an invalid id', async () => {
-    const result = new FindPostDto({
-      params: Promise.resolve({ id: 'invalid' }),
-    })
-    expect(await result.getId()).toEqual(expect.any(ZodError))
+  it('should throw an error for an invalid id', () => {
+    const { id } = new FindPostDto(0)
+    expect(id).toEqual(expect.any(ZodError))
   })
 
-  it('should allow a valid id', async () => {
-    const result = new FindPostDto({ params: Promise.resolve({ id: '1' }) })
-    expect(await result.getId()).toEqual(1)
+  it('should allow a valid id', () => {
+    const { id } = new FindPostDto(1)
+    expect(id).toEqual(1)
   })
 })
