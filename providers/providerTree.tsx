@@ -2,6 +2,7 @@
 
 import { PropsWithChildren } from 'react'
 import { SessionProvider } from 'next-auth/react'
+import { ThemeProvider, ThemeProviderProps } from 'next-themes'
 
 import {
   AdminMenuContextProvider,
@@ -10,16 +11,18 @@ import {
 
 type Props = {
   initialAdminMenuContent?: AdminMenuContextType['content']
+  themeProviderProps?: ThemeProviderProps
 }
 
 export function ProviderTree({
   children,
   initialAdminMenuContent,
+  themeProviderProps,
 }: PropsWithChildren<Props>) {
   return (
     <SessionProvider>
       <AdminMenuContextProvider initialContent={initialAdminMenuContent}>
-        {children}
+        <ThemeProvider {...themeProviderProps}>{children}</ThemeProvider>
       </AdminMenuContextProvider>
     </SessionProvider>
   )
