@@ -59,14 +59,14 @@ vi.mock('@/globals/components', async (importActual) => {
 describe('<CreatePostForm />', () => {
   it('should redirect an unauthorized user', async () => {
     mockPostsAuthSession({ role: 'USER' })
-    renderWithProviders(<CreatePostForm />)
+    renderWithProviders(<CreatePostForm />, { includesSession: true })
     await waitFor(() => expect(mockRouter.pathname).toBe(ROUTES.home))
   })
 
   it('should render an error message when the POST request errors', async () => {
     await mockCookieHeader()
     mockPostsCreateResponse({ status: INTERNAL_SERVER_ERROR })
-    renderWithProviders(<CreatePostForm />)
+    renderWithProviders(<CreatePostForm />, { includesSession: true })
     await userEvent.type(screen.getByLabelText(/Title/), 'title')
     const editor = screen
       .getByTestId('content-editor')
@@ -80,7 +80,7 @@ describe('<CreatePostForm />', () => {
 
   it('should render a form that calls the createPost action', async () => {
     await mockCookieHeader()
-    renderWithProviders(<CreatePostForm />)
+    renderWithProviders(<CreatePostForm />, { includesSession: true })
     await userEvent.type(screen.getByLabelText(/Title/), faker.book.title())
     await userEvent.type(
       screen.getByLabelText(/Description/),

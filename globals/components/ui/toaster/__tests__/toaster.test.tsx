@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
-import { ThemeProvider } from 'next-themes'
 import { toast } from 'sonner'
+
+import { renderWithProviders } from '@/test/helpers/utils'
 
 import { Toaster } from '..'
 
@@ -31,13 +32,12 @@ describe('<Toaster />', () => {
   })
 
   it('should apply the theme from next-themes to the toaster list', async () => {
-    render(
-      <ThemeProvider defaultTheme="light" enableSystem={false}>
-        <Toaster {...PROPS} />
-      </ThemeProvider>,
-    )
+    renderWithProviders(<Toaster {...PROPS} />, {
+      includesTheme: true,
+      themeProviderProps: { defaultTheme: 'dark', enableSystem: false },
+    })
     const list = await showToast()
-    expect(list.getAttribute('data-sonner-theme')).toBe('light')
+    expect(list.getAttribute('data-sonner-theme')).toBe('dark')
   })
 
   it('should resolve the system theme when next-themes does not supply a theme', async () => {
@@ -142,11 +142,7 @@ describe('<Toaster />', () => {
   })
 
   it('should forward closeButton and richColors to each toast', async () => {
-    render(
-      <ThemeProvider defaultTheme="light" enableSystem={false}>
-        <Toaster {...PROPS} closeButton richColors />
-      </ThemeProvider>,
-    )
+    render(<Toaster {...PROPS} closeButton richColors />)
     await showToast()
     const toastElement = document.querySelector('[data-sonner-toast]')
     expect(toastElement).toHaveAttribute('data-rich-colors')

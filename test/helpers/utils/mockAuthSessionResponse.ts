@@ -46,7 +46,7 @@ export function mockAuthSessionResponse(
 
   server.use(
     http.get(getApiUrl('authSession'), () =>
-      HttpResponse.json(null, { status: 200 }),
+      HttpResponse.json({}, { status: 200 }),
     ),
   )
   return { token: null, user: null }

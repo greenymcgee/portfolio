@@ -22,7 +22,14 @@ export function ProviderTree({
   return (
     <SessionProvider>
       <AdminMenuContextProvider initialContent={initialAdminMenuContent}>
-        <ThemeProvider {...themeProviderProps}>{children}</ThemeProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          {...themeProviderProps}
+        >
+          {children}
+        </ThemeProvider>
       </AdminMenuContextProvider>
     </SessionProvider>
   )

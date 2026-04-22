@@ -54,6 +54,7 @@ export default function RootLayout({ children }: Props) {
         openSans.variable,
       )}
       lang="en"
+      suppressHydrationWarning
     >
       <body className="text-foreground bg-background relative h-full">
         <ProviderTree>
