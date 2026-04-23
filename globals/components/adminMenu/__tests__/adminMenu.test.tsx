@@ -1,4 +1,4 @@
-import { act, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 
 import { mockCookieHeader, renderWithProviders } from '@/test/helpers/utils'
 import { mockRootLayoutAuthSession, rootLayoutServer } from '@/test/servers'
@@ -10,15 +10,18 @@ afterEach(() => rootLayoutServer.resetHandlers())
 afterAll(() => rootLayoutServer.close())
 
 describe('<AdminMenu />', () => {
-  it('should not render anything when AdminMenuContext.content is blank', async () => {
-    const { container } = renderWithProviders(<AdminMenu />)
-    await act(() => expect(container).toBeEmptyDOMElement())
+  it('should not render anything when AdminMenuContext.content is blank', () => {
+    const { container } = renderWithProviders(<AdminMenu />, {
+      includesSession: true,
+    })
+    expect(container).toBeEmptyDOMElement()
   })
 
   it('should render when content and a user are present', async () => {
     await mockCookieHeader()
     mockRootLayoutAuthSession({ role: 'ADMIN' })
     renderWithProviders(<AdminMenu />, {
+      includesSession: true,
       initialAdminMenuContent: <div>hello</div>,
     })
     expect(await screen.findByTestId('admin-menu-toggle')).toBeVisible()

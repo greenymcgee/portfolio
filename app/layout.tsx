@@ -13,6 +13,7 @@ import {
   SiteNavbar,
   SmallRainbow,
 } from '@/globals/components'
+import { Toaster } from '@/globals/components/ui'
 import { ROUTES } from '@/globals/constants'
 import { ProviderTree } from '@/providers'
 
@@ -53,6 +54,7 @@ export default function RootLayout({ children }: Props) {
         openSans.variable,
       )}
       lang="en"
+      suppressHydrationWarning
     >
       <body className="text-foreground bg-background relative h-full">
         <ProviderTree>
@@ -86,6 +88,7 @@ export default function RootLayout({ children }: Props) {
               preserveAspectRatio="none"
             />
           </div>
+          <Toaster />
         </ProviderTree>
       </body>
     </html>

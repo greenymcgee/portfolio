@@ -28,25 +28,33 @@ const PROPS: PropsOf<typeof AdminMenuDialog> = { content: <p>Children</p> }
 describe('<AdminMenuDialog />', () => {
   it('should not render for an unauthenticated user', async () => {
     mockRootLayoutAuthSession({ signedIn: false })
-    renderWithProviders(<AdminMenuDialog {...PROPS} />)
+    renderWithProviders(<AdminMenuDialog {...PROPS} />, {
+      includesSession: true,
+    })
     expect(await screen.findByText('unauthenticated')).toBeVisible()
   })
 
   it('should not render for a non-admin user', async () => {
     mockRootLayoutAuthSession({ role: 'USER' })
-    renderWithProviders(<AdminMenuDialog {...PROPS} />)
+    renderWithProviders(<AdminMenuDialog {...PROPS} />, {
+      includesSession: true,
+    })
     expect(await screen.findByText('authenticated')).toBeVisible()
   })
 
   it('should render for an admin user', async () => {
     mockRootLayoutAuthSession({ role: 'ADMIN' })
-    renderWithProviders(<AdminMenuDialog {...PROPS} />)
+    renderWithProviders(<AdminMenuDialog {...PROPS} />, {
+      includesSession: true,
+    })
     expect(await screen.findByTestId('admin-menu-toggle')).toBeVisible()
   })
 
   describe('event handlers', () => {
     it('should set aria-expanded to true after pointer enter', async () => {
-      renderWithProviders(<AdminMenuDialog {...PROPS} />)
+      renderWithProviders(<AdminMenuDialog {...PROPS} />, {
+        includesSession: true,
+      })
       const toggle = await screen.findByTestId('admin-menu-toggle')
       expect(toggle).toHaveAttribute('aria-expanded', 'false')
       vi.useFakeTimers()
@@ -58,7 +66,9 @@ describe('<AdminMenuDialog />', () => {
     })
 
     it('should set aria-expanded to false after pointer leave', async () => {
-      renderWithProviders(<AdminMenuDialog {...PROPS} />)
+      renderWithProviders(<AdminMenuDialog {...PROPS} />, {
+        includesSession: true,
+      })
       const toggle = await screen.findByTestId('admin-menu-toggle')
       vi.useFakeTimers()
       fireEvent.pointerEnter(toggle)
@@ -73,7 +83,9 @@ describe('<AdminMenuDialog />', () => {
     })
 
     it('should post to the Next-Auth sign-out route when Sign Out is clicked', async () => {
-      renderWithProviders(<AdminMenuDialog {...PROPS} />)
+      renderWithProviders(<AdminMenuDialog {...PROPS} />, {
+        includesSession: true,
+      })
       await screen.findByTestId('admin-menu-toggle')
       fireEvent.click(screen.getByText('Sign Out'))
       await waitFor(() =>
@@ -85,7 +97,9 @@ describe('<AdminMenuDialog />', () => {
       rootLayoutServer.use(
         http.post(getApiUrl('authSignout'), () => HttpResponse.error()),
       )
-      renderWithProviders(<AdminMenuDialog {...PROPS} />)
+      renderWithProviders(<AdminMenuDialog {...PROPS} />, {
+        includesSession: true,
+      })
       await screen.findByTestId('admin-menu-toggle')
       fireEvent.click(screen.getByText('Sign Out'))
       expect(await screen.findByTestId('sign-out-error')).toBeInTheDocument()

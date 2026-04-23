@@ -11,12 +11,12 @@ afterAll(() => postsServer.close())
 
 describe('<NewPostPage />', () => {
   it('should render an h1', () => {
-    renderWithProviders(<NewPostPage />)
+    renderWithProviders(<NewPostPage />, { includesSession: true })
     expect(screen.getByTestId('create-post-heading').tagName).toBe('H1')
   })
 
   it('should render the CreatePostForm', () => {
-    renderWithProviders(<NewPostPage />)
+    renderWithProviders(<NewPostPage />, { includesSession: true })
     expect(screen.getByTestId('create-post-form')).toBeVisible()
   })
 })
