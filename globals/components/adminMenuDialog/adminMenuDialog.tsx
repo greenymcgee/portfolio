@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from 'react'
 import { tryCatch } from '@greenymcgee/typescript-utils'
+import clsx from 'clsx'
 import { Menu } from 'lucide-react'
 import { signOut, useSession } from 'next-auth/react'
 
@@ -7,6 +8,7 @@ import { hasPermission } from '@/lib/permissions'
 import type { AdminMenuContextType } from '@/providers'
 
 import { SessionStatus } from '../sessionStatus'
+import { Button } from '../ui'
 import { debouncePopoverInteraction } from './utils'
 
 type Props = { content: NonNullable<AdminMenuContextType['content']> }
@@ -67,20 +69,24 @@ export function AdminMenuDialog({ content }: Props) {
       onBlur={hidePopover}
       onFocusCapture={showPopover}
     >
-      <button
+      <Button
         aria-expanded={expanded}
         aria-label="Open Admin Menu"
-        className="cursor-pointer text-xl"
+        className="h-[unset] py-1"
         data-testid="admin-menu-toggle"
         onPointerEnter={showPopover}
         onPointerLeave={hidePopover}
+        size="lg"
         style={{ anchorName: '--admin-menu-anchor' }}
-        type="button"
+        variant="ghost"
       >
-        <Menu aria-hidden className="h-[1em] w-[1em]" />
-      </button>
+        <Menu aria-hidden className="size-8" />
+      </Button>
       <dialog
-        className="text-muted bg-muted-foreground absolute top-[anchor(bottom)] right-[anchor(right)] left-auto rounded-sm px-4 py-2"
+        className={clsx(
+          'text-background bg-foreground absolute rounded-sm',
+          'top-[calc(anchor(bottom)+0.25rem)] right-auto left-[anchor(left)]',
+        )}
         id="admin-menu-popover"
         onPointerEnter={showPopover}
         onPointerLeave={hidePopover}
@@ -95,15 +101,17 @@ export function AdminMenuDialog({ content }: Props) {
           <p data-testid="sign-out-loader">Signing out</p>
         ) : (
           <>
-            {content}
-            <hr className="my-3" />
-            <button
-              className="cursor-pointer"
-              onClick={handleSignout}
-              type="button"
-            >
-              Sign Out
-            </button>
+            <div className="px-1 pt-2">{content}</div>
+            <hr className="border-subtle my-3" />
+            <div className="px-1 pb-2">
+              <Button
+                onClick={handleSignout}
+                type="button"
+                variant="outline-inverse"
+              >
+                Sign Out
+              </Button>
+            </div>
           </>
         )}
       </dialog>

@@ -18,16 +18,13 @@ export function SiteNavbar({ pathname }: Props) {
   const postsRouteActive = pathname !== ROUTES.home
 
   return (
-    <nav
-      className="flex items-center justify-end gap-4"
-      data-testid="site-navbar"
-    >
+    <nav className="flex items-center gap-4" data-testid="site-navbar">
       <Suspense>
         <AdminMenu />
       </Suspense>
       <div
         className={clsx(
-          'text-muted-foreground bg-muted relative',
+          'text-muted-foreground bg-muted relative ml-auto',
           'rounded-full border',
         )}
       >

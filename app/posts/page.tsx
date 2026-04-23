@@ -1,16 +1,15 @@
 import { Suspense } from 'react'
 import clsx from 'clsx'
 
-import {
-  LatestPosts,
-  PostsAdminMenuContentSetter,
-} from '@/features/posts/components'
+import { LatestPosts } from '@/features/posts/components'
+import { PostsPageAdminMenuContent } from '@/features/posts/components'
 import { POST_PAGE_CLASS_NAMES } from '@/features/posts/constants'
+import { AdminMenuContentSetter } from '@/globals/components'
 
 export default function PostsPage() {
   return (
     <>
-      <PostsAdminMenuContentSetter />
+      <AdminMenuContentSetter content={<PostsPageAdminMenuContent />} />
       <main className="mb-23">
         <header
           className={clsx(

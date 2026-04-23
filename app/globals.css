@@ -147,19 +147,19 @@
   --foreground: #d9d9d9;
   --muted: #252525;
   --muted-foreground: #e2e2e2;
+  --popover: var(--background);
+  --popover-foreground: var(--foreground);
   --primary-foreground: var(--background);
   --ring: var(--foreground);
   --secondary: var(--foreground);
   --secondary-foreground: var(--background);
   --subtle: #a1a1a1;
-  --transition-duration: 0.2s;
-  --transition-timing-function: ease-out;
+  --transition-duration: 0.3s;
+  --transition-timing-function: ease-linear;
 
   /* Defined by shadcn */
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
