@@ -1,11 +1,11 @@
-export default function PostPage() {
+import { Suspense } from 'react'
+
+import { PostPageContent } from '@/features/posts/components'
+
+export default function PostPage({ params }: PropsOf<typeof PostPageContent>) {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-8">
-      <article className="w-full max-w-3xl rounded-lg bg-white p-8 shadow-lg">
-        <h1 className="mb-4 text-5xl font-extrabold text-gray-900">
-          Coming Soon
-        </h1>
-      </article>
-    </main>
+    <Suspense fallback={<p data-testid="post-loader">Loading post</p>}>
+      <PostPageContent params={params} />
+    </Suspense>
   )
 }
