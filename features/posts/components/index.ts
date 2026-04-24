@@ -1,3 +1,5 @@
 export * from './createPostForm'
 export * from './latestPosts'
+export * from './postPageAdminMenuContent'
+export * from './postPageContent'
 export * from './postsPageAdminMenuContent'
