@@ -1,4 +1,5 @@
 export * from './adminMenu'
+export * from './adminMenuContentSetter'
 export * from './card'
 export * from './cardGroup'
 export * from './clientSiteNavbar'

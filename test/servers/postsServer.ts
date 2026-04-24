@@ -7,7 +7,6 @@ import { User } from '@/prisma/generated/client'
 
 import {
   ADMIN_USER,
-  AUTHORED_POST,
   POSTS,
   POSTS_SECOND_PAGE,
   UNPUBLISHED_POST,
@@ -48,12 +47,6 @@ const handlers = [
       { status: CREATED },
     ),
   ),
-  http.get(getApiUrl('post', [AUTHORED_POST.id]), () =>
-    HttpResponse.json(
-      { message: HTTP_TEXT_BY_STATUS[SUCCESS], post: AUTHORED_POST },
-      { status: SUCCESS },
-    ),
-  ),
   http.get(getApiUrl('authSession'), () =>
     HttpResponse.json(
       { expires: EXPIRES.toISOString(), token: TOKEN, user: ADMIN_USER },
@@ -75,25 +68,6 @@ export function mockGetPostsResponse(options: ResponseOptions = {}) {
   }
   postsServer.use(
     http.get(getApiUrl('posts'), () =>
-      HttpResponse.json({ message, ...body }, { status }),
-    ),
-  )
-}
-
-export function mockGetPostResponse(
-  options: ResponseOptions & {
-    body: { [key: string | symbol]: unknown; id: number }
-  } = { body: { id: AUTHORED_POST.id } },
-) {
-  const {
-    body,
-    message = HTTP_TEXT_BY_STATUS[SUCCESS],
-    status = SUCCESS,
-  } = {
-    ...options,
-  }
-  postsServer.use(
-    http.get(getApiUrl('post', [body.id]), () =>
       HttpResponse.json({ message, ...body }, { status }),
     ),
   )
