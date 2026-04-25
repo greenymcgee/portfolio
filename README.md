@@ -13,6 +13,7 @@ Next.js, Prisma, and Tailwind CSS.
 - [TypeScript](https://www.typescriptlang.org/)
 - [Docker Compose](https://docs.docker.com/compose/) - for local development and testing
 - [GitHub Actions](https://github.com/features/actions)
+- [Neverthrow](https://github.com/supermacro/neverthrow)
 
 **Testing**
 
