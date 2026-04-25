@@ -1,4 +1,5 @@
 import { screen } from '@testing-library/react'
+import { format } from 'date-fns'
 
 import { PostRepository } from '@/features/posts/post.repository'
 import { NotFoundError } from '@/lib/errors'
@@ -56,5 +57,25 @@ describe('<PostPageContent />', () => {
     const jsx = await PostPageContent(PROPS)
     renderWithProviders(jsx)
     expect(screen.getByRole('article')).toBeVisible()
+  })
+
+  it('should render the author name and published date', async () => {
+    vi.spyOn(PostRepository, 'findOne').mockResolvedValueOnce(AUTHORED_POST)
+    const jsx = await PostPageContent(PROPS)
+    renderWithProviders(jsx)
+    const authorName = `${AUTHORED_POST.author.firstName} ${AUTHORED_POST.author.lastName}`
+    const publishedAt = format(
+      AUTHORED_POST.publishedAt as Date,
+      'MMMM do, yyyy',
+    )
+    expect(screen.getByText(new RegExp(authorName))).toBeVisible()
+    expect(screen.getByText(new RegExp(publishedAt))).toBeVisible()
+  })
+
+  it('should render the socials', async () => {
+    vi.spyOn(PostRepository, 'findOne').mockResolvedValueOnce(AUTHORED_POST)
+    const jsx = await PostPageContent(PROPS)
+    renderWithProviders(jsx)
+    expect(screen.getByTestId('socials')).toBeVisible()
   })
 })

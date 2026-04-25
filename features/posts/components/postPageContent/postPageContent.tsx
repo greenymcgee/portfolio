@@ -1,4 +1,10 @@
-import { AdminMenuContentSetter, RichTextEditor } from '@/globals/components'
+import { Time } from '@greenymcgee/react-components'
+
+import {
+  AdminMenuContentSetter,
+  RichTextEditor,
+  Socials,
+} from '@/globals/components'
 import { Heading } from '@/globals/components/ui'
 
 import { getPost } from '../../actions'
@@ -12,23 +18,47 @@ export async function PostPageContent({ params }: Props) {
 
   if (error) {
     return (
-      <main className="pt-28">
+      <main className="pt-10">
         <Heading>Something went wrong</Heading>
       </main>
     )
   }
 
   return (
-    <main className="pt-28">
-      <AdminMenuContentSetter
-        content={<PostPageAdminMenuContent post={post} />}
-      />
-      <article>
-        <Heading>{post.title}</Heading>
-        <RichTextEditor
-          initialState={typeof post.content === 'string' ? post.content : null}
+    <>
+      <main className="mb-8 pt-10 pl-6">
+        <AdminMenuContentSetter
+          content={<PostPageAdminMenuContent post={post} />}
         />
-      </article>
-    </main>
+        <article>
+          <header className="mb-8">
+            <Heading className="mb-4 text-right font-extrabold" size="2xl">
+              {post.title}
+            </Heading>
+            <p className="text-subtle text-right text-sm">
+              by{' '}
+              <span className="text-foreground font-medium">
+                {post.author.firstName} {post.author.lastName}
+              </span>
+              ,{' '}
+              <Time
+                date={
+                  post.publishedAt?.toISOString() ?? new Date().toISOString()
+                }
+                format="MMMM do, yyyy"
+              />
+            </p>
+          </header>
+          <RichTextEditor
+            initialState={
+              typeof post.content === 'string' ? post.content : null
+            }
+          />
+        </article>
+      </main>
+      <footer className="pb-10 pl-6 text-right text-xl">
+        <Socials />
+      </footer>
+    </>
   )
 }

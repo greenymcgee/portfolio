@@ -6,14 +6,17 @@ import { cn } from '@/lib/utils'
 import { HEADING_VARIANTS } from './constants'
 
 type Props = ComponentProps<'h1'> &
-  Omit<VariantProps<typeof HEADING_VARIANTS>, 'level'> & {
-    level?: 'h1' | 'h2'
+  VariantProps<typeof HEADING_VARIANTS> & {
+    level?: 'h1' | 'h2' | 'h3'
   }
 
-export function Heading({ className, level = 'h1', ...options }: Props) {
-  const As = level
-
+export function Heading({
+  className,
+  level: As = 'h1',
+  size,
+  ...options
+}: Props) {
   return (
-    <As className={cn(HEADING_VARIANTS({ className, level }))} {...options} />
+    <As className={cn(HEADING_VARIANTS({ className, size }))} {...options} />
   )
 }
