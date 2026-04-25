@@ -18,7 +18,7 @@ export function SiteNavbar({ pathname }: Props) {
   const postsRouteActive = pathname !== ROUTES.home
 
   return (
-    <nav className="flex items-center gap-4" data-testid="site-navbar">
+    <nav className="flex items-center gap-4 pl-4" data-testid="site-navbar">
       <Suspense>
         <AdminMenu />
       </Suspense>

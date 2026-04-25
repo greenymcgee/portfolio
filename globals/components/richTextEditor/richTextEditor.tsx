@@ -33,12 +33,13 @@ export function RichTextEditor({
     editorState: initialState ?? null,
     theme: {
       heading: {
-        h2: 'mb-2 text-lg md:text-xl leading-md font-bold',
-        h3: 'mb-2 text-md md:text-lg leading-md font-bold',
-        h4: 'mb-2 leading-md font-bold',
-        h5: 'mb-2 leading-md font-bold',
-        h6: 'mb-2 leading-md font-bold',
+        h2: 'mb-2 text-lg md:text-xl leading-md font-semibold',
+        h3: 'mb-2 text-md md:text-lg leading-md font-semibold',
+        h4: 'mb-2 leading-md font-semibold',
+        h5: 'mb-2 leading-md font-semibold',
+        h6: 'mb-2 leading-md font-semibold',
       },
+      paragraph: 'text-subtle',
       text: {
         bold: 'font-bold',
         italic: 'italic',

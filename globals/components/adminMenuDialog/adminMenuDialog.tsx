@@ -72,7 +72,7 @@ export function AdminMenuDialog({ content }: Props) {
       <Button
         aria-expanded={expanded}
         aria-label="Open Admin Menu"
-        className="h-[unset] py-1"
+        className="bg-background h-[unset] py-1"
         data-testid="admin-menu-toggle"
         onPointerEnter={showPopover}
         onPointerLeave={hidePopover}
