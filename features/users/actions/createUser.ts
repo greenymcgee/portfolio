@@ -1,6 +1,7 @@
 'use server'
 
 import { redirect } from 'next/navigation'
+import { flattenError } from 'zod'
 
 import { ROUTES } from '@/globals/constants'
 import { logger } from '@/lib/logger'
@@ -23,7 +24,7 @@ export async function createUser(_: State, formData: FormData): Promise<State> {
         case 'dto': {
           return {
             ...formValues,
-            error: error.details,
+            error: flattenError(error.details),
             status: 'ERROR',
           } satisfies State
         }

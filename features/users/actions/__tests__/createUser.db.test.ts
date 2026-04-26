@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker'
 import bcrypt from 'bcryptjs'
 import { errAsync } from 'neverthrow'
 import { redirect } from 'next/navigation'
-import { ZodError } from 'zod'
+import { flattenError, ZodError } from 'zod'
 
 import { UserService } from '@/features/users/user.service'
 import {
@@ -43,7 +43,7 @@ describe('createUser', () => {
       } as const) as unknown as CreateUserReturn,
     )
     const result = await createUser(STATE, new FormData())
-    expect(result).toEqual({ error: zodError, status: 'ERROR' })
+    expect(result).toEqual({ error: flattenError(zodError), status: 'ERROR' })
   })
 
   it('should return an error status when the service returns an entity error', async () => {
