@@ -3,7 +3,7 @@
 > Part of [fix-register-page architecture](./README.md). Source slice:
 > [architecture.md](../architecture.md) §6.15.
 
-Six new test files. Each follows `.cursor/rules/VITEST_RULES.mdc`:
+Seven new test files. Each follows `.cursor/rules/VITEST_RULES.mdc`:
 factories from `@/test/factories`, fixtures from `@/test/fixtures`,
 `it("should …")` phrasing, ≤2 expects per `it`, no `mock`-prefixed
 names, no className selectors.
@@ -12,7 +12,7 @@ names, no className selectors.
 
 | File | Pattern source | Layer |
 | --- | --- | --- |
-| `features/users/__tests__/user.repository.test.ts` | `features/posts/__tests__/post.respository.test.ts` | Repository (mocked Prisma) |
+| `features/users/__tests__/user.repository.test.ts` | `features/posts/__tests__/post.repository.test.ts` | Repository (mocked Prisma) |
 | `features/users/__tests__/user.service.test.ts` | `features/posts/__tests__/post.service.test.ts` | Service (mocked repo) |
 | `features/users/actions/__tests__/createUser.db.test.ts` | `features/posts/actions/__tests__/{getPost,deletePost}.db.test.ts` | Action (mocked service) + integration (real DB) |
 | `features/users/dto/__tests__/create-user.dto.test.ts` | `features/posts/dto/__tests__/create-post.dto.test.ts` | DTO |

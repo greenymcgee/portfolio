@@ -60,7 +60,7 @@ The only missing pieces are:
 | Repository (Prisma + `tryCatch` + error-as-value) | `features/posts/post.repository.ts` (`create` method) | Same shape, no `Session['user']` arg |
 | Service (neverthrow `result.match`, error envelopes) | `features/posts/post.service.ts` | Auth/perm branch omitted — anonymous create |
 | Action pattern w/ `useActionState` | `features/posts/actions/createPost.ts` | Maps formData → schema → call → redirect/state |
-| Repository tests | `features/posts/__tests__/post.respository.test.ts` | Mock `prismaMock`, test each error branch |
+| Repository tests | `features/posts/__tests__/post.repository.test.ts` | Mock `prismaMock`, test each error branch |
 | Service tests | `features/posts/__tests__/post.service.test.ts` | Mock repo, test each error branch |
 | Action tests | `features/posts/actions/__tests__/createPost.test.ts` | Mock `UserService.create` directly — no msw needed since action calls service in-process |
 | Page test | `app/posts/__tests__/posts.page.test.tsx` | For `/register` after rewrite |

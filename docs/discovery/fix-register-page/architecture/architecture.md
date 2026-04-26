@@ -633,14 +633,14 @@ the constant's only purpose was that route, so it goes too).
 
 ### 6.15. Testing Strategy
 
-Four new test files. Each follows `.cursor/rules/VITEST_RULES.mdc`:
+The following new test files each follow  `.cursor/rules/VITEST_RULES.mdc`:
 factories from `@/test/factories`, fixtures from `@/test/fixtures`,
 `it("should …")` phrasing, ≤2 expects per `it`, no `mock`-prefixed
 names, no className selectors.
 
 #### `features/users/__tests__/user.repository.test.ts`
 
-Pattern source: `features/posts/__tests__/post.respository.test.ts`.
+Pattern source: `features/posts/__tests__/post.repository.test.ts`.
 
 | Branch | Setup | Assertion |
 | --- | --- | --- |
