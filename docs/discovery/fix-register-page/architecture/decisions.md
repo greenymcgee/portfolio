@@ -174,3 +174,167 @@
 - **Step:** 1 — Setup & Initial Plan
 - **Resolves:** New decision (no Q-number; emerged after Q1–Q8 were
   closed).
+
+## 2026-04-25 — Withdraw `?registered=true` follow-up
+
+- **Decision:** Drop the speculative `?registered=true` follow-up
+  ("Account created — please sign in" notice on `/login`) from the
+  plan, todos, and architecture. Supersedes the "Follow-up (deferred…)"
+  note appended to the "Redirect to `/login` after successful
+  registration" entry above.
+- **Why:** Engineer never asked for it. A prior agent introduced the
+  idea in `initial_plan.md` R3 and propagated it to `todos.md` and the
+  redirect-decision's follow-up note as if it were tracked work.
+  Engineer flagged the scope creep. No requirement, no constraint, no
+  user signal motivates it; removing it keeps the plan honest.
+- **Alternatives considered:** Surface as a real Q (engineer-decision
+  pending) — rejected; the right move is to delete agent speculation,
+  not formalize it as if the engineer had asked. Keep R3's "Optional
+  follow-up" sentence — rejected; it's the trail of the same
+  speculation. R3 itself is retained as a one-line UX-trade-off note
+  because it honestly describes a deliberate engineer decision.
+- **Step:** 2 — Architecture Document (cleanup before drafting)
+
+## 2026-04-25 — Generic error string via `withCallbacks`
+
+- **Decision:** The "Registration failed. Please try again." string
+  lives in client `useState` inside `RegisterForm`, set by the
+  `withCallbacks(createUser, { onError: () => setErrorMessage(REGISTRATION_FAILED_MESSAGE) })`
+  callback (`@greenymcgee/typescript-utils`). The `CreateUserState`
+  action-state shape carries form-value preservation and `error?:
+  ZodError` only — no string field.
+- **Why:** Mirrors `features/posts/components/createPostForm/createPostForm.tsx`,
+  which is the canonical "form with action + generic error" pattern in
+  this codebase. `withCallbacks` fires `onError` whenever the action
+  returns `state.status === 'ERROR'` (the `ActionState` interface from
+  `@greenymcgee/typescript-utils`). Keeps `CreateUserState` a near-mirror
+  of `PostCreateState` and avoids inventing a parallel error-surfacing
+  shape.
+- **Alternatives considered:** Add `errorMessage?: string` to
+  `CreateUserState` (my initial recommendation) — rejected once the
+  `CreatePostForm` precedent surfaced; would have drifted from the
+  established pattern with no upside. Reuse `error` as a union of
+  `ZodError | string` — rejected; conflates field-level and form-level
+  rendering paths.
+- **Step:** 2 — Architecture Document
+- **Resolves:** "How does the page see the generic error?"
+
+## 2026-04-25 — Service Ok payload omits `password`
+
+- **Decision:** `UserService.create` returns `okAsync({ user, status: CREATED })`
+  where `user` is `Omit<User, 'password'>`. The repository returns the
+  full `User` row; the service strips `password` before envelope.
+- **Why:** Defense in depth. The `createUser` action redirects to
+  `/login` immediately on success, so the `user` payload is never
+  shipped to the client today, but stripping `password` at the service
+  boundary eliminates a foot-gun if any future consumer of the service
+  Ok envelope reads or returns the user.
+- **Alternatives considered:** Return the full `User` row (mirroring
+  `PostService.create` which returns the full `Post`) — rejected; the
+  `Post` row has no secret fields, the `User` row does (the bcrypt
+  hash). Strip in the repository instead — rejected; the repository's
+  job is "Prisma in, entity out," and the column-level Prisma return
+  shape should not be lossy at the persistence boundary.
+- **Step:** 2 — Architecture Document
+- **Resolves:** Service Ok payload shape question.
+
+## 2026-04-25 — Page split: `RegisterForm` + `RegisterFormBody`
+
+- **Decision:** Extract two new components under
+  `features/users/components/`:
+  - `registerForm/registerForm.tsx` — orchestrator (`'use client'`,
+    `useActionState`, `withCallbacks`, error state, wraps Next's `Form`).
+  - `registerFormBody/registerFormBody.tsx` — presenter (five inputs,
+    error block, submit button; receives `default*` form values,
+    `errorMessage`, `fieldErrors`, `pending` as props).
+
+  `app/register/page.tsx` becomes a thin entry point that renders
+  `<main>` + `<h2>` + `<RegisterForm />` + the "Already have an
+  account? Sign in" `<Link>`.
+- **Why:** Mirrors `features/posts/components/{createPostForm,createPostFormBody}/`
+  exactly. Aligns with `.cursor/skills/clean-authoring/SKILL.md`:
+  - "Thin entry points" — page files exist to wire, not to own logic.
+  - "Orchestration vs. presentation" — orchestrator owns state/effects,
+    presenter owns output shape.
+- **Alternatives considered:** Keep `app/register/page.tsx` as a single
+  inline component (today's shape) — rejected; the page would own form
+  state, effects, *and* markup, drifting from the post-feature pattern
+  for no real reason (registration is simpler than post creation but
+  the same split applies). Single `RegisterForm` component without the
+  body split — rejected; the orchestrator/presenter split is the
+  canonical shape, and the body is testable in isolation when split.
+- **Step:** 2 — Architecture Document
+- **Resolves:** Frontend componentry layout question.
+
+## 2026-04-25 — Action-state type named `CreateUserState`
+
+- **Decision:** The action-state type is named `CreateUserState` (file
+  `features/users/types/createUserState.ts`), not `UserCreateState`.
+- **Why:** Engineer-specified. The verb-first form reads as a clear
+  English phrase ("create user state") and aligns with the rest of the
+  feature's verb-first naming: `createUser` (action), `CreateUserDto`,
+  `createUserSchema`, `createUserState`. Matches `clean-authoring`
+  guidance that names should be descriptive phrases.
+- **Alternatives considered:** `UserCreateState` (mirrors the legacy
+  `PostCreateState`) — rejected; the engineer explicitly called the
+  legacy name out as a mistake and asked us not to repeat it.
+- **Step:** 3 — Iterative Refinement
+- **Resolves:** Naming inconsistency surfaced after Step 2 write.
+
+## 2026-04-25 — Form-values helper named `getRegisterFormValues`
+
+- **Decision:** The form-values helper is named `getRegisterFormValues`
+  (file `features/users/utils/getRegisterFormValues.ts`), not
+  `getUserCreateFormValues`.
+- **Why:** Engineer-specified. The helper is scoped to the register
+  flow specifically (it reads the four preserved fields from the
+  register form's `FormData`), so naming it after the surface that
+  produces the data — the register form — reads more accurately than
+  a generic `userCreate*` prefix. Aligns with the sibling component
+  names `RegisterForm` / `RegisterFormBody` / `register.page.tsx`.
+- **Alternatives considered:** `getUserCreateFormValues` (mirrors the
+  legacy `getPostCreateFormValues`) — rejected; same reasoning as the
+  `CreateUserState` rename. The legacy `*CreateFormValues` shape
+  conflates the entity name with the surface, and the engineer prefers
+  surface-named helpers when there's only one surface that uses them.
+- **Step:** 3 — Iterative Refinement
+- **Resolves:** Naming inconsistency surfaced after Step 2 write.
+- **Superseded by:** "Drop `getRegisterFormValues` helper, inline
+  `Object.fromEntries`" (same day) — the helper itself is removed, so
+  this naming decision becomes moot. Kept in the log for traceability.
+
+## 2026-04-25 — Drop `getRegisterFormValues` helper, inline `Object.fromEntries`
+
+- **Decision:** No standalone form-values helper. The action does the
+  rest-strip inline:
+
+  ```typescript
+  const { password: _password, ...formValues } = Object.fromEntries(formData)
+  ```
+
+  Supersedes the prior "Form-values helper named `getRegisterFormValues`"
+  decision. The entire `features/users/utils/` directory is removed
+  from the plan (no other utils were planned).
+- **Why:** Engineer-flagged the helper as fluff after seeing the rest
+  of the plan. Trace confirms it: the helper's only consumer is the
+  `createUser` action, the operation is one line, and the
+  `clean-authoring` SKILL's "When *not* to split" section calls out
+  exactly this case ("two halves would always be consumed together
+  with no separate reuse or test story" + "split is purely syntactic").
+  Inlining keeps the password-stripping intent local to where it
+  matters, drops a file, drops a barrel export, drops a (would-be)
+  trivial test, and follows the codebase's own `_`-prefix-for-discard
+  idiom (`_: State` in this same action).
+- **Alternatives considered:** Keep the helper (mirrors the legacy
+  `getPostCreateFormValues`) — rejected; legacy `getPostCreateFormValues`
+  is the same kind of fluff for the same reason, and the engineer
+  doesn't want to repeat the pattern. Use `Object.fromEntries` then
+  `delete formValues.password` — rejected; mutation when a non-mutating
+  rest-strip is exactly as concise. Use `formData.get('email')` etc.
+  inline — rejected; verbose, four duplicated lines instead of one.
+- **Out of scope:** The legacy `getPostCreateFormValues` helper at
+  `features/posts/utils/getPostCreateFormValues.ts` is the same fluff
+  pattern but a separate cleanup; not touched here.
+- **Step:** 3 — Iterative Refinement
+- **Resolves:** Helper-vs-inline question surfaced after the rename
+  decision above.

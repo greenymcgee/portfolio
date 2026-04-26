@@ -5,11 +5,7 @@
 
 ## Open
 
-- [ ] **UX follow-up: post-registration `/login` notice.** [skill] Optional —
-  `redirect(`${ROUTES.login}?registered=true`)` so the login page can render
-  an "Account created — please sign in" notice. Out of scope for the
-  initial-plan-only agent; pick up in Step 2 architecture or as a follow-up
-  ticket. Tracked alongside R3 in `initial_plan.md`.
+_None._
 
 ## Closed (during Step 1)
 
@@ -30,3 +26,20 @@ verifications are resolved. Each links to the canonical record.
 | Implementation: grep `ROUTES.newUser` callers | Only runtime caller is `proxy.ts` `matcher`; cleanup steps now in `initial_plan.md` step 4 |
 | Implementation: hash via schema `transform` vs repo | Resolved by Q7 (repo). Schema/DTO never see the hashed value |
 | New: action test as `.db.test.ts` integration | See `decisions.md` → "Action coverage as `.db.test.ts` integration" |
+
+## Closed (during Step 2)
+
+| Item | Resolution |
+| --- | --- |
+| Withdraw `?registered=true` follow-up | Agent speculation, never engineer-driven. See `decisions.md` → "Withdraw `?registered=true` follow-up" |
+| Generic error string surfacing | Via `withCallbacks` (client `useState`), not action state. See `decisions.md` → "Generic error string via `withCallbacks`" |
+| `UserService.create` Ok payload shape | Strip `password` before returning. See `decisions.md` → "Service Ok payload omits `password`" |
+| Frontend componentry layout | Extract `RegisterForm` (orchestrator) + `RegisterFormBody` (presenter); page becomes thin entry. See `decisions.md` → "Page split: `RegisterForm` + `RegisterFormBody`" |
+
+## Closed (during Step 3)
+
+| Item | Resolution |
+| --- | --- |
+| Action-state type name | `CreateUserState` (verb-first), not `UserCreateState`. See `decisions.md` → "Action-state type named `CreateUserState`" |
+| Form-values helper name | `getRegisterFormValues` (surface-named), not `getUserCreateFormValues`. See `decisions.md` → "Form-values helper named `getRegisterFormValues`" — superseded same day. |
+| Drop the form-values helper | Inline `const { password: _password, ...formValues } = Object.fromEntries(formData)` in the action. Removes `features/users/utils/` from the plan. See `decisions.md` → "Drop `getRegisterFormValues` helper, inline `Object.fromEntries`" |

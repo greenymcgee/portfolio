@@ -11,8 +11,10 @@
   ],
   "words": [
     "autoincrement",
+    "bcryptjs",
     "cellspacing",
     "Chakra",
+    "componentry",
     "cuid",
     "currentcolor",
     "descoping",
@@ -38,6 +40,7 @@
     "Pino",
     "psql",
     "renderable",
+    "respository",
     "rowspan",
     "shadcn",
     "sslmode",

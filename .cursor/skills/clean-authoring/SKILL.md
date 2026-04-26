@@ -28,6 +28,7 @@ Before finishing any new or refactored unit, verify:
 - [ ] Folder/file structure mirrors responsibility: one unit per folder, co-located tests.
 - [ ] No abbreviations anywhere.
 - [ ] No single-letter names anywhere, including generic type parameters.
+- [ ] Each if block includes a line break after the condition.
 
 If any box is unchecked, refactor before moving on.
 

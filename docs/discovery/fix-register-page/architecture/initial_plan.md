@@ -75,8 +75,8 @@ The only missing pieces are:
    mirroring the post-side shape with `prismaMock` (repository) and
    `vi.mock('../user.repository')` (service).
 2. **Server action** — `features/users/actions/createUser.ts` with
-   signature `(state: UserCreateState, formData: FormData) =>
-   Promise<UserCreateState>`. Calls `UserService.create(new
+   signature `(state: CreateUserState, formData: FormData) =>
+   Promise<CreateUserState>`. Calls `UserService.create(new
    CreateUserDto(formData))`. On `Ok` → `redirect(ROUTES.login)`. On
    `Err` → log (already done in service) + return `{ ...formValues
    (excluding password), status: 'ERROR' }` with a generic `error`
@@ -133,10 +133,7 @@ The only missing pieces are:
   same treatment without their own decision).
 - **R3 (low): Auto-login after registration removed (not a risk, a UX
   trade-off worth flagging).** Users must manually sign in on `/login`
-  after registering. Optional follow-up:
-  `redirect(`${ROUTES.login}?registered=true`)` so the login page can
-  render an "Account created — please sign in" notice. Tracked in
-  `todos.md`.
+  after registering. Engineer-accepted trade-off; no follow-up planned.
 
 ## Out of Scope
 
