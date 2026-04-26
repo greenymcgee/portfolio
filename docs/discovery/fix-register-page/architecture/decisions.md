@@ -303,6 +303,71 @@
   `Object.fromEntries`" (same day) — the helper itself is removed, so
   this naming decision becomes moot. Kept in the log for traceability.
 
+## 2026-04-25 — `plans/` structure: 6 top-level + backend/ + frontend/ subdirectories
+
+- **Decision:** Split `architecture.md` (880 lines, §1–§8) into the
+  following `plans/` layout:
+
+  ```
+  plans/
+  ├── README.md                      (entry point + routing + 16 decisions)
+  ├── existing-implementation.md     (§3)
+  ├── proposed-solution.md           (§4)
+  ├── user-facing-behavior.md        (§5)
+  ├── data-models.md                 (§6.1)
+  ├── security-considerations.md     (§6.2)
+  ├── backend/
+  │   ├── README.md                  (overview + §6.3 + §6.10)
+  │   ├── schema.md                  (§6.4)
+  │   ├── dto.md                     (§6.5)
+  │   ├── repository.md              (§6.6)
+  │   ├── service.md                 (§6.7)
+  │   ├── action.md                  (§6.8)
+  │   └── action-state.md            (§6.9)
+  ├── frontend/
+  │   ├── README.md                  (overview + §6.13 page)
+  │   ├── components.md              (§6.11 + §6.12)
+  │   └── state-management.md        (`withCallbacks` + `useActionState` narrative)
+  ├── cleanup.md                     (§6.14)
+  ├── testing-strategy.md            (§6.15)
+  ├── rollout-strategy.md            (§6.16)
+  └── risks-open-questions.md        (§7)
+  ```
+
+  Monolithic `architecture.md` is retained as a reference per the
+  SKILL.md Step 4 rule.
+
+- **Why:** Each backend file maps 1:1 to a source file in the
+  implementation (`schema.md` ↔ `create-user.schema.ts`, `dto.md` ↔
+  `create-user.dto.ts`, etc.), giving the LLM "load just the file you
+  need" routing. Frontend gets its own subdirectory per the SKILL's
+  "Subdirectory for frontend with child files for component structure,
+  state management, and styling" guidance — minus `styling.md`
+  (constraint #2 explicitly descopes design). `state-management.md`
+  exists as its own file because the `withCallbacks` + `useActionState`
+  + client-`useState` wiring is the single contract most likely to be
+  copy-pasted incorrectly, and giving it a dedicated file makes the
+  contract table easier to find. `backend/action-state.md` is split
+  from `backend/action.md` because the type is referenced from both
+  the action and the form orchestrator — keeping it standalone means
+  either consumer can load it without the other.
+- **Alternatives considered:** Single-level flat directory (no
+  `backend/` / `frontend/` subdirs) — rejected; 7 backend files at the
+  top level visually drowns out the cross-cutting docs. Generate a
+  `frontend/styling.md` placeholder — rejected per SKILL "Don't create
+  files for sections that are only a few lines" + constraint #2.
+  Generate an `api-contract.md` — rejected per SKILL "Remove sections
+  that don't apply" (the architecture decided "no HTTP route"; the
+  file would be a one-line "N/A"). Combine `cleanup.md` into
+  `rollout-strategy.md` — rejected; cleanup is a code-change scope
+  question (which files to delete), rollout is a sequencing question
+  (when + how to ship), distinct concerns worth separating.
+- **Step:** 4 — Structure Architecture
+- **Resolves:** First use of Step 4 in this repo; this layout doubles
+  as a precedent for future discoveries (and a candidate seed for a
+  `templates/plans/` skeleton — see status.md "Notes for the Next
+  Agent").
+
 ## 2026-04-25 — Drop `getRegisterFormValues` helper, inline `Object.fromEntries`
 
 - **Decision:** No standalone form-values helper. The action does the
