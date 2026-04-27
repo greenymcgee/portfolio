@@ -62,3 +62,84 @@
 - **Step:** 1 — Setup & Initial Plan
 - **Resolves:** PR shape and sequencing.
 - **Supersedes:** The "separate PR from the backend" framing in "Pagination UI in scope, separate PR from backend" — refines the 2-PR sketch into the 3-PR ship plan above.
+
+## 2026-04-27 — Q1 resolved: cached service-direct read entry with `cacheTag('posts')`; `revalidateTag` invalidation
+
+- **Decision:** The new read entry is a server-side function at `features/posts/actions/getPaginatedPosts.ts` that opens with `'use cache'`, calls `cacheTag('posts')`, and invokes `PostService.findAndCount(new FindAndCountPostsDto({ page, limit }))`. **No `'use server'` directive** — `'use cache'` and `'use server'` are mutually exclusive at the function level, and we want caching. `deletePost` invalidates with `revalidateTag('posts')` (replacing the two `revalidatePath` calls). `cacheLife` stays at the default profile.
+- **Why:** The marquee Step-2 question. The research-pass findings against the Next.js 16.1.6 docs landed three constraints that resolve the option space cleanly:
+  1. **`'use cache'` is GA in 16.0.0+** ([directive reference](https://nextjs.org/docs/app/api-reference/directives/use-cache) "Version History" table). R4 from `initial-plan.md` resolved.
+  2. **`cacheComponents: true` is required** for `'use cache'` to function — and it's already set in `next.config.ts:6`. The portfolio is already running under the explicit-opt-in caching model. No app-wide flag flip needed.
+  3. **`cacheTag` only works inside `'use cache'`** — the original "± `cacheTag`" framing in the todo collapses; tag-based invalidation is bundled with the directive choice, not orthogonal.
+  4. **`'use cache'` and `'use server'` are mutually exclusive** at the function level — caching forces service-direct (eliminates the action-wrapper sub-option from Q1).
+  5. **`'use cache'` cannot read `searchParams`/`cookies`/`headers` directly**; values must be passed as arguments. This is exactly the DTO-primitives shape we already need (`{ page, limit }`), so it costs us nothing.
+  Tag-based invalidation is the architectural fit for the requirements: `revalidateTag('posts')` invalidates every cached `{ page, limit }` entry tagged `'posts'` in one call, fanning across all `?page=N` variants. That's the property `revalidatePath` cannot give us cleanly (per the Next.js 16 docs, query strings aren't supported in `revalidatePath`, and `revalidatePath('/posts', 'page')` operates on the route's render cache, not on tagged data caches). The research goal — "engineer has a good understanding of caching in Next.js 16" — is satisfied by the directive + tag combination, not by the no-cache options.
+- **Alternatives considered:**
+  - **Option A: Service-direct, no caching, `revalidatePath('/posts', 'page')`.** Rejected. Doesn't exercise the caching primitives. The user-facing pain ("hook doesn't invalidate") goes away with any server-side read regardless of cache layer, but the research goal explicitly demands the caching primitives. Skipping them defeats the project's purpose.
+  - **Option B: `getPaginatedPosts` as a `'use server'` action, no caching.** Rejected. Mirrors `getPost` symmetrically but adds a `'use server'` marshalling boundary that's an anti-pattern for read paths called only from RSCs (per Vercel guidance). Also doesn't exercise caching.
+  - **Option D: `unstable_cache(fn, [keyParts], { tags: ['posts'] })`.** Rejected. Same invalidation model as Option C, but uses an `unstable_*` API that the Next.js 16 docs route around. Adopting `unstable_cache` now means migrating to `'use cache'` later — committing to the deprecated path is a downgrade with no compensating benefit.
+  - **Tag granularity: per-page tags (`'posts:page:N'`) or hierarchical tags.** Rejected. Adds key-management overhead with no win — every mutation invalidates the whole list anyway (delete affects ordering across all pages). One coarse tag is the right granularity.
+  - **`cacheLife({ revalidate: 60 })` or tighter.** Deferred. Default profile (5min stale / 15min revalidate) is fine for a portfolio. Tighten only if observed staleness becomes a complaint.
+- **Step:** 2 — Architecture Document
+- **Resolves:** Q1 (read-entry shape + invalidation primitive) and the orthogonal "± `cacheTag`" sub-question, which the research pass collapsed into a single decision.
+- **Refines:** "Defer read-pattern decision to Step 2" (2026-04-27, Step 1).
+
+## 2026-04-27 — Q2 resolved: Shadcn `<Pagination>` over `react-headless-pagination`
+
+- **Decision:** Pagination ships as a Shadcn `<Pagination>` copy-paste install at `globals/components/ui/pagination/`, wrapped by a feature-level component at `features/posts/components/pagination/pagination.tsx` that accepts `{ currentPage, totalPages }` and renders Shadcn primitives with `next/link` items. Page list logic: show all if `totalPages <= 7`, else `[1, ..., page-1, page, page+1, ..., last]` with ellipses for non-adjacent gaps.
+- **Why:** Shadcn aligns with the codebase's `cn` + `cva` + `data-slot` patterns (`globals/components/ui/button/button.tsx`); ships with `next/link` integration; no `package.json` churn (copy-paste install, not a dep). The engineer's "decent results with `react-headless-pagination`" is a softer endorsement than "uses the exact primitives the rest of the app uses." The feature-level wrapper keeps `globals/components/ui/pagination/` route-agnostic for future paginated surfaces.
+- **Alternatives considered:**
+  - **`react-headless-pagination`** (engineer-flagged) — rejected. New dependency, headless-only (paint layer ours), no `next/link` integration out of the box. Would need its own wrapper to match Shadcn's visual conventions, which is exactly what Shadcn's primitive already is.
+  - **Custom ~50 LOC headless component.** Rejected. Slightly more code than Shadcn's primitive, and we'd reinvent the page-list-with-ellipses logic. Shadcn ships it.
+- **Step:** 2 — Architecture Document
+- **Resolves:** Q2 (pagination library).
+- **Refines:** "Pagination UI in scope, separate PR from backend" (2026-04-27, Step 1).
+
+## 2026-04-27 — DTO shape: replace outright in PR 1 (option c)
+
+- **Decision:** `FindAndCountPostsDto`'s `Request`-based constructor is replaced outright in PR 1 with a primitives constructor: `constructor({ page, limit }: { page: number; limit?: number })`. The Zod schema (`findAndCountPostsSchema`) and validation flow are unchanged — `coerce.number()` accepts both string and number inputs. PR 1 also updates `app/api/posts/route.ts`'s `GET` handler to extract `searchParams` itself and pass primitives to the DTO; PR 3 then deletes the handler outright.
+- **Why:** The `Request`-based shape is dead code in the steady state — its only caller is the GET handler, and PR 3 deletes that handler. Carrying a transitional dual-mode DTO across PR 1 → PR 2 → PR 3 for code that's deleted three PRs later is more ceremony than the tradeoff is worth. Replacing outright in PR 1 also avoids two distinct DTO shapes coexisting on `main` between PR 1 and PR 3.
+- **Alternatives considered:**
+  - **(a) Widen DTO to accept both `Request` and primitives.** Rejected — adds runtime type-narrowing (`if (input instanceof Request)`) for code that's deleted within the same project's PR sequence.
+  - **(b) Sibling `FindAndCountPostsParamsDto` for the in-process path.** Rejected — same reasoning. Two DTOs for the same operation are confusing; the second one becomes the canonical shape and the original becomes dead weight.
+- **Step:** 2 — Architecture Document
+- **Resolves:** "FindAndCountPostsDto shape" todo.
+- **Superseded numbering by:** "Ship plan refined to 4 PRs" (2026-04-27, Step 3) — the decision still holds, but DTO replacement now lands in PR 2 (backend additive) and the GET handler is deleted in PR 4 (backend cleanup). Read "PR 1" in the body above as "PR 2" and "PR 3" as "PR 4" against the 4-PR plan.
+
+## 2026-04-27 — Ship plan refined to 4 PRs (pagination install carve-out)
+
+- **Decision:** The 3-PR ship plan is refined to a 4-PR sequence by carving the pagination component install into its own PR ahead of the backend work:
+  1. **PR 1 — Pagination primitives.** Shadcn `<Pagination>` install at `globals/components/ui/pagination/` (one component per file), per-component smoke tests, no consumer yet.
+  2. **PR 2 — Backend, additive only.** (Was PR 1 in the 3-PR plan.) `getPaginatedPosts` read entry, DTO primitives constructor, `deletePost` swap to `revalidateTag('posts')`, GET handler updated to pass primitives.
+  3. **PR 3 — Frontend, cutover.** (Was PR 2 in the 3-PR plan.) Sync page + async `LatestPosts`, `PostCards` props change, `useGetPaginatedPostsQuery` deletion, feature-level pagination wrapper at `features/posts/components/pagination/`.
+  4. **PR 4 — Backend cleanup.** (Was PR 3 in the 3-PR plan.) Delete `GET /api/posts` route handler, its tests, and the `mockGetPostsResponse` msw helper.
+- **Why:** Engineer-specified ("We're going to include a PR dedicated to installing and testing the pagination components. The one component per file rule will be followed."). Reasoning:
+  - The pagination primitives are a self-contained Shadcn install. They don't depend on any of the read-path migration work and aren't depended on by the backend PR. Shipping them separately means PR 3's diff is purely about the read-path migration and the feature-level wrapper, not about reviewing seven new UI primitive files at the same time.
+  - Pagination-first ordering (vs. pagination-last) was chosen so PR 3 imports already-merged primitives instead of pulling them in alongside the cutover. Reviewers of PR 3 see a single concern: the read-path migration. Reviewers of PR 1 see a single concern: are the primitives correct, accessible, and consistent with the rest of `globals/components/ui/`.
+  - Primitive-level test failures in PR 1 don't block the cutover review in PR 3.
+- **Alternatives considered:**
+  - **3-PR plan, primitives folded into the cutover PR.** Rejected per engineer; mixes UI-primitive review with read-path migration review.
+  - **4-PR plan with pagination as PR 4 (last).** Rejected — would mean PR 3 ships the cutover with no pagination UI, then PR 4 retrofits it. Either the cutover renders nothing where pagination should be, or the cutover hand-rolls a placeholder that PR 4 deletes. Both are worse than landing primitives first.
+- **Step:** 3 — Approval & Refinement
+- **Resolves:** PR ordering question raised when the install carve-out was introduced.
+- **Supersedes:** "Ship plan: 3 PRs with strict backend / frontend separation" (2026-04-27, Step 1) — the strict backend / frontend separation principle still holds; the plan now adds a primitives-only PR ahead of the backend work and renumbers the rest accordingly.
+
+## 2026-04-27 — One component per file for pagination primitives
+
+- **Decision:** Shadcn's `<Pagination>` install is split one-component-per-file under `globals/components/ui/pagination/`. The seven primitives (`Pagination`, `PaginationContent`, `PaginationItem`, `PaginationLink`, `PaginationPrevious`, `PaginationNext`, `PaginationEllipsis`) each live in their own `<componentName>.tsx` file, with a co-located test in `__tests__/<componentName>.test.tsx` and a barrel `index.ts` re-exporting the public surface. `<PaginationLink>` reuses `BUTTON_VARIANTS` from `globals/components/ui/button/constants.ts` rather than introducing a new `pagination/constants.ts`.
+- **Why:** Engineer-specified ("The one component per file rule will be followed"), and consistent with every existing Shadcn-style install in `globals/components/ui/` (`button/`, `heading/`, `spinner/`, `toaster/` all follow this shape). Reusing `BUTTON_VARIANTS` for `<PaginationLink>` matches Shadcn's own reference (which calls `buttonVariants(...)` for active/inactive link styling) and keeps the codebase from diverging into two near-identical variant tables.
+- **Alternatives considered:**
+  - **Single `pagination.tsx` exporting all seven primitives.** Rejected per engineer; violates the established convention and makes per-component test discovery awkward.
+  - **Define a parallel `PAGINATION_LINK_VARIANTS` mirroring `BUTTON_VARIANTS`.** Rejected — the Shadcn reference itself uses `buttonVariants`, and the active/inactive styling we need (`outline` vs. `ghost` + `icon-sm`) is already expressible against `BUTTON_VARIANTS`. Defining a parallel table is duplication for no benefit.
+- **Step:** 3 — Approval & Refinement
+- **Resolves:** File-organization question for the pagination install.
+
+## 2026-04-27 — Truncation logic placement: implementation-time call
+
+- **Decision:** The page-list truncation logic in the feature-level pagination wrapper starts inline inside `pagination.tsx`. If during PR 3 implementation it grows beyond a few clear branches, the implementer extracts it to a sibling pure utility at `features/posts/components/pagination/getTruncatedPageList.ts` with its own `__tests__/getTruncatedPageList.test.ts`. The "complicated enough to extract" call is made by the implementer at PR-write time; this decision is the principle, not a line-count threshold.
+- **Why:** Engineer-specified ("It depends on how complicated the util is. If complicated we move it to a util, but if the concern makes more sense in the component we keep it there."). The truncation rule is small enough on the happy path (`totalPages <= 7` → render all; else windowed list with ellipses) that an inline implementation is plausible, but boundary handling (currentPage at 0 or `totalPages - 1`, ellipsis-collapse, off-by-ones) can balloon it. Premature extraction adds a file with no real separation-of-concerns win; premature inlining buries logic that wants its own pure-function tests. The right call depends on what the function looks like once written, so the architecture defers it to PR 3 instead of guessing now.
+- **Alternatives considered:**
+  - **Always extract** — rejected; one-file overhead for what may be 8 lines of logic.
+  - **Always inline** — rejected; punishes the case where the logic genuinely sprawls and wants pure-function tests.
+  - **Pin a line-count threshold** (e.g., "extract if > 30 LOC"). Rejected; a clean 35-line function and a tangled 25-line function should land on opposite sides of this call. Engineer judgment at write-time is the right arbiter.
+- **Step:** 3 — Approval & Refinement
+- **Resolves:** "Truncation utility placement" question raised during the 4-PR refinement.
