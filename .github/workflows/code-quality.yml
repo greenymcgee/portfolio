@@ -9,6 +9,7 @@ defaults:
 
 env:
   AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+  BASE_PORTFOLIO_API_URL: ${{ secrets.BASE_PORTFOLIO_API_URL }}
   DATABASE_URL: ${{ secrets.DATABASE_URL }}
   VERCEL_URL: ${{ secrets.VERCEL_URL }}
 

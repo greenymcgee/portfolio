@@ -1,8 +1,8 @@
 export const API_ROUTES = {
-  authCsrf: '/auth/csrf',
-  authLog: '/auth/_log',
-  authSession: '/auth/session',
-  authSignout: '/auth/signout',
-  post: (id: number) => `/posts/${id}`,
-  posts: '/posts',
+  authCsrf: '/api/auth/csrf',
+  authLog: '/api/auth/_log',
+  authSession: '/api/auth/session',
+  authSignout: '/api/auth/signout',
+  post: (id: number) => `/api/posts/${id}`,
+  posts: '/api/posts',
 } as const
