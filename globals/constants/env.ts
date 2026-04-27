@@ -1,11 +1,16 @@
 function getBaseApiUrl() {
-  if (process.env.VERCEL_ENV === 'production')
-    return process.env.BASE_PORTFOLIO_API_URL
+  if (
+    process.env.VERCEL_ENV === 'preview' ||
+    process.env.NEXT_PUBLIC_VERCEL_ENV === 'preview'
+  ) {
+    const host = process.env.VERCEL_URL ?? process.env.NEXT_PUBLIC_VERCEL_URL
+    return `https://${host}`
+  }
 
-  const url = process.env.VERCEL_URL ?? process.env.NEXT_PUBLIC_VERCEL_URL
-  if (process.env.NODE_ENV === 'production') return `https://${url}/api`
-
-  return `http://${url}/api`
+  return (
+    process.env.BASE_PORTFOLIO_API_URL ??
+    process.env.NEXT_PUBLIC_BASE_PORTFOLIO_API_URL
+  )
 }
 
 export const BASE_API_URL = getBaseApiUrl()
