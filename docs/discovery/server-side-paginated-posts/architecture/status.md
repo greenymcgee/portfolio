@@ -4,7 +4,7 @@
 | --- | --- |
 | Created | 2026-04-27 |
 | Last Updated | 2026-04-27 |
-| Current Focus | Step 3 — Iterative Refinement. `architecture.md` is drafted with Q1 and Q2 both resolved and the ship plan refined to **4 PRs** (pagination primitives → backend additive → frontend cutover → backend cleanup). 10 open refinement items in `todos.md`, organized by PR. Ready to work refinement items conversationally. |
+| Current Focus | Step 3 — Iterative Refinement. `architecture.md` is drafted with Q1 and Q2 both resolved and the ship plan refined to **4 PRs** (pagination primitives → backend additive → frontend cutover → backend cleanup). 9 open refinement items in `todos.md`, organized by PR. Ready to work refinement items conversationally. |
 
 ## Step Tracker
 
@@ -24,13 +24,13 @@
 
 ## Todo Progress
 
-10 open refinement items / 14 closed. Open items are now grouped by PR in `todos.md` (PR 1: 3 items; PR 2: 3 items; PR 3: 4 items; post-launch: 1 item).
+9 open refinement items / 15 closed. Open items are grouped by PR in `todos.md` (PR 1: 2 items; PR 2: 3 items; PR 3: 4 items; post-launch: 1 item).
 
 ## Notes for the Next Agent
 
 - **Architecture is monolithic, not yet structured.** `architecture.md` is the active working copy for Step 3 refinement. Don't try to read `plans/` — Step 4 (structure architecture) hasn't run.
 - **4-PR sequence (pagination first):**
-  1. **PR 1** — Shadcn `<Pagination>` primitives install at `globals/components/ui/pagination/`, one component per file, with per-component smoke tests. Reuses `BUTTON_VARIANTS`. No consumer yet.
+  1. **PR 1** — Shadcn `<Pagination>` primitives install, one component per directory under `globals/components/ui/` (`pagination/`, `paginationContent/`, `paginationItem/`, `paginationLink/`, `paginationPrevious/`, `paginationNext/`, `paginationEllipsis/`), each with its own `index.ts` and `__tests__/`. `globals/components/ui/index.ts` gains 7 export lines. Reuses `BUTTON_VARIANTS`. No consumer yet.
   2. **PR 2** — Backend additive: `getPaginatedPosts` (`'use cache'` + `cacheTag('posts')`), `FindAndCountPostsDto` primitives constructor, `deletePost` swap to `revalidateTag('posts')`, GET handler updated to pass primitives.
   3. **PR 3** — Frontend cutover: sync page + async `LatestPosts`, `PostCards` props change, `useGetPaginatedPostsQuery` deletion, feature-level pagination wrapper at `features/posts/components/pagination/`.
   4. **PR 4** — Backend cleanup: delete `GET /api/posts` route handler + tests + `mockGetPostsResponse` msw helper.
@@ -41,12 +41,12 @@
   - The two `revalidatePath` calls in `deletePost` are **both** removed in favor of a single `revalidateTag('posts')`. Don't half-migrate.
   - `vitest.setup.tsx:16` already mocks `revalidateTag`. Test scaffolding is unchanged for the invalidation swap.
 - **Pattern shape is still locked** — `app/posts/page.tsx` stays sync, async data fetch in `LatestPosts` (a child RSC) inside `<Suspense>`, `searchParams` flows through as `Promise<{ page?: string }>` and is awaited inside the async child. The architecture honors this; don't propose making the page async.
-- **One-component-per-file rule for the pagination primitives install** is engineer-specified. Each of the seven Shadcn primitives gets its own `<componentName>.tsx` file under `globals/components/ui/pagination/` with a co-located test in `__tests__/`. `<PaginationLink>` reuses `BUTTON_VARIANTS` rather than introducing a parallel variants table.
+- **One-component-per-directory rule for the pagination primitives install** is engineer-specified. Each of the seven Shadcn primitives gets its own directory under `globals/components/ui/` with a `<componentName>.tsx`, `index.ts`, and `__tests__/<componentName>.test.tsx`. `globals/components/ui/index.ts` gains 7 export lines. `<PaginationLink>` reuses `BUTTON_VARIANTS` rather than introducing a parallel variants table.
 - **Truncation logic placement is an implementation-time call**, not a Step-3 decision. Default: keep the page-list computation inline in the wrapper. If during PR 3 implementation it sprawls (boundary handling, ellipsis collapse, off-by-ones), extract to a sibling pure utility (`features/posts/components/pagination/getTruncatedPageList.ts`) with its own tests. The "complicated enough to extract" judgment is the implementer's at write-time.
 - **Backend / frontend separation is still non-negotiable** per the engineer's earlier correction. The 4-PR plan preserves it; primitives in PR 1 are pure UI, PR 2 is pure backend, PR 3 is the cutover, PR 4 is pure backend deletion.
 - **`createPost` is still out of scope.** Don't fold it into this work.
 - **Open refinement items by PR** (full text in `todos.md`):
-  - **PR 1:** primitives a11y assertions in the per-component tests; `BUTTON_VARIANTS` reuse sanity check; barrel `index.ts` discussion (see `todos.md`).
+  - **PR 1:** primitives a11y assertions in the per-component tests; `BUTTON_VARIANTS` reuse sanity check. (Barrel export resolved — see `decisions.md`.)
   - **PR 2:** `revalidatePath` removal grep; `getPaginatedPosts` arg shape; `'use cache'` request-scope deduplication doc.
   - **PR 3:** wrapper a11y; page-list truncation spec table (drives where the logic lives); empty-state UX call; `?page > totalPages` behavior call.
   - **Post-launch:** revisit `cacheLife`.

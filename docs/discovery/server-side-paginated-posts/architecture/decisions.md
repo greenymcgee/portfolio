@@ -133,6 +133,14 @@
 - **Step:** 3 — Approval & Refinement
 - **Resolves:** File-organization question for the pagination install.
 
+## 2026-04-27 — Barrel export: one directory per primitive, re-exported from `globals/components/ui/index.ts`
+
+- **Decision:** Each of the 7 pagination primitives gets its own directory under `globals/components/ui/` (`pagination/`, `paginationContent/`, `paginationItem/`, `paginationLink/`, `paginationPrevious/`, `paginationNext/`, `paginationEllipsis/`). Each directory has its own `<componentName>.tsx`, `index.ts`, and `__tests__/<componentName>.test.tsx`. `globals/components/ui/index.ts` gains 7 new `export * from './<componentName>'` lines. Consumers import from `@/globals/components/ui` — no deep imports.
+- **Why:** Engineer-confirmed ("the pattern is one component per directory. And then the barrel export from ui/index.ts yes."). Consistent with every existing `globals/components/ui/` folder (`button/`, `heading/`, `spinner/`, `toaster/`), all of which follow the same one-directory-per-component shape with a subfolder `index.ts` and a top-level re-export. All 7 existing consumers import from `@/globals/components/ui`; no deep-import precedent exists in the codebase.
+- **Alternatives considered:** All 7 primitives in a single shared `globals/components/ui/pagination/` directory with one barrel — rejected; violates the one-component-per-directory convention. Deep imports only (no sub-barrel) — rejected; no precedent in the codebase and requires consumers to know file paths inside the primitive folder.
+- **Step:** 3 — Iterative Refinement
+- **Resolves:** "Barrel export (`index.ts`) — discuss before PR 1 lands" todo. Also supersedes the architecture's earlier assumption of a shared `pagination/` directory for all 7 primitives.
+
 ## 2026-04-27 — Truncation logic placement: implementation-time call
 
 - **Decision:** The page-list truncation logic in the feature-level pagination wrapper starts inline inside `pagination.tsx`. If during PR 3 implementation it grows beyond a few clear branches, the implementer extracts it to a sibling pure utility at `features/posts/components/pagination/getTruncatedPageList.ts` with its own `__tests__/getTruncatedPageList.test.ts`. The "complicated enough to extract" call is made by the implementer at PR-write time; this decision is the principle, not a line-count threshold.

@@ -37,15 +37,6 @@
       `BUTTON_VARIANTS` truly can't express the visual. Default
       preference: stay on `BUTTON_VARIANTS` per the install-decision
       rationale. `[skill]`
-- [ ] **Barrel export (`index.ts`) — discuss before PR 1 lands.**
-      `architecture.md` (pagination primitives table) assumes
-      `globals/components/ui/pagination/index.ts` re-exports all seven
-      primitives, mirroring `globals/components/ui/button/index.ts`.
-      Confirm with the team: keep the barrel vs. deep imports only;
-      any bundler / tree-shaking preferences; consistency with other
-      `globals/components/ui/*` folders. Resolution updates the table in
-      `architecture.md` if the decision diverges from a barrel.
-      `[engineer]`
 
 ### PR 2 — backend additive
 
@@ -155,4 +146,5 @@
 | Backend cleanup (PR 4) — confirm GET handler has no other callers | Validated during Step 2 research pass: `useGetPaginatedPostsQuery` (`features/posts/hooks/useGetPaginatedPostsQuery.ts:18`) is the only `baseAPI.get` against `API_ROUTES.posts`. The `POST` caller (`features/posts/requests/postPostCreateRequest.ts:15`) is unaffected by PR 4. `app/api/posts/__tests__/GET.db.test.ts` and the `mockGetPostsResponse` helper in `test/servers/postsServer.ts` can be deleted alongside the route handler. |
 | Page test rewrite (PR 3) | Use `vi.spyOn(PostService, 'findAndCount')` for `posts.page.test.tsx` and `latestPosts.test.tsx` — fast mocked-service branches, no DB. Integration coverage lives in the new `getPaginatedPosts.db.test.ts`. See `architecture.md` § Testing Strategy → PR 3 tests. |
 | One component per file for pagination primitives | Engineer-specified during the 4-PR refinement. Each of the seven primitives lives in its own `<componentName>.tsx` with a co-located test; barrel `index.ts` re-exports the public surface. `<PaginationLink>` reuses `BUTTON_VARIANTS` rather than a parallel variants table. See `decisions.md` → "One component per file for pagination primitives". |
+| Barrel export for pagination primitives | One directory per primitive under `globals/components/ui/`; each directory has its own `index.ts`; `globals/components/ui/index.ts` gains 7 new export lines. Consumers import from `@/globals/components/ui`. Consistent with `button/`, `heading/`, `spinner/`, `toaster/`. See `decisions.md` → "Barrel export: one directory per primitive, re-exported from `globals/components/ui/index.ts`". |
 | Truncation logic placement principle | Implementation-time call, made by the engineer during PR 3. Default inline; extract to `getTruncatedPageList.ts` if the logic sprawls. See `decisions.md` → "Truncation logic placement: implementation-time call". (The truncation _spec_ — the table of expected outputs — remains open under PR 3.) |

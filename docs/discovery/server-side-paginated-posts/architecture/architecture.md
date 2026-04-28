@@ -286,20 +286,19 @@ PostsPage (sync RSC)
 
 This work breaks into two distinct units:
 
-**PR 1 — Pagination primitives (`globals/components/ui/pagination/`).** Shadcn's `<Pagination>` reference primitive copy-pasted in, but split one-component-per-file to match the codebase convention (`globals/components/ui/button/`, `heading/`, `spinner/`, `toaster/` all follow this shape). No new dependency.
+**PR 1 — Pagination primitives.** Shadcn's `<Pagination>` reference primitive copy-pasted in, split one-component-per-directory to match the codebase convention (`globals/components/ui/button/`, `heading/`, `spinner/`, `toaster/` all follow this shape). No new dependency.
 
-| File | Component | Element | Notes |
+| Directory | Component | Element | Notes |
 |---|---|---|---|
-| `pagination.tsx` | `<Pagination>` | `<nav>` | `aria-label="pagination"` default; consumer can override |
-| `paginationContent.tsx` | `<PaginationContent>` | `<ul>` | `data-slot="pagination-content"` |
-| `paginationItem.tsx` | `<PaginationItem>` | `<li>` | `data-slot="pagination-item"` |
-| `paginationLink.tsx` | `<PaginationLink>` | `<a>` (or `next/link`) | Accepts `isActive?: boolean`. Active sets `aria-current="page"`. Styled via `BUTTON_VARIANTS({ variant: isActive ? 'outline' : 'ghost', size: 'icon-sm' })` from `globals/components/ui/button/constants.ts` — **reuses existing variants**, no new `constants.ts`. |
-| `paginationPrevious.tsx` | `<PaginationPrevious>` | wraps `<PaginationLink>` | Renders `lucide-react`'s `ChevronLeft` + the text "Previous". `aria-label="Go to previous page"`. |
-| `paginationNext.tsx` | `<PaginationNext>` | wraps `<PaginationLink>` | Renders `lucide-react`'s `ChevronRight` + the text "Next". `aria-label="Go to next page"`. |
-| `paginationEllipsis.tsx` | `<PaginationEllipsis>` | `<span>` | Renders `lucide-react`'s `MoreHorizontal`. `aria-hidden="true"` plus an SR-only "More pages" text. |
-| `index.ts` | barrel | — | Re-exports all 7. Mirrors `globals/components/ui/button/index.ts`. |
+| `globals/components/ui/pagination/` | `<Pagination>` | `<nav>` | `aria-label="pagination"` default; consumer can override |
+| `globals/components/ui/paginationContent/` | `<PaginationContent>` | `<ul>` | `data-slot="pagination-content"` |
+| `globals/components/ui/paginationItem/` | `<PaginationItem>` | `<li>` | `data-slot="pagination-item"` |
+| `globals/components/ui/paginationLink/` | `<PaginationLink>` | `<a>` (or `next/link`) | Accepts `isActive?: boolean`. Active sets `aria-current="page"`. Styled via `BUTTON_VARIANTS({ variant: isActive ? 'outline' : 'ghost', size: 'icon-sm' })` from `globals/components/ui/button/constants.ts` — **reuses existing variants**, no new `constants.ts`. |
+| `globals/components/ui/paginationPrevious/` | `<PaginationPrevious>` | wraps `<PaginationLink>` | Renders `lucide-react`'s `ChevronLeft` + the text "Previous". `aria-label="Go to previous page"`. |
+| `globals/components/ui/paginationNext/` | `<PaginationNext>` | wraps `<PaginationLink>` | Renders `lucide-react`'s `ChevronRight` + the text "Next". `aria-label="Go to next page"`. |
+| `globals/components/ui/paginationEllipsis/` | `<PaginationEllipsis>` | `<span>` | Renders `lucide-react`'s `MoreHorizontal`. `aria-hidden="true"` plus an SR-only "More pages" text. |
 
-Each component lives next to a co-located test in `globals/components/ui/pagination/__tests__/` (one test file per component, named `<componentName>.test.tsx`). Tests are smoke-level: render + ARIA defaults + `data-slot` + `isActive` → `aria-current="page"` on `<PaginationLink>` + correct icon imports on prev/next/ellipsis.
+Each directory contains a `<componentName>.tsx`, an `index.ts` re-exporting the component, and a co-located `__tests__/<componentName>.test.tsx`. `globals/components/ui/index.ts` gains 7 new `export * from './<componentName>'` lines. Tests are smoke-level: render + ARIA defaults + `data-slot` + `isActive` → `aria-current="page"` on `<PaginationLink>` + correct icon imports on prev/next/ellipsis.
 
 PR 1 is purely additive — these components ship to `main` ahead of any consumer. They're dead code until PR 3 imports them, which is the same posture as adding any new Shadcn primitive ahead of its first use.
 
@@ -351,19 +350,19 @@ No change. Already running on Vercel with `cacheComponents: true` (`next.config.
 
 #### PR 1 tests — pagination primitives
 
-One test file per component, co-located in `globals/components/ui/pagination/__tests__/`:
+One test file per component, co-located in each component's own `__tests__/` directory:
 
-- `pagination.test.tsx` — `<Pagination>` renders a `<nav>` with `aria-label`; passes through `className` / `data-*`.
-- `paginationContent.test.tsx` — `<PaginationContent>` renders a `<ul>` with `data-slot="pagination-content"`.
-- `paginationItem.test.tsx` — `<PaginationItem>` renders an `<li>` with `data-slot="pagination-item"`.
-- `paginationLink.test.tsx` —
+- `globals/components/ui/pagination/__tests__/pagination.test.tsx` — `<Pagination>` renders a `<nav>` with `aria-label`; passes through `className` / `data-*`.
+- `globals/components/ui/paginationContent/__tests__/paginationContent.test.tsx` — `<PaginationContent>` renders a `<ul>` with `data-slot="pagination-content"`.
+- `globals/components/ui/paginationItem/__tests__/paginationItem.test.tsx` — `<PaginationItem>` renders an `<li>` with `data-slot="pagination-item"`.
+- `globals/components/ui/paginationLink/__tests__/paginationLink.test.tsx` —
   - Renders an `<a>` (or whatever `<PaginationLink>` resolves to in the install — possibly `next/link`).
   - With `isActive={true}` sets `aria-current="page"` and applies `outline` variant styling.
   - With `isActive={false}` (default) omits `aria-current` and applies `ghost` variant styling.
   - Forwards `href`, `onClick`, and other anchor props.
-- `paginationPrevious.test.tsx` — renders `ChevronLeft` icon, has `aria-label="Go to previous page"`, includes the visible "Previous" text.
-- `paginationNext.test.tsx` — renders `ChevronRight` icon, has `aria-label="Go to next page"`, includes the visible "Next" text.
-- `paginationEllipsis.test.tsx` — renders `MoreHorizontal` icon, is `aria-hidden="true"`, includes SR-only "More pages" text.
+- `globals/components/ui/paginationPrevious/__tests__/paginationPrevious.test.tsx` — renders `ChevronLeft` icon, has `aria-label="Go to previous page"`, includes the visible "Previous" text.
+- `globals/components/ui/paginationNext/__tests__/paginationNext.test.tsx` — renders `ChevronRight` icon, has `aria-label="Go to next page"`, includes the visible "Next" text.
+- `globals/components/ui/paginationEllipsis/__tests__/paginationEllipsis.test.tsx` — renders `MoreHorizontal` icon, is `aria-hidden="true"`, includes SR-only "More pages" text.
 
 These are smoke tests, not behavior tests — the primitives are pure render adapters with no internal logic to break. Behavior coverage lives in PR 3's feature-wrapper test.
 
@@ -421,7 +420,7 @@ The 4-PR ship plan is the rollout. From `decisions.md` → "Ship plan: 4 PRs (pa
 
 | PR | Scope | What lands | What does not | Reversibility |
 |----|-------|-----------|---------------|---------------|
-| 1 | Pagination primitives, additive | Shadcn `<Pagination>` install at `globals/components/ui/pagination/`, one component per file (`pagination`, `paginationContent`, `paginationItem`, `paginationLink`, `paginationPrevious`, `paginationNext`, `paginationEllipsis`); barrel `index.ts`; per-component smoke tests under `__tests__/`; reuses `BUTTON_VARIANTS` from `globals/components/ui/button/constants.ts`. | No `app/`, no `features/`, no `next.config.ts`. Pure new files in `globals/components/ui/pagination/`. | Safe to ship alone. Components are unimported; revert is a clean delete. |
+| 1 | Pagination primitives, additive | Shadcn `<Pagination>` install, one component per directory under `globals/components/ui/` (`pagination/`, `paginationContent/`, `paginationItem/`, `paginationLink/`, `paginationPrevious/`, `paginationNext/`, `paginationEllipsis/`); each with its own `index.ts` and `__tests__/`; `globals/components/ui/index.ts` gains 7 new export lines; reuses `BUTTON_VARIANTS` from `globals/components/ui/button/constants.ts`. | No `app/`, no `features/`, no `next.config.ts`. Pure new files under `globals/components/ui/`. | Safe to ship alone. Components are unimported; revert is a clean delete. |
 | 2 | Backend, additive | `getPaginatedPosts` (`'use cache'` + `cacheTag('posts')`); `FindAndCountPostsDto` primitives constructor; `deletePost` swaps to `revalidateTag('posts')`; `app/api/posts/route.ts` `GET` updated to pass primitives; new + updated backend tests. | No `app/posts/page.tsx`, no `features/posts/components/`, no `features/posts/hooks/` changes. | Safe to ship alone. The `GET` handler still works; `useGetPaginatedPostsQuery` still consumes it. `revalidateTag('posts')` is a no-op against an empty tag set (no `'use cache'` callers exist yet to tag entries) — but the *next* PR introduces them, so the call is forward-compatible. |
 | 3 | Frontend, cutover | Sync `app/posts/page.tsx` with `<Suspense>` fallback; new async `LatestPosts` (RSC); `PostCards` props change to `{ posts }`; `useGetPaginatedPostsQuery` + tests deleted; `PaginatedPostsQuery` type deleted; new feature wrapper `features/posts/components/pagination/pagination.tsx` consuming PR 1's primitives; rewritten `posts.page.test.tsx` and `latestPosts.test.tsx`; new `pagination.test.tsx` (and conditional `getTruncatedPageList.test.ts` if extracted). | No `app/api/posts/`, no `features/posts/post.{service,repository}.ts`, no `features/posts/dto/` changes. | Revertable as one commit. After this lands, `revalidateTag('posts')` from `deletePost` is doing real work and the user-facing list reads from cache. |
 | 4 | Backend cleanup | `app/api/posts/route.ts` `GET` export deleted (file slimmed to POST-only); `app/api/posts/__tests__/GET.db.test.ts` deleted; `test/servers/postsServer.ts` `GET` handler + `mockGetPostsResponse` helper deleted. | No frontend touched. Pure deletion. | Revertable. After this, no transitional dead handler is on `main`. |
