@@ -75,7 +75,7 @@ There is no pagination UI on the page today. `?page=N` is editable only via dire
 
 `app/posts/page.tsx` stays synchronous. It accepts `searchParams: Promise<{ page?: string }>` and passes the `Promise` through to a new async `LatestPosts` Server Component without awaiting it. The static `<header>` and `<Latest>` heading render immediately. `<Suspense fallback={<p>Loading posts...</p>}>` wraps the async child — the existing fallback hoists from inside `LatestPosts` to inside the page.
 
-`LatestPosts` becomes an `async function` Server Component. It awaits `searchParams`, normalizes `page` to a non-negative integer, calls `getPaginatedPosts({ page, limit: 10 })`, and renders `<PostCards posts={posts} />` plus `<Pagination currentPage={page} totalPages={totalPages} />`. The `'use client'` directive and the `useGetPaginatedPostsQuery` import disappear.
+`LatestPosts` becomes an `async function` Server Component. It awaits `searchParams`, normalizes `page` to a non-negative integer, calls `getPaginatedPosts({ page, limit: 10 })`, and renders either `<PostCards posts={posts} />` or `<p data-testid="latest-posts-empty">No posts on this page</p>` when `posts.length === 0`, plus `<Pagination currentPage={page} totalPages={totalPages} />` only when `totalPages > 1`. The `'use client'` directive and the `useGetPaginatedPostsQuery` import disappear.
 
 `getPaginatedPosts({ page, limit })` is a new server-side function in `features/posts/actions/getPaginatedPosts.ts` (action-folder path for symmetry with `getPost`, but **without** the `'use server'` directive — see "Read entry" below). It opens with `'use cache'`, calls `cacheTag('posts')`, instantiates `new FindAndCountPostsDto({ page, limit })` (DTO shape change — see "DTO change"), calls `PostService.findAndCount(dto)`, and returns `{ error, posts, totalPages }` on success or `{ error, posts: [], totalPages: 0 }` on error. Mirrors `getPost`'s `result.match(...)` shape.
 
@@ -170,7 +170,7 @@ Same as Flow 3, except after the redirect the admin manually clicks "Page 2" in 
 | Scenario | Expected Behavior |
 |----------|-------------------|
 | Invalid `?page` (`"abc"`, negative, very large) | `findAndCountPostsSchema` coerces; non-numeric → Zod error → `LatestPosts` renders the error branch. Existing schema `transform((page) => page \|\| 0)` already collapses `0` / falsy / NaN to page 0. |
-| `?page` greater than `totalPages` | `prisma.post.findMany` with a too-large `skip` returns an empty array; `LatestPosts` renders `<PostCards posts={[]} />` (empty card group) and `<Pagination>` with the requested page — pagination control still highlights the requested page but the list is empty. Acceptable for MVP; matches current behavior. |
+| `?page` greater than `totalPages` | `prisma.post.findMany` with a too-large `skip` returns an empty array; `LatestPosts` renders `<p data-testid="latest-posts-empty">No posts on this page</p>`. `<Pagination>` still renders (since `totalPages > 1` for any multi-page dataset) and highlights the requested page so the user can navigate back. Accepted for MVP. |
 | Prisma error during read | `PostService.findAndCount` returns an `entity` error envelope → `getPaginatedPosts` returns `{ error, posts: [], totalPages: 0 }` → `LatestPosts` renders `<p data-testid="latest-posts-error">Something went wrong</p>` (preserving the existing `data-testid` so test assertions carry over). |
 | Cache miss under load | First request per `{ page, limit }` combo hits Prisma; subsequent requests within `cacheLife` window read from in-memory LRU. No user-visible difference beyond first-request latency. |
 | Stale cache between revalidations | `cacheLife` default: stale at 5min (client), revalidate at 15min (server). Acceptable for a portfolio site; if observed staleness becomes a complaint post-launch, tighten `cacheLife`. |
@@ -250,8 +250,9 @@ PostsPage (sync RSC)
       └─ <Suspense fallback={<p>Loading posts...</p>}>
          └─ LatestPosts (async RSC)
             ├─ getPaginatedPosts({ page, limit: 10 })  ← cached, tagged 'posts'
-            ├─ PostCards (RSC, props: { posts })
-            └─ Pagination (Client Component, props: { currentPage, totalPages })
+            ├─ PostCards (RSC, props: { posts })            ← posts.length > 0
+            │   OR <p data-testid="latest-posts-empty">    ← posts.length === 0
+            └─ Pagination (props: { currentPage, totalPages })  ← totalPages > 1 only
                 └─ next/link items
 ```
 
@@ -270,8 +271,12 @@ PostsPage (sync RSC)
 - On success, returns:
   ```tsx
   <div aria-live="polite" data-testid="latest-posts">
-    <PostCards posts={posts} />
-    <Pagination currentPage={page} totalPages={totalPages} />
+    {posts.length === 0 ? (
+      <p data-testid="latest-posts-empty">No posts on this page</p>
+    ) : (
+      <PostCards posts={posts} />
+    )}
+    {totalPages > 1 && <Pagination currentPage={page} totalPages={totalPages} />}
   </div>
   ```
 - The internal `<Suspense>` and `useGetPaginatedPostsQuery` go away.
@@ -280,7 +285,7 @@ PostsPage (sync RSC)
 
 - Props change: `{ promise: PaginatedPostsQuery }` → `{ posts: AuthoredPost[] }`.
 - The `use(promise)` consumption goes away. The `error` branch goes away.
-- Map over `posts` and render `<Card>` rows as before. Behavior on empty array: empty `<CardGroup>` (no posts, no error message — acceptable per [Edge Cases](#edge-cases--error-states)).
+- Map over `posts` and render `<Card>` rows as before. `LatestPosts` guards the empty-array case upstream — `PostCards` is only called when `posts.length > 0`.
 
 #### `Pagination` — primitives + feature wrapper, split across PR 1 and PR 3
 
@@ -310,7 +315,16 @@ Responsibilities:
 - Render the primitive composition: `<Pagination> > <PaginationContent> > [<PaginationPrevious>, ...page items, <PaginationNext>]` with `<PaginationLink href={`${ROUTES.posts}?page=${n}`} isActive={n === currentPage}>` items and `<PaginationEllipsis>` for gaps.
 - Disable `<PaginationPrevious>` at `currentPage === 0` and `<PaginationNext>` at `currentPage === totalPages - 1` (`aria-disabled="true"` + `pointer-events-none` so clicks no-op without changing visual rhythm).
 
-**Page-list truncation rule.** If `totalPages <= 7`, render all pages `[1..totalPages]`. Otherwise render `[1, …, currentPage-1, currentPage, currentPage+1, …, totalPages]` with `<PaginationEllipsis>` for non-adjacent gaps. Edge cases (currentPage at 0 or `totalPages - 1`, totalPages = 0/1) pinned in the truncation table — see `todos.md` → "Page-list truncation spec".
+**Page-list truncation rule.** `<Pagination>` renders only when `totalPages > 1`. When rendered: if `totalPages <= 7`, render all pages `[1..totalPages]`. Otherwise render a windowed list — first page, ellipsis if non-adjacent, pages `currentPage-1` through `currentPage+1` (clamped to valid range), ellipsis if non-adjacent, last page.
+
+| Input | Output |
+|-------|--------|
+| `(currentPage=0, totalPages=2)` | `[1, 2]` |
+| `(currentPage=0, totalPages=5)` | `[1, 2, 3, 4, 5]` |
+| `(currentPage=0, totalPages=10)` | `[1, 2, 3, …, 10]` |
+| `(currentPage=4, totalPages=10)` | `[1, …, 4, 5, 6, …, 10]` |
+| `(currentPage=9, totalPages=10)` | `[1, …, 8, 9, 10]` |
+| `totalPages ≤ 1` | — (pagination not rendered) |
 
 **Truncation logic placement — implementation-time call.** Default: keep the page-list computation inline in the wrapper. If during PR 3 implementation it grows beyond a few clear branches (boundary conditions, ellipsis-collapse logic, off-by-ones for window size > 1, etc.), extract to a sibling pure util (`features/posts/components/pagination/getTruncatedPageList.ts`) with its own `__tests__/getTruncatedPageList.test.ts`. The "complicated enough to extract" call is made by the implementer — engineer guidance is the principle, not the line count. See `decisions.md` → "Truncation logic placement: implementation-time call".
 
@@ -387,10 +401,15 @@ These are smoke tests, not behavior tests — the primitives are pure render ada
   - Pagination control renders.
   - Admin menu content renders (existing assertion).
   - Error branch renders the `latest-posts-error` element when `findAndCount` returns an error envelope.
-- `features/posts/components/latestPosts/__tests__/latestPosts.test.tsx` — rewrite. Currently uses `mockGetPostsResponse` (msw) — that helper is going away in PR 4, so the test must move off it before PR 4 ships. Replace with `vi.spyOn(PostService, 'findAndCount')` setting up success / error returns and `await act(() => render(<LatestPosts searchParams={Promise.resolve({ page: '0' })} />))`. Assertions match current ones (links to post pages, error message on failure).
+- `features/posts/components/latestPosts/__tests__/latestPosts.test.tsx` — rewrite. Currently uses `mockGetPostsResponse` (msw) — that helper is going away in PR 4, so the test must move off it before PR 4 ships. Replace with `vi.spyOn(PostService, 'findAndCount')` setting up success / error returns and `await act(() => render(<LatestPosts searchParams={Promise.resolve({ page: '0' })} />))`. Assertions: links to post pages, error message on failure, `latest-posts-empty` element renders when `findAndCount` returns `{ posts: [], totalPages: 0 }`.
 - `features/posts/hooks/__tests__/useGetPaginatedPostsQuery.test.ts` — **delete** (the hook is deleted in PR 3).
-- New: `features/posts/components/pagination/__tests__/pagination.test.tsx` — feature wrapper behavior. Render with `{ currentPage: 1, totalPages: 5 }`; assert links exist with `href={'/posts?page=N'}`; assert `aria-current="page"` on the active page; assert "Previous" disabled (`aria-disabled="true"`) at page 0; assert "Next" disabled at last page; assert ellipses appear at the right boundaries for `totalPages > 7`. Drives the truncation table from `todos.md` → "Page-list truncation spec".
-- New (conditional): `features/posts/components/pagination/__tests__/getTruncatedPageList.test.ts` — only if the truncation logic is extracted to a sibling util during implementation. Pure-function tests across the truncation table (`(currentPage=0, totalPages=1)` → `[1]`; `(currentPage=4, totalPages=10)` → `[1, '…', 4, 5, 6, '…', 10]`; etc.). If logic stays inline in the wrapper, those assertions live inside `pagination.test.tsx` instead.
+- New: `features/posts/components/pagination/__tests__/pagination.test.tsx` — feature wrapper behavior:
+  - `totalPages <= 1` → renders nothing (conditional mount).
+  - `{ currentPage: 1, totalPages: 5 }` → links with `href="/posts?page=N"`, `aria-current="page"` on active page.
+  - `currentPage === 0` → `<PaginationPrevious>` has `aria-disabled="true"`.
+  - `currentPage === totalPages - 1` → `<PaginationNext>` has `aria-disabled="true"`.
+  - Ellipsis assertions across the truncation table from `architecture.md` → "Page-list truncation rule".
+- New (conditional): `features/posts/components/pagination/__tests__/getTruncatedPageList.test.ts` — only if the truncation logic is extracted to a sibling util during implementation. Pure-function tests across the same truncation table. If logic stays inline, those assertions live inside `pagination.test.tsx` instead.
 
 #### PR 4 tests — backend cleanup
 

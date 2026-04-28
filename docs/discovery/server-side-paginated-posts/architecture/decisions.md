@@ -151,3 +151,32 @@
   - **Pin a line-count threshold** (e.g., "extract if > 30 LOC"). Rejected; a clean 35-line function and a tangled 25-line function should land on opposite sides of this call. Engineer judgment at write-time is the right arbiter.
 - **Step:** 3 — Approval & Refinement
 - **Resolves:** "Truncation utility placement" question raised during the 4-PR refinement.
+
+## 2026-04-28 — Out-of-range `?page`: leave as-is (option a)
+
+- **Decision:** When `?page=N` exceeds `totalPages`, the app does not clamp or redirect. `LatestPosts` calls `getPaginatedPosts` with the requested page, receives `posts = []`, renders the empty-state message, and `<Pagination>` (if `totalPages > 1`) still renders with the requested page highlighted. No special-case handling in `LatestPosts`.
+- **Why:** MVP. Out-of-range URLs require intentional URL manipulation on a portfolio site; the cost of adding a clamp or redirect (more logic, more tests, edge cases around `totalPages` being read before the redirect decision) isn't justified for the observed risk. The explicit empty-state message (see separate decision) communicates the state clearly without a redirect.
+- **Alternatives considered:**
+  - **(b) Clamp `page` to `Math.min(requested, totalPages - 1)` in `LatestPosts`.** Cleanest UX — pagination reflects reality — but adds a read-then-decide step and complicates the caching contract (`getPaginatedPosts` would sometimes be called with a different arg than the URL suggests). Deferred to post-launch.
+  - **(c) Redirect to `/posts` when out of range.** Heavier — requires fetching `totalPages` first, then deciding, then redirecting. Two network-round-trip equivalent. Out of scope for MVP.
+- **Step:** 3 — Iterative Refinement
+- **Resolves:** "`?page` beyond `totalPages` — define behavior" todo.
+
+## 2026-04-28 — Empty-state UX: explicit message when `posts.length === 0`
+
+- **Decision:** When `getPaginatedPosts` returns `posts = []` (empty DB or out-of-range page), `LatestPosts` renders `<p data-testid="latest-posts-empty">No posts on this page</p>` instead of an empty `<PostCards>`. `<Pagination>` still renders alongside it when `totalPages > 1`. `PostCards` is only called when `posts.length > 0`.
+- **Why:** An empty card group is a silent failure — the user can't distinguish "no posts exist" from "something broke." An explicit message is a minimal, zero-layout-cost improvement that gives the user enough information to act (navigate to another page). The `data-testid` makes it directly assertable in `latestPosts.test.tsx`.
+- **Alternatives considered:**
+  - **Silent empty `<CardGroup>` (prior default).** Rejected — matches today's behavior, but today's behavior is ambiguous at the UI level when the page URL is intentionally out of range.
+- **Step:** 3 — Iterative Refinement
+- **Resolves:** "Empty-state UX — keep the empty `<CardGroup>`, or add a 'No posts yet' element?" todo.
+
+## 2026-04-28 — Pagination renders only when `totalPages > 1`
+
+- **Decision:** The feature-level `<Pagination>` wrapper in `LatestPosts` is conditionally rendered: `{totalPages > 1 && <Pagination ... />}`. It does not render when `totalPages === 0` (no posts) or `totalPages === 1` (all posts fit on one page). The `<Pagination>` component's own truncation logic therefore only needs to handle `totalPages >= 2`.
+- **Why:** Engineer-specified. A single-page result with a pagination control showing "1 of 1" is visual noise with no navigable state. Omitting the control when there's nothing to paginate matches standard UX practice and simplifies the truncation edge-case surface — `totalPages = 0` and `totalPages = 1` rows disappear from the truncation table entirely.
+- **Alternatives considered:**
+  - **Always render `<Pagination>` and disable controls when `totalPages <= 1`.** Rejected — engineer explicitly wants no pagination for `totalPages <= 1`. Always-render adds a visible control that conveys no information.
+  - **Render a single disabled "1" indicator when `totalPages === 1`.** Rejected — same as above; engineer wants no pagination when there's only one page.
+- **Step:** 3 — Iterative Refinement
+- **Resolves:** "Page-list truncation spec — `totalPages=0` edge case" todo (collapses the `totalPages=0` and `totalPages=1` rows into a no-render condition; remaining truncation table is complete in `architecture.md` → "Page-list truncation rule").

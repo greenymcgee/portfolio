@@ -3,8 +3,8 @@
 | Field | Value |
 | --- | --- |
 | Created | 2026-04-27 |
-| Last Updated | 2026-04-27 |
-| Current Focus | Step 3 — Iterative Refinement. `architecture.md` is drafted with Q1 and Q2 both resolved and the ship plan refined to **4 PRs** (pagination primitives → backend additive → frontend cutover → backend cleanup). 9 open refinement items in `todos.md`, organized by PR. Ready to work refinement items conversationally. |
+| Last Updated | 2026-04-28 |
+| Current Focus | Step 3 complete — all engineer-decision items closed. 7 open items remain, all implementation-time or low-priority (no engineer call needed). Ready to move to Step 4 — Structure Architecture. |
 
 ## Step Tracker
 
@@ -12,7 +12,7 @@
 | --- | --- | --- | --- |
 | 1 | Setup & Initial Plan | Complete | `inputs/requirements.md` (engineer-authored), `initial-plan.md`, `decisions.md`, `todos.md` all in sync. Constraints + design map intentionally skipped per requirements. Pattern shape and PR split locked after engineer corrections. |
 | 2 | Architecture Document | Complete | `architecture.md` drafted. Q1 resolved (service-direct + `'use cache'` + `cacheTag('posts')` + `revalidateTag` invalidation; `cacheComponents: true` already enabled in `next.config.ts:6`). Q2 resolved (Shadcn `<Pagination>`). DTO shape resolved (replace outright in the backend-additive PR). 4 decision entries appended. |
-| 3 | Iterative Refinement | In Progress | Ship plan refined from 3 PRs to 4 PRs (pagination install carved out into its own PR ahead of the backend work). One-component-per-file rule reaffirmed for the primitives install. Truncation logic placement is an implementation-time call. 10 open refinement items in `todos.md`. |
+| 3 | Iterative Refinement | Complete | All engineer-decision items resolved: out-of-range `?page` → leave as-is; empty-state → explicit message; `<Pagination>` renders only when `totalPages > 1` (collapses the truncation edge cases). 7 open items remaining — all implementation-time or low-priority. |
 | 4 | Structure Architecture | Not Started | — |
 | 5 | Engineering Review Prep | Not Started | — |
 
@@ -24,7 +24,7 @@
 
 ## Todo Progress
 
-9 open refinement items / 15 closed. Open items are grouped by PR in `todos.md` (PR 1: 2 items; PR 2: 3 items; PR 3: 4 items; post-launch: 1 item).
+7 open refinement items / 18 closed. Open items grouped by PR in `todos.md` (PR 1: 2 items; PR 2: 3 items; PR 3: 1 item; post-launch: 1 item). All are implementation-time or low-priority — no engineer calls outstanding.
 
 ## Notes for the Next Agent
 
@@ -50,4 +50,4 @@
   - **PR 2:** `revalidatePath` removal grep; `getPaginatedPosts` arg shape; `'use cache'` request-scope deduplication doc.
   - **PR 3:** wrapper a11y; page-list truncation spec table (drives where the logic lives); empty-state UX call; `?page > totalPages` behavior call.
   - **Post-launch:** revisit `cacheLife`.
-- **Items needing an engineer call before implementation starts:** truncation spec table (PR 3), empty-state UX (PR 3), out-of-range `?page` behavior (PR 3). The rest can be resolved during PR-write.
+- **No engineer calls outstanding.** All decision items are closed. Remaining open items are implementation-time or low-priority and can be resolved during PR-write.

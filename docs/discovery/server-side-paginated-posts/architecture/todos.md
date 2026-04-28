@@ -77,47 +77,6 @@
         `pointer-events-none` so the link doesn't navigate.
       Acceptance: `pagination.test.tsx` (the wrapper test) covers
       each. `[skill]`
-- [ ] **Page-list truncation spec — pin exact output across edge
-      cases.** The architecture sketches "show first, prev, current ±
-      1, next, last with ellipses." Before PR 3 ships, write a small
-      table of expected `[<list>]` for representative inputs:
-      - `(currentPage=0, totalPages=1)` → `[1]`
-      - `(currentPage=0, totalPages=5)` → `[1,2,3,4,5]`
-      - `(currentPage=0, totalPages=10)` → `[1,2,3,...,10]`
-      - `(currentPage=4, totalPages=10)` → `[1,...,4,5,6,...,10]`
-      - `(currentPage=9, totalPages=10)` → `[1,...,8,9,10]`
-      - `(currentPage=N, totalPages=0)` → render nothing (or a single
-        disabled "1"?) — engineer call.
-      During PR 3 implementation, decide whether the truncation logic
-      stays inline in `pagination.tsx` or extracts to
-      `getTruncatedPageList.ts` per the placement-is-an-
-      implementation-time-call decision (`decisions.md` →
-      "Truncation logic placement: implementation-time call"). If
-      extracted, table-driven assertions live in
-      `getTruncatedPageList.test.ts`; otherwise they live in
-      `pagination.test.tsx`. `[skill]`
-- [ ] **Empty-state UX — keep the empty `<CardGroup>`, or add a "No
-      posts yet" element?** The architecture currently says empty
-      array → empty `<CardGroup>` (matches today's behavior, since
-      the page is never empty in practice). If we're shipping
-      pagination, a user could land on `?page=999` and see an empty
-      page silently. Decide whether to render an explicit empty-state
-      element (e.g., `<p data-testid="latest-posts-empty">No posts on
-      this page</p>`) and keep the pagination control to navigate
-      back, or leave the silent empty `<CardGroup>` as the MVP shape.
-      `[skill]`
-- [ ] **`?page` beyond `totalPages` — define behavior.** Today,
-      requesting `?page=999` returns an empty `posts` array but
-      `<Pagination>` still renders with the requested page
-      highlighted. Decide:
-      - (a) Leave as-is (empty list, pagination shows the requested
-        page).
-      - (b) Clamp `page` to `Math.min(requested, totalPages - 1)` in
-        `LatestPosts` before calling `getPaginatedPosts`, so the
-        pagination control reflects reality.
-      - (c) Redirect to `/posts` (page 0) when out of range.
-      Likely (a) for MVP, (b) is the cleanest UX; (c) is heavier.
-      `[skill]`
 
 ### Post-launch
 
@@ -147,4 +106,7 @@
 | Page test rewrite (PR 3) | Use `vi.spyOn(PostService, 'findAndCount')` for `posts.page.test.tsx` and `latestPosts.test.tsx` — fast mocked-service branches, no DB. Integration coverage lives in the new `getPaginatedPosts.db.test.ts`. See `architecture.md` § Testing Strategy → PR 3 tests. |
 | One component per file for pagination primitives | Engineer-specified during the 4-PR refinement. Each of the seven primitives lives in its own `<componentName>.tsx` with a co-located test; barrel `index.ts` re-exports the public surface. `<PaginationLink>` reuses `BUTTON_VARIANTS` rather than a parallel variants table. See `decisions.md` → "One component per file for pagination primitives". |
 | Barrel export for pagination primitives | One directory per primitive under `globals/components/ui/`; each directory has its own `index.ts`; `globals/components/ui/index.ts` gains 7 new export lines. Consumers import from `@/globals/components/ui`. Consistent with `button/`, `heading/`, `spinner/`, `toaster/`. See `decisions.md` → "Barrel export: one directory per primitive, re-exported from `globals/components/ui/index.ts`". |
-| Truncation logic placement principle | Implementation-time call, made by the engineer during PR 3. Default inline; extract to `getTruncatedPageList.ts` if the logic sprawls. See `decisions.md` → "Truncation logic placement: implementation-time call". (The truncation _spec_ — the table of expected outputs — remains open under PR 3.) |
+| Truncation logic placement principle | Implementation-time call, made by the engineer during PR 3. Default inline; extract to `getTruncatedPageList.ts` if the logic sprawls. See `decisions.md` → "Truncation logic placement: implementation-time call". |
+| `?page` beyond `totalPages` behavior | Option (a): leave as-is. Empty list → explicit empty-state message; `<Pagination>` still renders if `totalPages > 1`. See `decisions.md` → "Out-of-range `?page`: leave as-is (option a)". |
+| Empty-state UX | Explicit `<p data-testid="latest-posts-empty">No posts on this page</p>` when `posts.length === 0`. `PostCards` only called when `posts.length > 0`. See `decisions.md` → "Empty-state UX: explicit message when `posts.length === 0`". |
+| Page-list truncation spec (`totalPages=0` edge case) | `<Pagination>` renders only when `totalPages > 1`; `totalPages=0` and `totalPages=1` rows collapse into the no-render condition. Remaining table is complete in `architecture.md` → "Page-list truncation rule". See `decisions.md` → "Pagination renders only when `totalPages > 1`". |
