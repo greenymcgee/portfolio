@@ -44,10 +44,7 @@ type Props = {
 export async function LatestPosts({
   searchParams,
 }: Props) {
-  const { page: pageParam } = await searchParams
-  const page = Number(pageParam) || 0
-
-  const { error, posts, totalPages } = await getPaginatedPosts({ page })
+  const { currentPage, error, posts, totalPages } = await getPaginatedPosts(await searchParams)
 
   if (error) {
     return (
@@ -65,7 +62,7 @@ export async function LatestPosts({
         <PostCards posts={posts} />
       )}
       {totalPages > 1 && (
-        <Pagination currentPage={page} totalPages={totalPages} />
+        <Pagination currentPage={currentPage} totalPages={totalPages} />
       )}
     </div>
   )
@@ -78,19 +75,23 @@ export async function LatestPosts({
 | --- | --- | --- |
 | Directive | `'use client'` | None (async RSC) |
 | Signature | `LatestPosts()` | `LatestPosts({ searchParams })` |
-| Data fetch | `useGetPaginatedPostsQuery()` hook | `await getPaginatedPosts({ page })` |
+| Data fetch | `useGetPaginatedPostsQuery()` hook | `await getPaginatedPosts(await searchParams)` |
 | Suspense | Owns its own `<Suspense>` | Suspense lives in `PostsPage` (hoisted) |
 | Error branch | Inside `<PostCards>` via `use(promise)` | `if (error)` at the top of `LatestPosts` |
 | Empty state | Silent empty `<CardGroup>` | `<p data-testid="latest-posts-empty">` |
 | Pagination | None | `<Pagination>` when `totalPages > 1` |
 
-## `page` normalization
+## `searchParams` handling
 
-`Number(pageParam) || 0` — normalizes `undefined`, `""`, `"abc"`, and
-`"0"` to `0`. `"1"` → `1`, etc. Non-numeric inputs land at `0` via the
-`||` short-circuit. If `findAndCountPostsSchema`'s Zod validation fails
-for the normalized value, `getPaginatedPosts` returns `{ error, posts:
-[], totalPages: 0 }` and the error branch fires.
+`LatestPosts` passes `await searchParams` directly to `getPaginatedPosts`
+with no intermediate normalization. `FindAndCountPostsDto` owns all
+parsing via `findAndCountPostsSchema` (`coerce.number()` handles strings,
+`undefined`, and other non-numeric inputs). The normalized `currentPage`
+integer is returned in the result and passed to `<Pagination>`.
+
+If `findAndCountPostsSchema`'s Zod validation fails, `getPaginatedPosts`
+returns `{ currentPage: 0, error, posts: [], totalPages: 0 }` and the
+error branch fires.
 
 ## `data-testid="latest-posts"` wrapper
 

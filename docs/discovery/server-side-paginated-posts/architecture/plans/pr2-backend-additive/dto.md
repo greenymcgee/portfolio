@@ -25,17 +25,19 @@ via `findAndCountPostsSchema` (Zod, with `coerce.number()`).
 ## After (PR 2)
 
 ```typescript
-constructor({ limit, page }: { limit?: number; page: number }) {
-  this.limit = limit ?? 10
+constructor({ page }: { page?: string }) {
   this.page = page
 }
 ```
 
 The private `url` field and the `searchParams` getter are removed. The
-`validateParams()` method and the `params` getter (`{ limit, offset }`)
-are unchanged. `findAndCountPostsSchema` is unchanged — `coerce.number()`
-accepts both string and number inputs, so the schema validates the
-primitives directly.
+`validateParams()` method, the `params` getter (`{ limit, offset }`),
+and the `limit` field are unchanged. `findAndCountPostsSchema` is
+unchanged — `coerce.number()` accepts strings, numbers, `undefined`, and
+`null`, so the Zod schema absorbs raw searchParam values directly. All
+parsing and normalization (including the `page || 0` fallback behavior
+that was previously inline in `LatestPosts`) lives inside the DTO
+through the schema.
 
 ## Why replace outright (not widen)
 
@@ -57,17 +59,15 @@ the 4-PR plan this lands in PR 2).
 ```typescript
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
-  const page = Number(searchParams.get('page') ?? '0')
-  const limit = Number(searchParams.get('limit') ?? '10')
   const result = await PostService.findAndCount(
-    new FindAndCountPostsDto({ page, limit }),
+    new FindAndCountPostsDto({ page: searchParams.get('page') ?? undefined }),
   )
   return createResponse(result)
 }
 ```
 
-The handler now owns the `searchParams` extraction (the responsibility
-the DTO used to carry). The DTO receives clean numbers.
+The handler passes the raw page string through — no number coercion in
+the handler. The DTO owns all normalization via `findAndCountPostsSchema`.
 
 This handler is updated in PR 2 and deleted in PR 4. `POST` is unaffected.
 

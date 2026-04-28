@@ -8,12 +8,12 @@ docs. All landed at **low** after research.
 
 ## R1 (low — was medium): Cache-invalidation semantics
 
-**Risk:** `revalidateTag('posts')` might not invalidate every `{ page,
-limit }` cache entry cleanly.
+**Risk:** `revalidateTag('posts')` might not invalidate every cached
+`searchParams` entry cleanly.
 
 **Resolution:** Confirmed by Next.js 16 docs. `revalidateTag('posts')`
 invalidates every `'use cache'` entry tagged `'posts'`, regardless of
-the `{ page, limit }` key arguments. `cacheComponents: true` is already
+the `searchParams` argument value. `cacheComponents: true` is already
 set in `next.config.ts:6`. No flag flip needed.
 
 ## R2 (resolved): `FindAndCountPostsDto` shape
@@ -78,16 +78,15 @@ discoverable. If a client-side caller surfaces later, the fix is a
 `'use server'` wrapper (re-introducing a marshalling boundary) or a
 separate uncached read path.
 
-## R8 (low): Cache key collision via default `limit`
+## R8 (resolved): Cache key collision via default `limit`
 
-**Risk:** If a second caller passes a different `limit`, the cache key
-splits into separate entries (`{ page: 0, limit: 10 }` vs.
-`{ page: 0, limit: 5 }`), increasing memory pressure.
+**Risk:** (Was) If a second caller passed a different `limit`, the
+cache key would split into separate entries, increasing memory pressure.
 
-**Mitigation:** Tag invalidation still fans out across all entries
-tagged `'posts'`, so correctness is unaffected. Today only `LatestPosts`
-calls `getPaginatedPosts`, always with `limit: 10`. Flag if a second
-surface emerges with a different limit.
+**Resolution:** `limit` is no longer a public parameter of
+`getPaginatedPosts`. The DTO handles `limit` internally. Cache key is
+keyed on the `searchParams` object only; `limit` is not part of the
+serialized key. Risk is eliminated.
 
 ## Open items (implementation-time)
 

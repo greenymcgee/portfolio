@@ -33,7 +33,7 @@ out across all `?page=N` cached entries, which `revalidateTag` does.
 
 Both `revalidatePath` calls are removed. `revalidateTag('posts')`
 invalidates every `'use cache'` entry tagged `'posts'` — across every
-`?page=N` / `{ page, limit }` cache key combination — in a single call.
+`?page=N` `searchParams` cache key — in a single call.
 
 The `redirect(ROUTES.posts)` stays. The redirect strips query params and
 lands the user on page 1. Per the requirements (Flow 4), the admin

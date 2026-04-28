@@ -17,13 +17,10 @@ import { logger } from '@/lib/logger'
 import { FindAndCountPostsDto } from '../dto'
 import { PostService } from '../post.service'
 
-export async function getPaginatedPosts({
-  limit = 10,
-  page,
-}: {
-  limit?: number
-  page: number
-}): Promise<{
+export async function getPaginatedPosts(
+  searchParams: { page?: string },
+): Promise<{
+  currentPage: number
   error: ReturnType<typeof PostService.findAndCount> extends Promise<infer R>
     ? R extends { _tag: 'Err' }
       ? R['error']
@@ -35,23 +32,27 @@ export async function getPaginatedPosts({
   'use cache'
   cacheTag('posts')
 
-  const result = await PostService.findAndCount(
-    new FindAndCountPostsDto({ limit, page }),
-  )
+  const dto = new FindAndCountPostsDto(searchParams)
+  const result = await PostService.findAndCount(dto)
   return result.match(
-    ({ posts, totalPages }) => ({ error: null, posts, totalPages }),
+    ({ posts, totalPages }) => ({
+      currentPage: dto.params.offset / dto.params.limit,
+      error: null,
+      posts,
+      totalPages,
+    }),
     (error) => {
       switch (error.type) {
         case 'dto':
         case 'entity': {
-          return { error, posts: [], totalPages: 0 }
+          return { currentPage: 0, error, posts: [], totalPages: 0 }
         }
         default: {
           logger.error(
             { error: error satisfies never },
             'UNHANDLED_FIND_AND_COUNT_POSTS_ERROR',
           )
-          return { error, posts: [], totalPages: 0 }
+          return { currentPage: 0, error, posts: [], totalPages: 0 }
         }
       }
     },
@@ -91,8 +92,8 @@ invalidation".
 
 ## Cache semantics
 
-- **Cache key:** `{ page, limit }` per `'use cache'` key rules (build
-  ID + function ID + serialized arguments). Each `?page=N` request maps
+- **Cache key:** `searchParams` per `'use cache'` key rules (build ID
+  + function ID + serialized arguments). Each `?page=N` request maps
   to a separate cache entry.
 - **Tag:** every entry is tagged `'posts'` via `cacheTag('posts')`.
   `revalidateTag('posts')` invalidates *every* entry tagged `'posts'`
@@ -101,7 +102,8 @@ invalidation".
   revalidate). Override only if post-launch monitoring shows staleness.
 - **`searchParams` rule:** `'use cache'` cannot read `searchParams`,
   `cookies`, or `headers` directly. Values must be passed as arguments.
-  `{ page, limit }` satisfies this constraint — no special handling needed.
+  The awaited `searchParams` object satisfies this constraint — it is a
+  plain serializable value by the time `getPaginatedPosts` receives it.
 
 ## Callers
 

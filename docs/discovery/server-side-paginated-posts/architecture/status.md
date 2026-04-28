@@ -4,7 +4,7 @@
 | --- | --- |
 | Created | 2026-04-27 |
 | Last Updated | 2026-04-28 |
-| Current Focus | Step 4 complete — architecture structured into `plans/` directory (19 files: README, 8 cross-cutting docs, 4 PR-specific subdirectories). 1 new engineer-decision item added (`limit` scope). Resolve that item, then move to Step 5 — Engineering Review Prep. |
+| Current Focus | Discovery complete — `review.md` created. All 6 remaining todos are implementation-time or low-priority; no engineer calls outstanding. Ready to begin PR 1 implementation. |
 
 ## Step Tracker
 
@@ -14,7 +14,7 @@
 | 2 | Architecture Document | Complete | `architecture.md` drafted. Q1 resolved (service-direct + `'use cache'` + `cacheTag('posts')` + `revalidateTag` invalidation; `cacheComponents: true` already enabled in `next.config.ts:6`). Q2 resolved (Shadcn `<Pagination>`). DTO shape resolved (replace outright in the backend-additive PR). 4 decision entries appended. |
 | 3 | Iterative Refinement | Complete | All engineer-decision items resolved: out-of-range `?page` → leave as-is; empty-state → explicit message; `<Pagination>` renders only when `totalPages > 1` (collapses the truncation edge cases). 7 open items remaining — all implementation-time or low-priority. |
 | 4 | Structure Architecture | Complete | 19 files in `plans/`: README, existing-implementation, proposed-solution, user-facing-behavior, data-models, security-considerations, testing-strategy, rollout-strategy, risks-open-questions, pr1-pagination-primitives/README, pr2-backend-additive/{README,action,dto,mutation}, pr3-frontend-cutover/{README,page,latest-posts,post-cards,pagination-wrapper}, pr4-backend-cleanup. |
-| 5 | Engineering Review Prep | Not Started | — |
+| 5 | Engineering Review Prep | Complete | `review.md` created. |
 
 ## Inputs Present
 
@@ -24,7 +24,7 @@
 
 ## Todo Progress
 
-8 open items / 18 closed. Open items grouped by PR in `todos.md` (PR 1: 2 items; PR 2: 4 items; PR 3: 1 item; post-launch: 1 item). **1 engineer call outstanding** — `limit` scope decision (PR 2). Remaining 7 are implementation-time or low-priority.
+6 open items / 21 closed. Open items grouped by PR in `todos.md` (PR 1: 2 items; PR 2: 2 items; PR 3: 1 item; post-launch: 1 item). No engineer calls outstanding — all are implementation-time or low-priority.
 
 ## Notes for the Next Agent
 
@@ -37,7 +37,7 @@
 - **Step 2 hard facts to keep load-bearing:**
   - `next.config.ts:6` already has `cacheComponents: true`. No PR in this sequence touches `next.config.ts`.
   - `'use cache'` and `'use server'` are mutually exclusive at the function level. `getPaginatedPosts.ts` opens the function with `'use cache'` and **does not** carry `'use server'` at the file or function level. Don't accidentally regress it to a server action — caching is the entire point of the read entry shape.
-  - `getPaginatedPosts({ page, limit })` is keyed by `{ page, limit }` and tagged `'posts'`. `revalidateTag('posts')` invalidates every page-keyed entry in one call.
+  - `getPaginatedPosts(searchParams: { page?: string })` is keyed by the `searchParams` argument and tagged `'posts'`. `revalidateTag('posts')` invalidates every page-keyed entry in one call. Returns `{ currentPage, error, posts, totalPages }` — callers never re-derive the normalized page.
   - The two `revalidatePath` calls in `deletePost` are **both** removed in favor of a single `revalidateTag('posts')`. Don't half-migrate.
   - `vitest.setup.tsx:16` already mocks `revalidateTag`. Test scaffolding is unchanged for the invalidation swap.
 - **Pattern shape is still locked** — `app/posts/page.tsx` stays sync, async data fetch in `LatestPosts` (a child RSC) inside `<Suspense>`, `searchParams` flows through as `Promise<{ page?: string }>` and is awaited inside the async child. The architecture honors this; don't propose making the page async.

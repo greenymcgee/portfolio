@@ -18,12 +18,11 @@
 2. `PostsPage` (sync RSC) streams the static `'Round the Corner` header
    + `<Suspense fallback={<p>Loading posts...</p>}>` shell to the browser.
 3. `LatestPosts` (async RSC) resolves inside the Suspense boundary:
-   awaits `searchParams`, normalizes `page`, calls
-   `getPaginatedPosts({ page, limit: 10 })`. On cache hit the result
+   calls `getPaginatedPosts(await searchParams)`. On cache hit the result
    returns immediately; on miss it hits Prisma, caches the result tagged
    `'posts'`.
 4. `LatestPosts` renders `<PostCards posts={posts} />` and (if
-   `totalPages > 1`) `<Pagination currentPage={page} totalPages={totalPages} />`.
+   `totalPages > 1`) `<Pagination currentPage={currentPage} totalPages={totalPages} />`.
 5. User clicks a pagination link. `<Pagination>` renders
    `<Link href="/posts?page=N">` items — the click is a soft navigation,
    `?page` updates, the page re-renders with the new `searchParams`
@@ -68,8 +67,8 @@ engineer's `inputs/requirements.md`.
 - Read flow migration: `useGetPaginatedPostsQuery` → cached
   `getPaginatedPosts` server function called from an async Server
   Component.
-- DTO shape change: `FindAndCountPostsDto` accepts `{ page, limit }`
-  primitives.
+- DTO shape change: `FindAndCountPostsDto` accepts `{ page?: string }`
+  (raw searchParams shape); DTO owns all normalization via Zod.
 - Mutation invalidation: `deletePost` swaps `revalidatePath` for
   `revalidateTag('posts')`.
 - Feature-level pagination wrapper at `features/posts/components/pagination/`.
@@ -95,8 +94,8 @@ engineer's `inputs/requirements.md`.
 | --- | --- |
 | Invalid `?page` (`"abc"`, negative, very large) | `findAndCountPostsSchema` coerces; non-numeric → Zod error → `LatestPosts` renders `<p data-testid="latest-posts-error">Something went wrong</p>`. Schema `transform((page) => page \|\| 0)` already collapses `0` / falsy / NaN to page 0 for in-range invalid inputs. |
 | `?page` greater than `totalPages` | `prisma.post.findMany` returns `[]`; `LatestPosts` renders `<p data-testid="latest-posts-empty">No posts on this page</p>`. `<Pagination>` still renders (if `totalPages > 1`) so the user can navigate back. Accepted for MVP. |
-| Prisma error during read | `PostService.findAndCount` returns an `entity` error envelope → `getPaginatedPosts` returns `{ error, posts: [], totalPages: 0 }` → `LatestPosts` renders `<p data-testid="latest-posts-error">Something went wrong</p>`. |
-| Cache miss under load | First request per `{ page, limit }` combo hits Prisma; subsequent requests within `cacheLife` window read from in-memory LRU. No user-visible difference beyond first-request latency. |
+| Prisma error during read | `PostService.findAndCount` returns an `entity` error envelope → `getPaginatedPosts` returns `{ currentPage: 0, error, posts: [], totalPages: 0 }` → `LatestPosts` renders `<p data-testid="latest-posts-error">Something went wrong</p>`. |
+| Cache miss under load | First request per `searchParams` value hits Prisma; subsequent requests within `cacheLife` window read from in-memory LRU. No user-visible difference beyond first-request latency. |
 | Stale cache between revalidations | Default: stale at 5min (client), revalidate at 15min (server). Acceptable for a portfolio site. |
 | Concurrent deletes from two admin sessions | Both calls run `revalidateTag('posts')`. Tag invalidation is idempotent — the second call is a no-op. No race risk. |
 | Mutation followed by immediate read | `revalidateTag` invalidates synchronously within the request lifecycle; the redirect's next render fetches fresh data. |

@@ -8,7 +8,7 @@
 `PostService.findAndCount` has no auth branch. Post listings are public
 regardless of viewer role. No change here.
 
-`getPaginatedPosts` is keyed by `{ page, limit }` — no session cookie,
+`getPaginatedPosts` is keyed by the `searchParams` argument — no session cookie,
 no user ID, no role flows through the cache key. There is zero risk of
 leaking admin-visible state to anonymous viewers via the `'use cache'`
 layer. If future work adds auth-scoped fields to the listing (e.g.,

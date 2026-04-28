@@ -17,12 +17,14 @@ call-site change, not a data-model change.
 
 | | Before (PR 1 state) | After (PR 2+) |
 | --- | --- | --- |
-| Constructor | `constructor(request: Request)` | `constructor({ page, limit }: { page: number; limit?: number })` |
+| Constructor | `constructor(request: Request)` | `constructor({ page }: { page?: string })` |
 | Internal Zod schema | `findAndCountPostsSchema` — unchanged | unchanged |
 | Output of `.params` | `{ limit, offset }` or `ZodError` | unchanged |
 
-The Zod schema uses `coerce.number()`, which accepts both string and
-number inputs, so the schema needs no adjustment for the new shape.
+The Zod schema uses `coerce.number()`, which accepts strings, numbers,
+`undefined`, and `null`, so the schema needs no adjustment. All
+normalization (including the page-0 fallback) lives inside the DTO via
+Zod, not at the call site.
 
 ## `PostService.findAndCount` — unchanged
 

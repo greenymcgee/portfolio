@@ -65,7 +65,7 @@ PostsPage (sync RSC — app/posts/page.tsx)
    └─ <article>
       └─ <Suspense fallback={<p>Loading posts...</p>}>
          └─ LatestPosts (async RSC)
-            ├─ getPaginatedPosts({ page, limit: 10 }) ← 'use cache' + cacheTag('posts')
+            ├─ getPaginatedPosts(await searchParams) ← 'use cache' + cacheTag('posts')
             ├─ PostCards (RSC, props: { posts })       ← posts.length > 0
             │   OR <p data-testid="latest-posts-empty"> ← posts.length === 0
             └─ <Pagination currentPage totalPages />   ← totalPages > 1 only
@@ -99,7 +99,7 @@ Numbered for cross-reference — each links into [`../decisions.md`](../decision
    `globals/components/ui/index.ts`.** Consistent with existing UI
    convention. ([`../decisions.md`](../decisions.md) → "Barrel export")
 7. **DTO shape replaced outright in PR 2.** `Request`-based constructor
-   → `{ page, limit }` primitives; Zod schema unchanged.
+   → `{ page?: string }` (raw searchParams shape); DTO owns normalization.
    ([`../decisions.md`](../decisions.md) → "DTO shape: replace outright
    in PR 1 (option c)")
 8. **`<Pagination>` renders only when `totalPages > 1`.** Collapses the

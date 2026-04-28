@@ -36,7 +36,7 @@ sequenceDiagram
     PostsPage-->>Browser: Stream shell + Suspense fallback
     PostsPage->>LatestPosts: <Suspense> resolves child
     LatestPosts->>LatestPosts: await searchParams → page = 1
-    LatestPosts->>getPaginatedPosts: ({ page: 1, limit: 10 })
+    LatestPosts->>getPaginatedPosts: ({ page: '1' })
     alt Cache hit (tag 'posts' valid)
         getPaginatedPosts-->>LatestPosts: cached { posts, totalPages, error }
     else Cache miss / first request
@@ -75,9 +75,9 @@ There is no pagination UI on the page today. `?page=N` is editable only via dire
 
 `app/posts/page.tsx` stays synchronous. It accepts `searchParams: Promise<{ page?: string }>` and passes the `Promise` through to a new async `LatestPosts` Server Component without awaiting it. The static `<header>` and `<Latest>` heading render immediately. `<Suspense fallback={<p>Loading posts...</p>}>` wraps the async child — the existing fallback hoists from inside `LatestPosts` to inside the page.
 
-`LatestPosts` becomes an `async function` Server Component. It awaits `searchParams`, normalizes `page` to a non-negative integer, calls `getPaginatedPosts({ page, limit: 10 })`, and renders either `<PostCards posts={posts} />` or `<p data-testid="latest-posts-empty">No posts on this page</p>` when `posts.length === 0`, plus `<Pagination currentPage={page} totalPages={totalPages} />` only when `totalPages > 1`. The `'use client'` directive and the `useGetPaginatedPostsQuery` import disappear.
+`LatestPosts` becomes an `async function` Server Component. It awaits `searchParams` and passes it directly to `getPaginatedPosts(await searchParams)`, receiving `{ currentPage, error, posts, totalPages }` back. It renders either `<PostCards posts={posts} />` or `<p data-testid="latest-posts-empty">No posts on this page</p>` when `posts.length === 0`, plus `<Pagination currentPage={currentPage} totalPages={totalPages} />` only when `totalPages > 1`. The `'use client'` directive and the `useGetPaginatedPostsQuery` import disappear.
 
-`getPaginatedPosts({ page, limit })` is a new server-side function in `features/posts/actions/getPaginatedPosts.ts` (action-folder path for symmetry with `getPost`, but **without** the `'use server'` directive — see "Read entry" below). It opens with `'use cache'`, calls `cacheTag('posts')`, instantiates `new FindAndCountPostsDto({ page, limit })` (DTO shape change — see "DTO change"), calls `PostService.findAndCount(dto)`, and returns `{ error, posts, totalPages }` on success or `{ error, posts: [], totalPages: 0 }` on error. Mirrors `getPost`'s `result.match(...)` shape.
+`getPaginatedPosts(searchParams: { page?: string })` is a new server-side function in `features/posts/actions/getPaginatedPosts.ts` (action-folder path for symmetry with `getPost`, but **without** the `'use server'` directive — see "Read entry" below). It opens with `'use cache'`, calls `cacheTag('posts')`, instantiates `new FindAndCountPostsDto(searchParams)` (DTO shape change — see "DTO change"), calls `PostService.findAndCount(dto)`, and returns `{ currentPage, error, posts, totalPages }` on success or `{ currentPage: 0, error, posts: [], totalPages: 0 }` on error. Mirrors `getPost`'s `result.match(...)` shape.
 
 `PostCards` props change from `{ promise: PaginatedPostsQuery }` to `{ posts: AuthoredPost[] }`. The `use(promise)` call goes away. The error branch goes away (errors are handled at `LatestPosts` level since it has the result envelope, not just a promise). `PaginatedPostsQuery` type is deleted.
 
@@ -87,7 +87,7 @@ There is no pagination UI on the page today. `?page=N` is editable only via dire
 
 ### Cache key, tag, and invalidation contract
 
-- **Cache key.** `getPaginatedPosts` is keyed by `{ page, limit }` per the `'use cache'` cache-key rules (build ID + function ID + serialized arguments). Each `?page=N` request maps to a separate cache entry.
+- **Cache key.** `getPaginatedPosts` is keyed by the `searchParams` argument per the `'use cache'` cache-key rules (build ID + function ID + serialized arguments). Each `?page=N` request maps to a separate cache entry.
 - **Tag.** Every entry is tagged `'posts'` via `cacheTag('posts')`.
 - **Invalidation.** `revalidateTag('posts')` from `deletePost` invalidates *every* cached entry tagged `'posts'` — across every `?page=N` value, in one call. This is the property `revalidatePath` cannot give us cleanly, and it's the correctness fix at the heart of the project.
 - **`cacheLife`.** Default profile (5min stale / 15min revalidate / no expire) is fine for this use case. The list isn't latency-critical and doesn't need tighter SLOs. If observed staleness becomes a problem post-launch, swap to `cacheLife({ revalidate: 60 })` or similar.
@@ -100,7 +100,7 @@ There is no pagination UI on the page today. `?page=N` is editable only via dire
 
 The current `FindAndCountPostsDto` (`features/posts/dto/find-and-count-posts.dto.ts`) takes a `Request`, reads `?page` / `?limit` off the URL, and validates via Zod. It's only called from `app/api/posts/route.ts`'s `GET` handler — which PR 4 deletes. So the `Request`-based shape is dead code in the steady state.
 
-PR 2 replaces the `Request`-based constructor outright with a primitives constructor: `new FindAndCountPostsDto({ page, limit })`. The Zod schema (`findAndCountPostsSchema`) and validation flow stay; only the input shape changes. The GET handler in PR 2 is updated to read `searchParams` itself and pass primitives to the DTO; PR 4 then deletes the handler entirely.
+PR 2 replaces the `Request`-based constructor outright with `constructor({ page }: { page?: string })`. The Zod schema (`findAndCountPostsSchema`) and validation flow stay — `coerce.number()` handles strings, `undefined`, and `null`. The DTO owns all normalization. The GET handler in PR 2 is updated to pass the raw `page` string from `searchParams` to the DTO; PR 4 then deletes the handler entirely.
 
 This is option (c) from the original DTO-shape todo: replace outright in PR 2. Rationale: avoids carrying a transitional dual-mode DTO across the PR sequence for code that's deleted two PRs later.
 
@@ -123,7 +123,7 @@ The four flows from `inputs/requirements.md`, with the system interactions calle
 
 1. User navigates to `/posts` (or `/posts?page=N`).
 2. `PostsPage` (sync RSC) streams the static header + `<Suspense>` fallback to the browser.
-3. `LatestPosts` (async RSC) awaits `searchParams`, calls `getPaginatedPosts({ page, limit: 10 })`. On cache hit, the result returns immediately; on miss, the call hits Prisma and the result is cached and tagged `'posts'`.
+3. `LatestPosts` (async RSC) calls `getPaginatedPosts(await searchParams)`. On cache hit, the result returns immediately; on miss, the call hits Prisma and the result is cached and tagged `'posts'`.
 4. `LatestPosts` renders `<PostCards posts={posts} />` and `<Pagination currentPage={page} totalPages={totalPages} />`.
 5. User clicks a pagination link. The `<Pagination>` component renders `<Link href="/posts?page=N+1">` items; the click is a soft navigation, `?page` updates, the page re-renders with the new `searchParams` Promise, the cached entry for that page (if any) returns immediately.
 6. User clicks a post card. `<Link href={ROUTES.post(post.id)}>` navigates to `/posts/[id]`.
@@ -149,7 +149,7 @@ Same as Flow 3, except after the redirect the admin manually clicks "Page 2" in 
 **In scope:**
 - Pagination component primitives: Shadcn `<Pagination>` install at `globals/components/ui/pagination/`, one component per file, with per-component tests. Reuses existing `BUTTON_VARIANTS`.
 - Read flow migration: `useGetPaginatedPostsQuery` → cached `getPaginatedPosts` server function called from an async Server Component.
-- DTO shape change: `FindAndCountPostsDto` accepts `{ page, limit }` primitives.
+- DTO shape change: `FindAndCountPostsDto` accepts `{ page?: string }` (raw searchParams shape); DTO owns all normalization via Zod.
 - Mutation invalidation: `deletePost` swaps `revalidatePath` for `revalidateTag('posts')`.
 - Feature-level pagination wrapper: `features/posts/components/pagination/` driven by `?page=N` via `next/link`, consuming the primitives.
 - Deletion of `app/api/posts/route.ts` `GET` handler, its `__tests__/GET.db.test.ts`, and the `mockGetPostsResponse` msw helper. Preserves `POST` for `createPost`.
@@ -172,7 +172,7 @@ Same as Flow 3, except after the redirect the admin manually clicks "Page 2" in 
 | Invalid `?page` (`"abc"`, negative, very large) | `findAndCountPostsSchema` coerces; non-numeric → Zod error → `LatestPosts` renders the error branch. Existing schema `transform((page) => page \|\| 0)` already collapses `0` / falsy / NaN to page 0. |
 | `?page` greater than `totalPages` | `prisma.post.findMany` with a too-large `skip` returns an empty array; `LatestPosts` renders `<p data-testid="latest-posts-empty">No posts on this page</p>`. `<Pagination>` still renders (since `totalPages > 1` for any multi-page dataset) and highlights the requested page so the user can navigate back. Accepted for MVP. |
 | Prisma error during read | `PostService.findAndCount` returns an `entity` error envelope → `getPaginatedPosts` returns `{ error, posts: [], totalPages: 0 }` → `LatestPosts` renders `<p data-testid="latest-posts-error">Something went wrong</p>` (preserving the existing `data-testid` so test assertions carry over). |
-| Cache miss under load | First request per `{ page, limit }` combo hits Prisma; subsequent requests within `cacheLife` window read from in-memory LRU. No user-visible difference beyond first-request latency. |
+| Cache miss under load | First request per `searchParams` value hits Prisma; subsequent requests within `cacheLife` window read from in-memory LRU. No user-visible difference beyond first-request latency. |
 | Stale cache between revalidations | `cacheLife` default: stale at 5min (client), revalidate at 15min (server). Acceptable for a portfolio site; if observed staleness becomes a complaint post-launch, tighten `cacheLife`. |
 | Concurrent deletes from two admin sessions | Both calls run their own `revalidateTag('posts')`. Tag invalidation is idempotent; the second call is a no-op against an already-invalidated tag. No race risk. |
 | Mutation followed by immediate read on the same request | `revalidateTag` invalidates synchronously within the request lifecycle; the redirect's subsequent render fetches fresh data. |
@@ -189,7 +189,7 @@ No schema changes. `Post` model unchanged.
 
 - Read path is public (`PostService.findAndCount` has no auth branch). No change.
 - `deletePost` remains admin-gated via `PostService.delete` → `authenticateAPISession` → `authorizeUser('delete')`. No change.
-- `'use cache'` cache key is keyed on `{ page, limit }` — no auth-scoped data flows through, so no risk of leaking admin-visible state to anonymous viewers via the cache layer. Posts are public regardless of viewer role.
+- `'use cache'` cache key is keyed on the `searchParams` argument — no auth-scoped data flows through, so no risk of leaking admin-visible state to anonymous viewers via the cache layer. Posts are public regardless of viewer role.
 
 ### Backend Routing
 
@@ -205,12 +205,13 @@ No schema changes. `Post` model unchanged.
 
 - **Location:** `features/posts/actions/getPaginatedPosts.ts` (filesystem symmetry with `getPost.ts`).
 - **Directives:** `'use cache'` at the top of the function body (not the file). **No `'use server'`** — the two are mutually exclusive at the function level, and we need cache.
-- **Signature:** `async function getPaginatedPosts(params: { page: number; limit?: number }): Promise<{ error: ... | null; posts: AuthoredPost[]; totalPages: number }>`.
+- **Signature:** `async function getPaginatedPosts(searchParams: { page?: string }): Promise<{ currentPage: number; error: ... | null; posts: AuthoredPost[]; totalPages: number }>`.
 - **Body:**
   1. `'use cache'`
   2. `cacheTag('posts')`
-  3. `const result = await PostService.findAndCount(new FindAndCountPostsDto({ page, limit: limit ?? 10 }))`
-  4. `result.match(...)` — success returns `{ error: null, posts, totalPages }`; error returns `{ error, posts: [], totalPages: 0 }`. The `default` branch logs `UNHANDLED_FIND_AND_COUNT_POSTS_ERROR`. Mirrors `getPost`'s shape.
+  3. `const dto = new FindAndCountPostsDto(searchParams)`
+  4. `const result = await PostService.findAndCount(dto)`
+  5. `result.match(...)` — success returns `{ currentPage: dto.params.offset / dto.params.limit, error: null, posts, totalPages }`; error returns `{ currentPage: 0, error, posts: [], totalPages: 0 }`. The `default` branch logs `UNHANDLED_FIND_AND_COUNT_POSTS_ERROR`. Mirrors `getPost`'s shape.
 - **Callers:** `LatestPosts` only.
 - **Cache lifetime:** default `cacheLife` (5min stale / 15min revalidate). Override only if post-launch monitoring shows staleness.
 
@@ -221,7 +222,7 @@ The service signature is already `findAndCount(dto: FindAndCountPostsDto)` and r
 #### `FindAndCountPostsDto` — primitives constructor
 
 - **Location:** `features/posts/dto/find-and-count-posts.dto.ts` (existing file).
-- **Constructor change:** `constructor({ page, limit }: { page: number; limit?: number })` replaces `constructor(request: Request)`. The internal `searchParams` getter and `validateParams` flow now reads from the primitive inputs, but the Zod schema (`findAndCountPostsSchema`) is unchanged — `coerce.number()` accepts both string and number, so the schema doesn't care.
+- **Constructor change:** `constructor({ page }: { page?: string })` replaces `constructor(request: Request)`. The internal `searchParams` getter is removed; the constructor sets `this.page` from the raw string. `findAndCountPostsSchema` is unchanged — `coerce.number()` handles strings, `undefined`, and `null`, so the Zod schema absorbs raw searchParam values directly.
 - **Migration shape:** outright replacement, not widening. The `Request`-based call site (`app/api/posts/route.ts` `GET`) is updated in PR 2 to extract `searchParams` and pass primitives, then deleted in PR 4.
 
 #### `deletePost` — invalidation primitive swap
@@ -249,7 +250,7 @@ PostsPage (sync RSC)
    └─ <article>
       └─ <Suspense fallback={<p>Loading posts...</p>}>
          └─ LatestPosts (async RSC)
-            ├─ getPaginatedPosts({ page, limit: 10 })  ← cached, tagged 'posts'
+            ├─ getPaginatedPosts(await searchParams)   ← cached, tagged 'posts'
             ├─ PostCards (RSC, props: { posts })            ← posts.length > 0
             │   OR <p data-testid="latest-posts-empty">    ← posts.length === 0
             └─ Pagination (props: { currentPage, totalPages })  ← totalPages > 1 only
@@ -266,7 +267,7 @@ PostsPage (sync RSC)
 #### `LatestPosts` — `features/posts/components/latestPosts/latestPosts.tsx`
 
 - Drops `'use client'`. Becomes `async function LatestPosts({ searchParams }: { searchParams: Promise<{ page?: string }> })`.
-- Awaits `searchParams`, parses `page` (`Number(page) || 0`), calls `getPaginatedPosts({ page })`.
+- Calls `getPaginatedPosts(await searchParams)` — no intermediate normalization; DTO + Zod own all parsing.
 - On error, returns `<p data-testid="latest-posts-error">Something went wrong</p>` (existing `data-testid` preserved).
 - On success, returns:
   ```tsx
@@ -360,7 +361,7 @@ No change. Already running on Vercel with `cacheComponents: true` (`next.config.
 
 ### Testing Strategy
 
-**Vertical slice that proves the approach:** PR 2's `getPaginatedPosts.db.test.ts` (mirrors `getPost.db.test.ts`) plus a small integration assertion — call `getPaginatedPosts({ page: 0 })` against a seeded DB, assert posts. This proves the read entry, the DTO change, and the cache directive don't regress correctness. It does *not* prove cache-tag invalidation (see "What NOT to test").
+**Vertical slice that proves the approach:** PR 2's `getPaginatedPosts.db.test.ts` (mirrors `getPost.db.test.ts`) plus a small integration assertion — call `getPaginatedPosts({ page: '0' })` against a seeded DB, assert posts. This proves the read entry, the DTO change, and the cache directive don't regress correctness. It does *not* prove cache-tag invalidation (see "What NOT to test").
 
 #### PR 1 tests — pagination primitives
 
@@ -385,9 +386,9 @@ These are smoke tests, not behavior tests — the primitives are pure render ada
 - `features/posts/actions/__tests__/getPaginatedPosts.db.test.ts` — new file. Mirrors `getPost.db.test.ts` shape:
   - Success path: spy on `PostService.findAndCount`, assert returned `{ error: null, posts, totalPages }`.
   - Entity error: mock `PostService.findAndCount` to return `errAsync({ type: 'entity', ... })`, assert `{ error, posts: [], totalPages: 0 }`.
-  - DTO error: pass invalid input (e.g., `{ page: -1 }` or `{ page: NaN }`); assert Zod path. Note: validates via `findAndCountPostsSchema`, not at the action level.
+  - DTO error: pass invalid input (e.g., `{ page: '-1' }`); assert Zod path. Note: validates via `findAndCountPostsSchema`, not at the action level.
   - Unhandled error: mock unknown error type, assert `logger.error` is called with the `UNHANDLED_FIND_AND_COUNT_POSTS_ERROR` message.
-  - Integration: `setupTestDatabase({ withPosts: true, withUsers: true })`, call `getPaginatedPosts({ page: 0 })`, assert ordering + `totalPages`.
+  - Integration: `setupTestDatabase({ withPosts: true, withUsers: true })`, call `getPaginatedPosts({ page: '0' })`, assert ordering + `totalPages` + `currentPage: 0`.
 - `features/posts/dto/__tests__/find-and-count-posts.dto.test.ts` — update existing tests for the primitives constructor. Drop `Request`-based test cases.
 - `features/posts/actions/__tests__/deletePost.test.ts` (existing) — update to assert `revalidateTag('posts')` is called (`vitest.setup.tsx` already mocks it) instead of `revalidatePath(ROUTES.posts)` / `revalidatePath(ROUTES.post(id))`.
 - `app/api/posts/__tests__/GET.db.test.ts` — update for the DTO change (handler now reads `searchParams` and passes primitives). Stays in PR 2; deleted in PR 4.
@@ -456,14 +457,14 @@ The 4-PR ship plan is the rollout. From `decisions.md` → "Ship plan: 4 PRs (pa
 
 ## Risks / Open Questions
 
-- **R1 (low — was medium): Cache-invalidation semantics.** Resolved: `revalidateTag('posts')` invalidates every `'use cache'` entry tagged `'posts'`, regardless of `{ page, limit }` arguments. Confirmed by Next.js 16 docs (`'use cache'` reference, `cacheTag` reference). Mitigation in place.
+- **R1 (low — was medium): Cache-invalidation semantics.** Resolved: `revalidateTag('posts')` invalidates every `'use cache'` entry tagged `'posts'`, regardless of the `searchParams` argument value. Confirmed by Next.js 16 docs (`'use cache'` reference, `cacheTag` reference). Mitigation in place.
 - **R2 (resolved): `FindAndCountPostsDto` shape.** Decision: replace outright in PR 2 (option c). See "DTO change" above and the new `decisions.md` entry.
 - **R3 (low): msw scaffolding around `/api/posts` GET.** Unchanged — `mockGetPostsResponse` removal in PR 4 is straightforward; `POST` plumbing survives.
 - **R4 (resolved): `'use cache'` maturity.** GA in Next.js 16.0.0+. `cacheComponents: true` is already set in `next.config.ts:6`. No flag flip needed.
 - **R5 (low): Pagination UI visual drift.** Mitigated by Shadcn choice — primitives use the same `cn` / `cva` / `data-slot` shape as the existing `Button`. Drift surface is the same as adopting any other Shadcn component.
 - **R6 (low): Transitional dead-handler window.** Between PR 3 and PR 4, `GET /api/posts` is on `main` with no in-app callers. Direct callers (curl, external tooling) still hit a working route. Confirmed via grep that `useGetPaginatedPostsQuery` is the only `baseAPI.get` against `API_ROUTES.posts` (`postPostCreateRequest.ts` is the `POST` caller, unaffected). Ship PR 4 promptly after PR 3.
 - **R7 (new — low): Cache-component-only function not callable from Client Components.** `getPaginatedPosts` lacks `'use server'`, so it cannot be invoked from a Client Component. Today this is a non-issue (only `LatestPosts` calls it, and `LatestPosts` is now an RSC). If a future Client Component wants paginated posts, it needs either a `'use server'` wrapper around the cached function (re-introducing the marshalling boundary) or a separate non-cached read path. Document at the call site so it's discoverable.
-- **R8 (new — low): Cache key collision via default `limit`.** `limit` defaults to 10 in the action signature. If we ever pass a different `limit` from a different surface, the cache key splits — separate entries per `{ page, limit }`. Tag invalidation still fans out, so this is a memory concern, not a correctness concern. Currently single-surface; flag if a second caller surfaces.
+- **R8 (resolved): Cache key collision via default `limit`.** No longer applicable — `limit` is not a public parameter. Cache key is keyed on `searchParams` only; the DTO's internal `limit` is not part of the serialized key.
 
 ## References
 

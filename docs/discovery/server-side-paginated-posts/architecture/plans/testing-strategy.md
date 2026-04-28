@@ -104,7 +104,7 @@ afterEach(() => {
 | Success | Spy returns `okAsync({ posts, totalPages, status: SUCCESS })` | Returns `{ error: null, posts, totalPages }` |
 | Entity error | Spy returns `errAsync({ type: 'entity', ... })` | Returns `{ error, posts: [], totalPages: 0 }` |
 | Unhandled error type | Spy returns unknown error type | `logger.error` called with `UNHANDLED_FIND_AND_COUNT_POSTS_ERROR`; returns `{ error, posts: [], totalPages: 0 }` |
-| Integration (real DB) | `setupTestDatabase({ withPosts: true, withUsers: true })` | `getPaginatedPosts({ page: 0 })` returns `posts.length > 0`, `totalPages >= 1`, `error: null` |
+| Integration (real DB) | `setupTestDatabase({ withPosts: true, withUsers: true })` | `getPaginatedPosts({ page: '0' })` returns `posts.length > 0`, `totalPages >= 1`, `currentPage: 0`, `error: null` |
 
 ### `find-and-count-posts.dto.test.ts` (changed)
 
@@ -112,9 +112,9 @@ Drop all `Request`-based test cases. Replace with primitives-constructor cases.
 
 | `it` | Setup | Assertion |
 | --- | --- | --- |
-| should return `{ limit, offset }` for valid inputs | `new FindAndCountPostsDto({ page: 1, limit: 10 }).params` | Returns `{ limit: 10, offset: 10 }` |
-| should return a `ZodError` for invalid inputs | `new FindAndCountPostsDto({ page: -1 }).params` | Returns `expect.any(ZodError)` |
-| should default `limit` to 10 | `new FindAndCountPostsDto({ page: 0 }).params` | Returns `{ limit: 10, offset: 0 }` |
+| should return `{ limit, offset }` for valid inputs | `new FindAndCountPostsDto({ page: '1' }).params` | Returns `{ limit: 10, offset: 10 }` |
+| should return a `ZodError` for invalid inputs | `new FindAndCountPostsDto({ page: '-1' }).params` | Returns `expect.any(ZodError)` |
+| should default page to 0 when absent | `new FindAndCountPostsDto({}).params` | Returns `{ limit: 10, offset: 0 }` |
 
 ### `deletePost.db.test.ts` (changed)
 

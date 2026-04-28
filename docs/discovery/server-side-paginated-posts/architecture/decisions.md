@@ -171,6 +171,18 @@
 - **Step:** 3 — Iterative Refinement
 - **Resolves:** "Empty-state UX — keep the empty `<CardGroup>`, or add a 'No posts yet' element?" todo.
 
+## 2026-04-28 — `getPaginatedPosts` signature: awaited `searchParams`, no `limit`
+
+- **Decision:** `getPaginatedPosts` takes `searchParams: { page?: string }` — the awaited Next.js `searchParams` object passed through unchanged from `LatestPosts`. `limit` is not a parameter at any public boundary. `FindAndCountPostsDto` receives the same object via `constructor({ page }: { page?: string })` and owns all parsing and normalization through `findAndCountPostsSchema`. The action returns `{ currentPage, error, posts, totalPages }` where `currentPage` is the normalized integer derived from `dto.params.offset / dto.params.limit`, so callers never re-derive it.
+- **Why:** Engineer-specified. `limit` is extra scope — no UI exists to change it and none will be added. Exposing it in the signature implies caller-controllability that doesn't exist. For the `searchParams` shape: passing the awaited object directly puts all parsing complexity in one place (the DTO + Zod schema) and eliminates the `Number(pageParam) || 0` normalization that was previously inline in `LatestPosts`. `currentPage` is returned by the action so `LatestPosts` never needs to re-parse the URL string itself for display purposes.
+- **Alternatives considered:**
+  - **`getPaginatedPosts(page: number)`** (positional, pre-normalized by caller) — rejected; caller owns normalization (`Number(pageParam) || 0`), which scatters parsing logic into the component.
+  - **`getPaginatedPosts({ page }: { page?: string })`** (destructured page string) — rejected; semantically identical to passing the full object but destroys the one-liner `getPaginatedPosts(await searchParams)` call site.
+  - **`limit` as optional param with default 10** — rejected per engineer; no consumer sets it, so the optional param is a false promise of caller-controllability.
+  - **Derive `currentPage` in `LatestPosts` from `resolvedParams.page`** — rejected; re-introduces `Number() || 0` normalization in the component, which is exactly what this decision exists to avoid.
+- **Step:** 5 — Engineering Review Prep
+- **Resolves:** "`limit` scope" engineer todo; "`getPaginatedPosts` arg shape" skill todo.
+
 ## 2026-04-28 — Pagination renders only when `totalPages > 1`
 
 - **Decision:** The feature-level `<Pagination>` wrapper in `LatestPosts` is conditionally rendered: `{totalPages > 1 && <Pagination ... />}`. It does not render when `totalPages === 0` (no posts) or `totalPages === 1` (all posts fit on one page). The `<Pagination>` component's own truncation logic therefore only needs to handle `totalPages >= 2`.

@@ -45,7 +45,7 @@ PostsPage (sync RSC)
    └─ <article>
       └─ <Suspense fallback={<p>Loading posts...</p>}>
          └─ LatestPosts (async RSC)
-            ├─ getPaginatedPosts({ page, limit: 10 })
+            ├─ getPaginatedPosts(await searchParams)
             ├─ PostCards (RSC, props: { posts })     ← posts.length > 0
             │   OR <p data-testid="latest-posts-empty">  ← posts.length === 0
             └─ <Pagination currentPage totalPages /> ← totalPages > 1 only

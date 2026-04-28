@@ -40,16 +40,6 @@
 
 ### PR 2 — backend additive
 
-- [ ] **`limit` is not sent from the frontend — decide whether to
-      expose it in the `getPaginatedPosts` signature at all.**
-      The engineer confirmed `limit` is extra scope for this project:
-      no UI exists to change it and none will be added. The open call
-      is whether `limit` stays as an optional param with a hardcoded
-      default of `10` in both `getPaginatedPosts` and
-      `FindAndCountPostsDto`, or is dropped from both public signatures
-      entirely and hardcoded only inside the DTO. Whichever is chosen,
-      the two signatures must be consistent. Resolve before PR 2 is
-      written. `[engineer]`
 - [ ] **`revalidatePath` removal — confirm no other callers rely on
       the path-based revalidation being removed from `deletePost`.**
       The change drops both `revalidatePath(ROUTES.post(state.id))` and
@@ -57,14 +47,8 @@
       `revalidatePath` in the codebase before PR 2 ships to confirm
       nothing else depends on these specific calls firing (e.g., a
       shared layout caching the navigation). `[skill]`
-- [ ] **`getPaginatedPosts` arg shape — destructured `{ page, limit }`
-      vs. positional `(page, limit)`.** Architecture went with
-      destructured. Confirm during PR 2 implementation that this reads
-      better at the call site (`getPaginatedPosts({ page })`) than the
-      positional alternative. Low-risk, easy to flip if a code review
-      surfaces a preference. `[skill]`
 - [ ] **`'use cache'` request-scope deduplication — document
-      behavior in JSDoc.** When `getPaginatedPosts({ page: 0 })` is
+      behavior in JSDoc.** When `getPaginatedPosts({ page: '0' })` is
       called twice within the same request (e.g., from `LatestPosts`
       and from a hypothetical sibling RSC), Next.js's cache should
       serve the second call from the in-flight cache entry without
@@ -114,6 +98,7 @@
 | `FindAndCountPostsDto` shape | Replace outright in PR 2 (was PR 1 under the 3-PR plan) with a primitives constructor (`{ page, limit }`). The `Request`-based shape goes away in the same PR; the GET handler in PR 2 reads `searchParams` itself and passes primitives. See `decisions.md` → "DTO shape: replace outright in PR 1 (option c)" (numbering remapped under the 4-PR plan). |
 | Backend cleanup (PR 4) — confirm GET handler has no other callers | Validated during Step 2 research pass: `useGetPaginatedPostsQuery` (`features/posts/hooks/useGetPaginatedPostsQuery.ts:18`) is the only `baseAPI.get` against `API_ROUTES.posts`. The `POST` caller (`features/posts/requests/postPostCreateRequest.ts:15`) is unaffected by PR 4. `app/api/posts/__tests__/GET.db.test.ts` and the `mockGetPostsResponse` helper in `test/servers/postsServer.ts` can be deleted alongside the route handler. |
 | Page test rewrite (PR 3) | Use `vi.spyOn(PostService, 'findAndCount')` for `posts.page.test.tsx` and `latestPosts.test.tsx` — fast mocked-service branches, no DB. Integration coverage lives in the new `getPaginatedPosts.db.test.ts`. See `architecture.md` § Testing Strategy → PR 3 tests. |
+| `getPaginatedPosts` signature — no `limit`, awaited `searchParams` object | `getPaginatedPosts(searchParams: { page?: string })`. `limit` is not exposed at any public boundary. `FindAndCountPostsDto` receives `{ page?: string }` and handles all normalization via Zod. Action returns `currentPage` (normalized integer) alongside `posts`, `totalPages`, `error` so callers never re-derive it. See `decisions.md` → "`getPaginatedPosts` signature". |
 | One component per file for pagination primitives | Engineer-specified during the 4-PR refinement. Each of the seven primitives lives in its own `<componentName>.tsx` with a co-located test; barrel `index.ts` re-exports the public surface. `<PaginationLink>` reuses `BUTTON_VARIANTS` rather than a parallel variants table. See `decisions.md` → "One component per file for pagination primitives". |
 | Barrel export for pagination primitives | One directory per primitive under `globals/components/ui/`; each directory has its own `index.ts`; `globals/components/ui/index.ts` gains 7 new export lines. Consumers import from `@/globals/components/ui`. Consistent with `button/`, `heading/`, `spinner/`, `toaster/`. See `decisions.md` → "Barrel export: one directory per primitive, re-exported from `globals/components/ui/index.ts`". |
 | Truncation logic placement principle | Implementation-time call, made by the engineer during PR 3. Default inline; extract to `getTruncatedPageList.ts` if the logic sprawls. See `decisions.md` → "Truncation logic placement: implementation-time call". |
