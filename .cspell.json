@@ -7,7 +7,8 @@
     "prisma/generated/**",
     "down.sql",
     "prisma/migrations/**",
-    "coverage/**"
+    "coverage/**",
+    "docs/discovery/**"
   ],
   "words": [
     "autoincrement",
@@ -17,6 +18,7 @@
     "componentry",
     "cuid",
     "currentcolor",
+    "cutover",
     "descopes",
     "descoping",
     "didn",
@@ -27,6 +29,7 @@
     "haspopup",
     "Hotwired",
     "IGDB",
+    "invalidatable",
     "isready",
     "Lifegroups",
     "Microtask",
@@ -39,6 +42,7 @@
     "oklch",
     "overscroll",
     "Pino",
+    "prerender",
     "psql",
     "renderable",
     "rowspan",
