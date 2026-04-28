@@ -40,6 +40,16 @@
 
 ### PR 2 — backend additive
 
+- [ ] **`limit` is not sent from the frontend — decide whether to
+      expose it in the `getPaginatedPosts` signature at all.**
+      The engineer confirmed `limit` is extra scope for this project:
+      no UI exists to change it and none will be added. The open call
+      is whether `limit` stays as an optional param with a hardcoded
+      default of `10` in both `getPaginatedPosts` and
+      `FindAndCountPostsDto`, or is dropped from both public signatures
+      entirely and hardcoded only inside the DTO. Whichever is chosen,
+      the two signatures must be consistent. Resolve before PR 2 is
+      written. `[engineer]`
 - [ ] **`revalidatePath` removal — confirm no other callers rely on
       the path-based revalidation being removed from `deletePost`.**
       The change drops both `revalidatePath(ROUTES.post(state.id))` and

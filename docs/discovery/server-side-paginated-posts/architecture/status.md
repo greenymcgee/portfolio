@@ -4,7 +4,7 @@
 | --- | --- |
 | Created | 2026-04-27 |
 | Last Updated | 2026-04-28 |
-| Current Focus | Step 3 complete — all engineer-decision items closed. 7 open items remain, all implementation-time or low-priority (no engineer call needed). Ready to move to Step 4 — Structure Architecture. |
+| Current Focus | Step 4 complete — architecture structured into `plans/` directory (19 files: README, 8 cross-cutting docs, 4 PR-specific subdirectories). 1 new engineer-decision item added (`limit` scope). Resolve that item, then move to Step 5 — Engineering Review Prep. |
 
 ## Step Tracker
 
@@ -13,7 +13,7 @@
 | 1 | Setup & Initial Plan | Complete | `inputs/requirements.md` (engineer-authored), `initial-plan.md`, `decisions.md`, `todos.md` all in sync. Constraints + design map intentionally skipped per requirements. Pattern shape and PR split locked after engineer corrections. |
 | 2 | Architecture Document | Complete | `architecture.md` drafted. Q1 resolved (service-direct + `'use cache'` + `cacheTag('posts')` + `revalidateTag` invalidation; `cacheComponents: true` already enabled in `next.config.ts:6`). Q2 resolved (Shadcn `<Pagination>`). DTO shape resolved (replace outright in the backend-additive PR). 4 decision entries appended. |
 | 3 | Iterative Refinement | Complete | All engineer-decision items resolved: out-of-range `?page` → leave as-is; empty-state → explicit message; `<Pagination>` renders only when `totalPages > 1` (collapses the truncation edge cases). 7 open items remaining — all implementation-time or low-priority. |
-| 4 | Structure Architecture | Not Started | — |
+| 4 | Structure Architecture | Complete | 19 files in `plans/`: README, existing-implementation, proposed-solution, user-facing-behavior, data-models, security-considerations, testing-strategy, rollout-strategy, risks-open-questions, pr1-pagination-primitives/README, pr2-backend-additive/{README,action,dto,mutation}, pr3-frontend-cutover/{README,page,latest-posts,post-cards,pagination-wrapper}, pr4-backend-cleanup. |
 | 5 | Engineering Review Prep | Not Started | — |
 
 ## Inputs Present
@@ -24,11 +24,11 @@
 
 ## Todo Progress
 
-7 open refinement items / 18 closed. Open items grouped by PR in `todos.md` (PR 1: 2 items; PR 2: 3 items; PR 3: 1 item; post-launch: 1 item). All are implementation-time or low-priority — no engineer calls outstanding.
+8 open items / 18 closed. Open items grouped by PR in `todos.md` (PR 1: 2 items; PR 2: 4 items; PR 3: 1 item; post-launch: 1 item). **1 engineer call outstanding** — `limit` scope decision (PR 2). Remaining 7 are implementation-time or low-priority.
 
 ## Notes for the Next Agent
 
-- **Architecture is monolithic, not yet structured.** `architecture.md` is the active working copy for Step 3 refinement. Don't try to read `plans/` — Step 4 (structure architecture) hasn't run.
+- **Architecture is now structured.** `plans/` is the active working copy. `architecture.md` is retained as a monolithic reference. Start with `plans/README.md` for navigation.
 - **4-PR sequence (pagination first):**
   1. **PR 1** — Shadcn `<Pagination>` primitives install, one component per directory under `globals/components/ui/` (`pagination/`, `paginationContent/`, `paginationItem/`, `paginationLink/`, `paginationPrevious/`, `paginationNext/`, `paginationEllipsis/`), each with its own `index.ts` and `__tests__/`. `globals/components/ui/index.ts` gains 7 export lines. Reuses `BUTTON_VARIANTS`. No consumer yet.
   2. **PR 2** — Backend additive: `getPaginatedPosts` (`'use cache'` + `cacheTag('posts')`), `FindAndCountPostsDto` primitives constructor, `deletePost` swap to `revalidateTag('posts')`, GET handler updated to pass primitives.
