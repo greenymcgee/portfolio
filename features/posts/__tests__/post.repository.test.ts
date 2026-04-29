@@ -125,7 +125,7 @@ describe('PostRepository', () => {
   describe('findAndCount', () => {
     it('should return a dto error', async () => {
       const result = await PostRepository.findAndCount(
-        new FindAndCountPostsDto(new Request('http://greeny.no?limit=invalid')),
+        new FindAndCountPostsDto({ limit: 'invalid' }),
       )
       expect(result).toEqual(expect.any(ZodError))
     })
@@ -134,7 +134,7 @@ describe('PostRepository', () => {
       const error = new Error('Bad')
       prismaMock.post.findMany.mockRejectedValue(error)
       const result = await PostRepository.findAndCount(
-        new FindAndCountPostsDto(new Request('http://greeny.no')),
+        new FindAndCountPostsDto({}),
       )
       expect(result).toEqual(new PrismaError(error))
     })
@@ -144,19 +144,24 @@ describe('PostRepository', () => {
       prismaMock.post.findMany.mockResolvedValueOnce(POSTS)
       prismaMock.post.count.mockRejectedValue(error)
       const result = await PostRepository.findAndCount(
-        new FindAndCountPostsDto(new Request('http://greeny.no')),
+        new FindAndCountPostsDto({}),
       )
       expect(result).toEqual(new PrismaError(error))
     })
 
     it('should return posts and a total count', async () => {
       const limit = 10
+      const count = limit * 2
+      const dto = new FindAndCountPostsDto({ limit: String(limit) })
       prismaMock.post.findMany.mockResolvedValueOnce(POSTS)
-      prismaMock.post.count.mockResolvedValueOnce(limit * 2)
-      const result = await PostRepository.findAndCount(
-        new FindAndCountPostsDto(new Request('http://greeny.no')),
-      )
-      expect(result).toEqual({ posts: POSTS, totalPages: 2 })
+      prismaMock.post.count.mockResolvedValueOnce(count)
+      const result = await PostRepository.findAndCount(dto)
+      expect(result).toEqual({
+        currentPage: dto.currentPage,
+        offset: dto.offset,
+        posts: POSTS,
+        totalPages: count / limit,
+      })
     })
   })
 

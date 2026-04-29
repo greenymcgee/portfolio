@@ -195,7 +195,7 @@ describe('PostService', () => {
       const error = new PrismaError(new Error('bad'))
       vi.mocked(PostRepository.findAndCount).mockResolvedValueOnce(error)
       const result = await PostService.findAndCount(
-        new FindAndCountPostsDto(new Request('http://green.no/posts')),
+        new FindAndCountPostsDto({}),
       )
       expect(result).toEqual(
         new Err({
@@ -210,9 +210,7 @@ describe('PostService', () => {
       const error = new ZodError([])
       vi.mocked(PostRepository.findAndCount).mockResolvedValue(error)
       const result = await PostService.findAndCount(
-        new FindAndCountPostsDto(
-          new Request('http://greeny.no/posts?limit="invalid'),
-        ),
+        new FindAndCountPostsDto({ limit: 'invalid' }),
       )
       expect(result).toEqual(
         new Err({ details: error, status: UNPROCESSABLE_CONTENT, type: 'dto' }),
@@ -221,15 +219,21 @@ describe('PostService', () => {
 
     it('should return posts', async () => {
       vi.mocked(PostRepository.findAndCount).mockResolvedValue({
+        currentPage: 5,
         // @ts-expect-error: the author isn't important for this test
         posts: POSTS,
         totalPages: 22,
       })
       const result = await PostService.findAndCount(
-        new FindAndCountPostsDto(new Request('http://greeny.no/posts')),
+        new FindAndCountPostsDto({}),
       )
       expect(result).toEqual(
-        new Ok({ posts: POSTS, status: SUCCESS, totalPages: 22 }),
+        new Ok({
+          currentPage: 5,
+          posts: POSTS,
+          status: SUCCESS,
+          totalPages: 22,
+        }),
       )
     })
   })

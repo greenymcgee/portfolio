@@ -65,14 +65,14 @@ export class PostRepository {
   }
 
   public static async findAndCount(dto: FindAndCountPostsDto) {
-    const { params } = dto
+    const { currentPage, offset, params } = dto
     if (params instanceof ZodError) return params
 
     const { error, response: posts } = await tryCatch(
       prisma.post.findMany({
         include: { author: { select: { firstName: true, lastName: true } } },
         orderBy: { createdAt: 'desc' },
-        skip: params.offset,
+        skip: offset,
         take: params.limit,
       }),
     )
@@ -81,7 +81,12 @@ export class PostRepository {
     const count = await PostRepository.countPosts()
     if (count instanceof PrismaError) return count
 
-    return { posts, totalPages: Math.ceil(count / params.limit) }
+    return {
+      currentPage,
+      offset,
+      posts,
+      totalPages: Math.ceil(count / params.limit),
+    }
   }
 
   public static async findOne(dto: FindPostDto) {
