@@ -7,7 +7,9 @@ import { logger } from '@/lib/logger'
 
 export async function GET(request: Request) {
   const result = await PostService.findAndCount(
-    new FindAndCountPostsDto(request),
+    new FindAndCountPostsDto(
+      Object.fromEntries(new URL(request.url).searchParams),
+    ),
   )
   return result.match(
     (response) => {

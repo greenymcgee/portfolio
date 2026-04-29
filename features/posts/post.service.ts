@@ -86,6 +86,7 @@ export class PostService {
     }
 
     return okAsync({
+      currentPage: response.currentPage,
       posts: response.posts,
       status: SUCCESS,
       totalPages: response.totalPages,

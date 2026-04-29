@@ -4,6 +4,8 @@ import { logger } from '@/lib/logger'
 
 import { findAndCountPostsSchema } from '../schemas'
 
+type Params = { limit?: string; page?: string }
+
 export class FindAndCountPostsDto {
   private error: ZodError | null = null
 
@@ -11,32 +13,26 @@ export class FindAndCountPostsDto {
 
   private page = 0
 
-  private url: URL
-
-  constructor(request: Request) {
-    this.url = new URL(request.url)
+  constructor(params: Params) {
+    this.validateParams(params)
   }
 
   public get params() {
-    this.validateParams()
-    if (this.error) return this.error
+    if (this.error instanceof ZodError) return this.error
 
-    return { limit: this.limit, offset: this.offset }
+    return { limit: this.limit, page: this.page }
   }
 
-  private get offset() {
-    if (this.page) return this.page * this.limit
-
-    return this.page
+  public get currentPage() {
+    return this.offset / this.limit
   }
 
-  private get searchParams() {
-    const { searchParams } = this.url
-    return { limit: searchParams.get('limit'), page: searchParams.get('page') }
+  public get offset() {
+    return this.page * this.limit
   }
 
-  private validateParams() {
-    const { data, error } = findAndCountPostsSchema.safeParse(this.searchParams)
+  private validateParams(params: Params) {
+    const { data, error } = findAndCountPostsSchema.safeParse(params)
     if (error) {
       logger.error({ error }, 'FindAndCountPostsDto error:')
       this.error = error
