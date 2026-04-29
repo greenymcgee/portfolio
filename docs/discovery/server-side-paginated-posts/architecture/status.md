@@ -3,8 +3,8 @@
 | Field | Value |
 | --- | --- |
 | Created | 2026-04-27 |
-| Last Updated | 2026-04-28 |
-| Current Focus | Discovery complete — `review.md` created. All 6 remaining todos are implementation-time or low-priority; no engineer calls outstanding. Ready to begin PR 1 implementation. |
+| Last Updated | 2026-04-29 |
+| Current Focus | PR 1 and PR 2 merged. PR 3 (frontend cutover) is next — see open todos for scope changes discovered post-merge. |
 
 ## Step Tracker
 
@@ -15,6 +15,8 @@
 | 3 | Iterative Refinement | Complete | All engineer-decision items resolved: out-of-range `?page` → leave as-is; empty-state → explicit message; `<Pagination>` renders only when `totalPages > 1` (collapses the truncation edge cases). 7 open items remaining — all implementation-time or low-priority. |
 | 4 | Structure Architecture | Complete | 19 files in `plans/`: README, existing-implementation, proposed-solution, user-facing-behavior, data-models, security-considerations, testing-strategy, rollout-strategy, risks-open-questions, pr1-pagination-primitives/README, pr2-backend-additive/{README,action,dto,mutation}, pr3-frontend-cutover/{README,page,latest-posts,post-cards,pagination-wrapper}, pr4-backend-cleanup. |
 | 5 | Engineering Review Prep | Complete | `review.md` created. |
+| 6 | PR 1 — Pagination Primitives | **Shipped** | PR #136 merged. All 7 Shadcn primitives installed under `globals/components/ui/` with per-component directories, tests, and barrel exports. `globals/components/ui/index.ts` gains 7 export lines. |
+| 7 | PR 2 — Backend Additive | **Shipped (partial)** | PR #137 merged. `getPosts` (not `getPaginatedPosts` — see notes below), DTO primitives constructor, GET handler updated. **`deletePost` swap to `revalidateTag` was NOT included** — moves to PR 3. |
 
 ## Inputs Present
 
@@ -24,30 +26,27 @@
 
 ## Todo Progress
 
-6 open items / 21 closed. Open items grouped by PR in `todos.md` (PR 1: 2 items; PR 2: 2 items; PR 3: 1 item; post-launch: 1 item). No engineer calls outstanding — all are implementation-time or low-priority.
+9 open items / 21 closed. Open items grouped by PR in `todos.md` (PR 3: 6 items; post-launch: 1 item; low-priority ongoing: 2 items). No engineer calls outstanding — all are implementation-time or low-priority.
 
 ## Notes for the Next Agent
 
-- **Architecture is now structured.** `plans/` is the active working copy. `architecture.md` is retained as a monolithic reference. Start with `plans/README.md` for navigation.
-- **4-PR sequence (pagination first):**
-  1. **PR 1** — Shadcn `<Pagination>` primitives install, one component per directory under `globals/components/ui/` (`pagination/`, `paginationContent/`, `paginationItem/`, `paginationLink/`, `paginationPrevious/`, `paginationNext/`, `paginationEllipsis/`), each with its own `index.ts` and `__tests__/`. `globals/components/ui/index.ts` gains 7 export lines. Reuses `BUTTON_VARIANTS`. No consumer yet.
-  2. **PR 2** — Backend additive: `getPaginatedPosts` (`'use cache'` + `cacheTag('posts')`), `FindAndCountPostsDto` primitives constructor, `deletePost` swap to `revalidateTag('posts')`, GET handler updated to pass primitives.
-  3. **PR 3** — Frontend cutover: sync page + async `LatestPosts`, `PostCards` props change, `useGetPaginatedPostsQuery` deletion, feature-level pagination wrapper at `features/posts/components/pagination/`.
-  4. **PR 4** — Backend cleanup: delete `GET /api/posts` route handler + tests + `mockGetPostsResponse` msw helper.
-- **Step 2 hard facts to keep load-bearing:**
-  - `next.config.ts:6` already has `cacheComponents: true`. No PR in this sequence touches `next.config.ts`.
-  - `'use cache'` and `'use server'` are mutually exclusive at the function level. `getPaginatedPosts.ts` opens the function with `'use cache'` and **does not** carry `'use server'` at the file or function level. Don't accidentally regress it to a server action — caching is the entire point of the read entry shape.
-  - `getPaginatedPosts(searchParams: { page?: string })` is keyed by the `searchParams` argument and tagged `'posts'`. `revalidateTag('posts')` invalidates every page-keyed entry in one call. Returns `{ currentPage, error, posts, totalPages }` — callers never re-derive the normalized page.
-  - The two `revalidatePath` calls in `deletePost` are **both** removed in favor of a single `revalidateTag('posts')`. Don't half-migrate.
-  - `vitest.setup.tsx:16` already mocks `revalidateTag`. Test scaffolding is unchanged for the invalidation swap.
-- **Pattern shape is still locked** — `app/posts/page.tsx` stays sync, async data fetch in `LatestPosts` (a child RSC) inside `<Suspense>`, `searchParams` flows through as `Promise<{ page?: string }>` and is awaited inside the async child. The architecture honors this; don't propose making the page async.
-- **One-component-per-directory rule for the pagination primitives install** is engineer-specified. Each of the seven Shadcn primitives gets its own directory under `globals/components/ui/` with a `<componentName>.tsx`, `index.ts`, and `__tests__/<componentName>.test.tsx`. `globals/components/ui/index.ts` gains 7 export lines. `<PaginationLink>` reuses `BUTTON_VARIANTS` rather than introducing a parallel variants table.
-- **Truncation logic placement is an implementation-time call**, not a Step-3 decision. Default: keep the page-list computation inline in the wrapper. If during PR 3 implementation it sprawls (boundary handling, ellipsis collapse, off-by-ones), extract to a sibling pure utility (`features/posts/components/pagination/getTruncatedPageList.ts`) with its own tests. The "complicated enough to extract" judgment is the implementer's at write-time.
-- **Backend / frontend separation is still non-negotiable** per the engineer's earlier correction. The 4-PR plan preserves it; primitives in PR 1 are pure UI, PR 2 is pure backend, PR 3 is the cutover, PR 4 is pure backend deletion.
-- **`createPost` is still out of scope.** Don't fold it into this work.
-- **Open refinement items by PR** (full text in `todos.md`):
-  - **PR 1:** primitives a11y assertions in the per-component tests; `BUTTON_VARIANTS` reuse sanity check. (Barrel export resolved — see `decisions.md`.)
-  - **PR 2:** `revalidatePath` removal grep; `getPaginatedPosts` arg shape; `'use cache'` request-scope deduplication doc.
-  - **PR 3:** wrapper a11y; page-list truncation spec table (drives where the logic lives); empty-state UX call; `?page > totalPages` behavior call.
-  - **Post-launch:** revisit `cacheLife`.
-- **No engineer calls outstanding.** All decision items are closed. Remaining open items are implementation-time or low-priority and can be resolved during PR-write.
+- **PRs 1 and 2 are merged.** Start with `plans/pr3-frontend-cutover/README.md` for what's next.
+- **PR 3 scope is larger than the plan shows.** The `deletePost.ts` → `revalidateTag('posts')` swap was missed in PR 2. It must ship in PR 3 — `revalidateTag` won't fire after deletes until it does. See `todos.md` → PR 3 section.
+- **Action is named `getPosts`, not `getPaginatedPosts`.** File: `features/posts/actions/getPosts.ts`. Every plan reference to `getPaginatedPosts` means `getPosts`. Only the PR 3 plans have been updated to reflect the actual name; `architecture.md` and the PR 2 sub-docs still say `getPaginatedPosts` and are intentionally left as-is (historical record).
+- **`getPosts` returns nulls on error, not zeros/empty arrays.** Actual error shape: `{ currentPage: null, error, posts: null, totalPages: null }`. This IS a proper discriminated union on `error: null`. In `LatestPosts`, do NOT destructure upfront — check `result.error` on the undestructured result to narrow the union, then destructure. See `plans/pr3-frontend-cutover/latest-posts.md` for the corrected code shape.
+- **`Pagination` primitive name collision in the feature wrapper.** `features/posts/components/pagination/pagination.tsx` exports `Pagination` (feature wrapper). Inside that file, it also imports `Pagination` (primitive) from `@/globals/components/ui`. Resolve with an alias: `import { Pagination as PaginationNav, ... } from '@/globals/components/ui'`.
+- **Async RSC test pattern.** Use `const jsx = await LatestPosts(props)` then `render(jsx)` — matching `features/posts/components/postPageContent/__tests__/postPageContent.test.tsx`. Do NOT use `await act(() => render(<LatestPosts />))`. The testing-strategy.md has been updated to reflect this.
+- **4-PR sequence — current state:**
+  1. ~~**PR 1**~~ — ✅ Merged (#136). All 7 Shadcn primitives in `globals/components/ui/`.
+  2. ~~**PR 2**~~ — ✅ Merged (#137, partial). `getPosts` action, DTO primitives constructor, GET handler updated. `deletePost` swap missed.
+  3. **PR 3** — *Next.* Sync page, async `LatestPosts`, `PostCards` props change, `useGetPaginatedPostsQuery` deletion, feature-level pagination wrapper, **plus `deletePost` → `revalidateTag` swap**.
+  4. **PR 4** — Backend cleanup: delete `GET /api/posts` handler + tests + `mockGetPostsResponse` msw helper.
+- **`getPosts` hard facts (load-bearing):**
+  - `next.config.ts:6` has `cacheComponents: true`. No PR in this sequence touches `next.config.ts`.
+  - `'use cache'` and `'use server'` are mutually exclusive. `getPosts.ts` has `'use cache'` and no `'use server'` anywhere. Don't add it.
+  - `getPosts(searchParams: { page?: string })` is keyed by argument + tagged `'posts'`. `revalidateTag('posts')` invalidates every page-keyed entry in one call.
+  - Both `revalidatePath` calls in `deletePost` must be removed in the same commit as the `revalidateTag` addition. Don't half-migrate.
+  - `vitest.setup.tsx:16` already mocks `revalidateTag`. No test scaffolding changes needed.
+- **Pattern shape locked** — `app/posts/page.tsx` stays sync, async data in `LatestPosts` (child RSC) inside `<Suspense>`, `searchParams` flows as `Promise<{ page?: string }>` awaited inside the child. Don't make the page async.
+- **`createPost` is out of scope.** Don't fold it in.
+- **No engineer calls outstanding.**

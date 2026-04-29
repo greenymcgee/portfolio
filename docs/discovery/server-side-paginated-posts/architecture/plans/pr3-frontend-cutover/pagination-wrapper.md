@@ -39,7 +39,7 @@ this component only when `totalPages > 1`.
 
 ```typescript
 import {
-  Pagination,
+  Pagination as PaginationNav,
   PaginationContent,
   PaginationEllipsis,
   PaginationItem,
@@ -51,6 +51,13 @@ import {
 
 All 7 primitives are already in `globals/components/ui/index.ts` after
 PR 1. No deep imports.
+
+**Name collision:** This file exports `Pagination` (the feature wrapper)
+and simultaneously imports `Pagination` (the primitive) from `@/globals/components/ui`.
+Alias the primitive import as `PaginationNav` (or any non-colliding name)
+and use `<PaginationNav ...>` as the JSX tag inside this file. The public
+export name stays `Pagination` so `LatestPosts`'s import path
+(`import { Pagination } from '../pagination'`) is unchanged.
 
 ## Page-list truncation rule
 
@@ -82,7 +89,7 @@ one-indexed. Page 1 → `?page=0`, Page 2 → `?page=1`, etc.
 ```tsx
 <PaginationPrevious
   aria-disabled={currentPage === 0 ? 'true' : undefined}
-  className={cslx(currentPage === 0 && 'pointer-events-none')}
+  className={clsx(currentPage === 0 && 'pointer-events-none')}
   href={`${ROUTES.posts}?page=${currentPage - 1}`}
 />
 ```
