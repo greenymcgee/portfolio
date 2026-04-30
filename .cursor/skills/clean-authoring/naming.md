@@ -87,13 +87,16 @@ when directionality matters more than ownership.
 ## Anti-patterns
 
 - **Abbreviations anywhere.** `usr`, `ctx`, `cfg`, `btn`. Either the full word is readable or the concept is wrong.
-- **Single-letter names.** Including generic type parameters. Prefer `Action`, `Item`, `Value` over `T`, `I`, `V`.
+- **Single-letter names.**
 - **Unpredictable grab-bag folders.** The anti-pattern is not the folder name (`utils/`, `helpers/`, `lib/` are fine); it's the *lack of predictable subdivision inside*. A `utils.ts` or top-level `misc/` that accumulates unrelated units is bad. A `lib/errors/`, `lib/permissions/`, `utils/renderNotification.ts` layout is good: every file has a predictable home based on what it does. Rule of thumb — if a newcomer can't guess where a given helper lives, the folder has become a grab-bag.
 - **Hungarian notation.** `sName`, `bIsActive`, `iCount`. The type system carries type information.
 - **Opposites asymmetry.** If one side is `open`, the other is `close` — not `dismiss` or `hide`. Pick an opposite pair and stick to it.
 - **Inconsistent acronym casing.** `APIHandler` vs. `ApiHandler`. Pick a casing convention per codebase and apply it everywhere.
 - **Time-coupled names.** `newCheckout`, `v2Parser`. Rename the old one and let repo history remember the transition.
 - **Stuttering.** `PostPostRepository`, `UserUserService`. Fix the nesting or drop the duplicate segment.
+- **Algorithm vocabulary for domain concepts.** Naming an intermediate value after the technique used to compute it rather than what it represents in the problem domain. `windowStart` / `windowEnd` are sliding-window algorithm terms; `pageRangeStart` / `pageRangeEnd` describe what the values actually are. The same mistake appears as `buffer` instead of `pendingMessages`, `queue` instead of `approvalRequests`, `stack` instead of `navigationHistory`. If the domain has a name for the concept, use it.
+
+For TypeScript- and JavaScript-specific naming rules (generic type parameters, unused callback parameters), see [authoring-typescript](../authoring-typescript/SKILL.md).
 
 ## Renaming discipline
 

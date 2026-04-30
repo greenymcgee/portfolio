@@ -27,7 +27,7 @@ Before finishing any new or refactored unit, verify:
 - [ ] Exceptional paths exit via early returns; the happy path is unindented.
 - [ ] Folder/file structure mirrors responsibility: one unit per folder, co-located tests.
 - [ ] No abbreviations anywhere.
-- [ ] No single-letter names anywhere, including generic type parameters.
+- [ ] No single-letter names anywhere.
 - [ ] Each if block includes a line break after the condition.
 
 If any box is unchecked, refactor before moving on.
