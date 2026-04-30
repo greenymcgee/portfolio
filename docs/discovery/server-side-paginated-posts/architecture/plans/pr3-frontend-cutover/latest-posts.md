@@ -31,7 +31,7 @@ export function LatestPosts() {
 ## After (PR 3)
 
 ```tsx
-import { getPaginatedPosts } from '@/features/posts/actions'
+import { getPosts } from '@/features/posts/actions'
 import { ROUTES } from '@/globals/constants'
 
 import { Pagination } from '../pagination'
@@ -41,18 +41,18 @@ type Props = {
   searchParams: Promise<{ page?: string }>
 }
 
-export async function LatestPosts({
-  searchParams,
-}: Props) {
-  const { currentPage, error, posts, totalPages } = await getPaginatedPosts(await searchParams)
+export async function LatestPosts({ searchParams }: Props) {
+  const result = await getPosts(await searchParams)
 
-  if (error) {
+  if (result.error) {
     return (
       <div aria-live="polite" data-testid="latest-posts">
         <p data-testid="latest-posts-error">Something went wrong</p>
       </div>
     )
   }
+
+  const { currentPage, posts, totalPages } = result
 
   return (
     <div aria-live="polite" data-testid="latest-posts">
@@ -75,7 +75,7 @@ export async function LatestPosts({
 | --- | --- | --- |
 | Directive | `'use client'` | None (async RSC) |
 | Signature | `LatestPosts()` | `LatestPosts({ searchParams })` |
-| Data fetch | `useGetPaginatedPostsQuery()` hook | `await getPaginatedPosts(await searchParams)` |
+| Data fetch | `useGetPaginatedPostsQuery()` hook | `await getPosts(await searchParams)` |
 | Suspense | Owns its own `<Suspense>` | Suspense lives in `PostsPage` (hoisted) |
 | Error branch | Inside `<PostCards>` via `use(promise)` | `if (error)` at the top of `LatestPosts` |
 | Empty state | Silent empty `<CardGroup>` | `<p data-testid="latest-posts-empty">` |
@@ -83,15 +83,17 @@ export async function LatestPosts({
 
 ## `searchParams` handling
 
-`LatestPosts` passes `await searchParams` directly to `getPaginatedPosts`
-with no intermediate normalization. `FindAndCountPostsDto` owns all
-parsing via `findAndCountPostsSchema` (`coerce.number()` handles strings,
-`undefined`, and other non-numeric inputs). The normalized `currentPage`
-integer is returned in the result and passed to `<Pagination>`.
+`LatestPosts` passes `await searchParams` directly to `getPosts` with no
+intermediate normalization. `FindAndCountPostsDto` owns all parsing via
+`findAndCountPostsSchema` (`coerce.number()` handles strings, `undefined`,
+and other non-numeric inputs). The normalized `currentPage` integer is
+returned in the result and passed to `<Pagination>`.
 
-If `findAndCountPostsSchema`'s Zod validation fails, `getPaginatedPosts`
-returns `{ currentPage: 0, error, posts: [], totalPages: 0 }` and the
-error branch fires.
+`getPosts` returns a discriminated union: on success `error` is `null` and
+all other fields are non-null; on failure `error` is non-null and
+`currentPage`, `posts`, `totalPages` are all `null`. **Do not destructure
+upfront** — check `result.error` on the undestructured return value so
+TypeScript narrows the union, then destructure in the success branch.
 
 ## `data-testid="latest-posts"` wrapper
 

@@ -16,6 +16,8 @@ PR 3 is the revert target if a regression appears after the cutover.
 | --- | --- |
 | `app/posts/page.tsx` | Changed — gains `searchParams` prop; Suspense fallback hoists |
 | `app/posts/__tests__/posts.page.test.tsx` | Rewritten — spy on `PostService.findAndCount`; no msw |
+| `features/posts/actions/deletePost.ts` | Changed — `revalidatePath` × 2 → `revalidateTag('posts')` (missed in PR 2) |
+| `features/posts/actions/__tests__/deletePost.db.test.ts` | Changed — assert `revalidateTag` in success branch |
 | `features/posts/components/latestPosts/latestPosts.tsx` | Changed — drops `'use client'`; becomes async RSC |
 | `features/posts/components/latestPosts/__tests__/latestPosts.test.tsx` | Rewritten — spy on `PostService.findAndCount`; no msw |
 | `features/posts/components/postCards/postCards.tsx` | Changed — props `{ promise }` → `{ posts }`; `use()` removed |

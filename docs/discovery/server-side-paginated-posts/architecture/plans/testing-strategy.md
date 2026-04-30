@@ -12,9 +12,9 @@ selectors, label-driven element selection.
 
 | PR | New | Rewritten | Changed | Deleted |
 | --- | --- | --- | --- | --- |
-| 1 | 7 primitive test files | — | `globals/components/ui/index.ts` (indirect) | — |
-| 2 | `getPaginatedPosts.db.test.ts` | — | `find-and-count-posts.dto.test.ts`, `deletePost.db.test.ts`, `GET.db.test.ts` | — |
-| 3 | `pagination.test.tsx` (wrapper), conditional `getTruncatedPageList.test.ts` | `posts.page.test.tsx`, `latestPosts.test.tsx` | — | `useGetPaginatedPostsQuery.test.ts` |
+| 1 ✅ | 7 primitive test files | — | `globals/components/ui/index.ts` (indirect) | — |
+| 2 ✅ | `getPosts.db.test.ts` | — | `find-and-count-posts.dto.test.ts`, `GET.db.test.ts` | — |
+| 3 | `pagination.test.tsx` (wrapper), conditional `getTruncatedPageList.test.ts` | `posts.page.test.tsx`, `latestPosts.test.tsx` | `deletePost.db.test.ts` (missed in PR 2) | `useGetPaginatedPostsQuery.test.ts` |
 | 4 | — | — | `postsServer.ts` (GET handler + helper removed) | `GET.db.test.ts` |
 
 ---
@@ -81,9 +81,9 @@ Behavior coverage lives in PR 3's feature-wrapper test.
 
 ---
 
-## PR 2 tests — backend additive
+## PR 2 tests — backend additive (✅ shipped)
 
-### `getPaginatedPosts.db.test.ts` (new)
+### `getPosts.db.test.ts` (shipped in PR 2)
 
 Mirrors `features/posts/actions/__tests__/getPost.db.test.ts` shape.
 
@@ -116,20 +116,21 @@ Drop all `Request`-based test cases. Replace with primitives-constructor cases.
 | should return a `ZodError` for invalid inputs | `new FindAndCountPostsDto({ page: '-1' }).params` | Returns `expect.any(ZodError)` |
 | should default page to 0 when absent | `new FindAndCountPostsDto({}).params` | Returns `{ limit: 10, offset: 0 }` |
 
-### `deletePost.db.test.ts` (changed)
+### `deletePost.db.test.ts` (changed — moves to PR 3)
 
-Update the success-branch assertion from `revalidatePath` to `revalidateTag`.
+The `deletePost` → `revalidateTag` swap was missed in PR 2 and ships in PR 3.
 `vitest.setup.tsx:16` already mocks `revalidateTag` — no new setup needed.
 
-| Change | Before | After |
-| --- | --- | --- |
-| Success branch assertion | `expect(revalidatePath).toHaveBeenCalledWith(ROUTES.posts)` | `expect(revalidateTag).toHaveBeenCalledWith('posts')` |
-| Remove | `expect(revalidatePath).toHaveBeenCalledWith(ROUTES.post(id))` | (deleted) |
+The existing `deletePost.db.test.ts` integration test has no assertion on
+`revalidatePath` or `revalidateTag`. Add an assertion in the success branch:
 
-### `GET.db.test.ts` (changed)
+| Change | Action |
+| --- | --- |
+| Success branch — add assertion | `expect(revalidateTag).toHaveBeenCalledWith('posts')` |
 
-Update for the primitives-constructor DTO shape. The handler now reads
-`searchParams` itself and passes primitives. Stays in PR 2; deleted in PR 4.
+### `GET.db.test.ts` (changed in PR 2 — ✅ shipped)
+
+Updated for the primitives-constructor DTO shape. Stays until PR 4 deletes it.
 
 ---
 
@@ -137,36 +138,51 @@ Update for the primitives-constructor DTO shape. The handler now reads
 
 ### `posts.page.test.tsx` (rewritten)
 
-Replace the msw `mockGetPostsResponse` approach with
-`vi.spyOn(PostService, 'findAndCount')`. The page test is an RTL render
-test — the integration coverage lives in `getPaginatedPosts.db.test.ts`.
+Replace the msw `postsServer` approach with direct rendering of the sync
+page component. `PostsPage` is synchronous — it wraps `<LatestPosts>` in
+`<Suspense>`, so the async RSC behavior is NOT tested here. All data
+scenarios (success, error, empty, pagination) are covered in
+`latestPosts.test.tsx`. The page test covers only static shell content
+and the Suspense fallback.
+
+```typescript
+// PostsPage is sync, so no await needed on the render:
+render(<PostsPage searchParams={Promise.resolve({})} />)
+```
 
 | `it` | Setup | Assertion |
 | --- | --- | --- |
 | should render the `posts-page-heading` | `render(<PostsPage searchParams={Promise.resolve({})} />)` | `getByTestId('posts-page-heading')` present |
-| should render the Suspense fallback before resolution | Spy deferred (pending promise) | `getByText(/Loading posts/)` present |
-| should render post cards once resolved | Spy returns success with posts | `findByTestId('card-…')` elements present |
-| should render the pagination control | Spy returns `totalPages: 3` | Pagination nav present |
-| should render the error branch | Spy returns entity error | `findByTestId('latest-posts-error')` present |
+| should render the Suspense fallback while `LatestPosts` loads | No spy needed — `LatestPosts` suspends in test env | `getByText(/Loading posts/)` present |
+| should render the admin menu | `renderWithProviders(..., { wrapper: AdminMenuContextWrapper })` | `getByTestId('posts-admin-menu-content')` present |
 
 ### `latestPosts.test.tsx` (rewritten)
 
 Replace msw approach with `vi.spyOn(PostService, 'findAndCount')`.
 
+Use the direct-call pattern established by `postPageContent.test.tsx` — call
+the async component as a function and render the returned JSX:
+
 ```typescript
-// Render pattern for async RSC in tests:
-await act(() =>
-  render(<LatestPosts searchParams={Promise.resolve({ page: '0' })} />)
-)
+const PROPS: PropsOf<typeof LatestPosts> = {
+  searchParams: Promise.resolve({ page: '0' }),
+}
+
+// Per-test pattern:
+const jsx = await LatestPosts(PROPS)
+render(jsx)
 ```
+
+Do NOT use `await act(() => render(<LatestPosts ... />))`. Async RSCs are
+tested by calling them as functions in this codebase.
 
 | `it` | Spy setup | Assertion |
 | --- | --- | --- |
 | should render post card links | Success with posts | `getByRole('link', { name: post.title })` present for each post |
-| should render the empty-state message when posts is empty | `posts: [], totalPages: 0` | `getByTestId('latest-posts-empty')` present |
+| should render the empty-state message when posts is empty | Success, `posts: [], totalPages: 0` | `getByTestId('latest-posts-empty')` present |
 | should render the error message on failure | Entity error | `getByTestId('latest-posts-error')` present |
-| should render pagination when `totalPages > 1` | `totalPages: 3` | Pagination nav present |
-| should not render pagination when `totalPages === 1` | `totalPages: 1` | Pagination nav absent |
+| should render pagination when `totalPages > 1` | Success, `totalPages: 3` | Pagination nav present |
+| should not render pagination when `totalPages === 1` | Success, `totalPages: 1` | Pagination nav absent |
 
 ### `useGetPaginatedPostsQuery.test.ts` (deleted)
 
