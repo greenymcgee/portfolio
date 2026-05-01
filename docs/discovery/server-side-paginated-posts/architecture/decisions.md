@@ -183,6 +183,52 @@
 - **Step:** 5 — Engineering Review Prep
 - **Resolves:** "`limit` scope" engineer todo; "`getPaginatedPosts` arg shape" skill todo.
 
+## 2026-04-30 — CACHE_TAGS constant
+
+- **Decision:** The raw string `'posts'` is not used directly in `deletePost.ts` or `getPosts.ts`. Both reference `CACHE_TAGS.posts` from `@/globals/constants`.
+- **Why:** Eliminates the risk of a string mismatch between the tagging site (`cacheTag`) and the invalidation site (`revalidateTag`). If the tag string changes, both call sites update together because they reference the same source of truth.
+- **Alternatives considered:** Use the raw string at both call sites — rejected; two independent string literals create a silent mismatch risk that only surfaces as a cache-miss bug at runtime.
+- **Step:** 7 — PR 3 Implementation
+
+## 2026-04-30 — revalidateTag second argument (Next.js 16 API change)
+
+- **Decision:** `deletePost.ts` calls `revalidateTag(CACHE_TAGS.posts, {})`. The empty `CacheLifeConfig` object satisfies the required second argument. The test assertion is `expect(revalidateTag).toHaveBeenCalledWith(CACHE_TAGS.posts, {})`.
+- **Why:** Next.js 16 changed `revalidateTag`'s signature from `(tag: string) => void` to `(tag: string, profile: string | CacheLifeConfig) => undefined`. The plan was written against the Next.js 15 API. `{}` (empty `CacheLifeConfig` where `expire` is optional) satisfies the type, avoids the deprecation console warning (which fires only when the second arg is falsy), and targets the default cache profile used by `getPosts`'s `'use cache'` directive.
+- **Alternatives considered:**
+  - **`revalidateTag(CACHE_TAGS.posts)` with one arg.** Rejected — TypeScript error; also triggers a runtime deprecation warning.
+  - **`updateTag(CACHE_TAGS.posts)`.** The Next.js 16 deprecation message recommends `updateTag` for server actions. Rejected in favor of the two-arg `revalidateTag` to keep the mocked function consistent with the existing `vitest.setup.tsx` mock (`revalidateTag: vi.fn()`). `updateTag` would have required adding a new mock entry.
+- **Step:** 7 — PR 3 Implementation
+
+## 2026-04-30 — cacheTag mock added to vitest.setup.tsx
+
+- **Decision:** `cacheTag: vi.fn()` was added to the `vi.mock('next/cache', ...)` block in `vitest.setup.tsx`.
+- **Why:** `getPosts.ts` now calls `cacheTag(CACHE_TAGS.posts)` inside the function body. The actual `cacheTag` from Next.js throws in a Vitest environment with the message "can only be called inside a 'use cache' function." Mocking it prevents test failures in any test that exercises `getPosts` (directly or via `LatestPosts`).
+- **Step:** 7 — PR 3 Implementation
+
+## 2026-04-30 — Empty state moved to PostCards
+
+- **Decision:** `PostCards` owns the empty-state message. It guards with `if (!posts.length)` and returns `<p data-testid="latest-posts-empty">`. `LatestPosts` always renders `<PostCards posts={posts} />` unconditionally — it does not branch on `posts.length`.
+- **Why:** Refines "Empty-state UX: explicit message when `posts.length === 0`". The plan placed the ternary in `LatestPosts` (`posts.length === 0 ? <p> : <PostCards>`), but moving the guard into `PostCards` gives it a single, self-contained concern: render any post list, including an empty one. `LatestPosts` stays thin — it owns only the error-vs-success branch from `getPosts`, not the empty-vs-non-empty branch of the data.
+- **Alternatives considered:** Keep the ternary in `LatestPosts` per the plan — rejected during implementation; it gave `LatestPosts` two branching reasons to change (error shape from `getPosts` and empty state of the data).
+- **Step:** 7 — PR 3 Implementation
+- **Refines:** "Empty-state UX: explicit message when `posts.length === 0`" (2026-04-28, Step 3).
+
+## 2026-04-30 — totalPages <= 1 guard internalized in Pagination
+
+- **Decision:** `LatestPosts` renders `<Pagination currentPage={currentPage} totalPages={totalPages} />` unconditionally. The `Pagination` component returns `null` when `totalPages <= 1`.
+- **Why:** Refines "Pagination renders only when `totalPages > 1`". Moving the guard inside `Pagination` co-locates the no-render condition with the component that owns it. Callers don't need to know the threshold — `<Pagination>` self-collapses, which is the same pattern used by the `PaginationFacade` (`availablePages` returns the short list for `totalPages <= 7`).
+- **Alternatives considered:** Keep `{totalPages > 1 && <Pagination ...>}` in `LatestPosts` per the plan — rejected during implementation; the conditional leaked rendering knowledge into the caller.
+- **Step:** 7 — PR 3 Implementation
+- **Refines:** "Pagination renders only when `totalPages > 1`" (2026-04-28, Step 3).
+
+## 2026-04-30 — Truncation logic extracted to getTruncatedPageList + PaginationFacade
+
+- **Decision:** The page-list truncation logic lives in `globals/facades/PaginationFacade`. `features/posts/components/pagination/getTruncatedPageList.ts` is the functional entry point (used in tests); it delegates to `PaginationFacade`. `pagination.tsx` uses `PaginationFacade` directly via `useMemo`. `PaginationFacade` exposes `pageRangeStart`, `pageRangeEnd`, `pageRange`, `pagesWithoutEllipsis`, and `availablePages` as private getters with a public `update(currentPage, totalPages)` method.
+- **Why:** Resolves "Truncation logic placement: implementation-time call". The boundary-handling logic (clamped range, double-ellipsis collapse, off-by-ones for window clamp) was complex enough to warrant extraction and isolation into named units. The `PaginationFacade` shape was preferred over a standalone pure function because it breaks the computation into named sub-steps (`pageRangeStart`, `pageRangeEnd`) that are each readable in isolation — consistent with the clean-authoring principle that names carry meaning.
+- **Alternatives considered:** Keep logic inline in `pagination.tsx` — rejected; the logic sprawled across enough conditional branches that inline placement made `pagination.tsx` hard to read at a glance.
+- **Step:** 7 — PR 3 Implementation
+- **Resolves:** "Truncation logic placement: implementation-time call" (2026-04-27, Step 3).
+
 ## 2026-04-28 — Pagination renders only when `totalPages > 1`
 
 - **Decision:** The feature-level `<Pagination>` wrapper in `LatestPosts` is conditionally rendered: `{totalPages > 1 && <Pagination ... />}`. It does not render when `totalPages === 0` (no posts) or `totalPages === 1` (all posts fit on one page). The `<Pagination>` component's own truncation logic therefore only needs to handle `totalPages >= 2`.

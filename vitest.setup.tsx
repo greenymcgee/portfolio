@@ -12,6 +12,7 @@ vi.mock('next/cache', async () => {
   const cache = await vi.importActual('next/cache')
   return {
     ...cache,
+    cacheTag: vi.fn(),
     revalidatePath: vi.fn(),
     revalidateTag: vi.fn(),
   }
@@ -57,20 +58,42 @@ vi.mock('next/navigation', async () => {
 
 // https://github.com/vercel/next.js/discussions/60125#discussioncomment-9653211
 vi.mock('next/link', () => {
-  interface Props {
+  interface Props extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
     children: React.ReactNode
     href: string
-    onClick: () => void
+    prefetch?: boolean | null
+    replace?: boolean
+    scroll?: boolean
+    shallow?: boolean
+    passHref?: boolean
+    locale?: string | false
   }
-  function mockLink({ children, href, onClick, ...options }: Props) {
+  function mockLink({
+    children,
+    href,
+    onClick,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    prefetch,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    replace,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    scroll,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    shallow,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    passHref,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    locale,
+    ...anchorProps
+  }: Props) {
     return (
       <a
         href={href}
         onClick={(event) => {
           event.preventDefault()
-          onClick()
+          onClick?.(event)
         }}
-        {...options}
+        {...anchorProps}
       >
         {children}
       </a>

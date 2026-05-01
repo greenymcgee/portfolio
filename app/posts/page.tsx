@@ -6,7 +6,9 @@ import { PostsPageAdminMenuContent } from '@/features/posts/components'
 import { POST_PAGE_CLASS_NAMES } from '@/features/posts/constants'
 import { AdminMenuContentSetter } from '@/globals/components'
 
-export default function PostsPage() {
+type Props = { searchParams: Promise<{ page?: string }> }
+
+export default function PostsPage({ searchParams }: Props) {
   return (
     <>
       <AdminMenuContentSetter content={<PostsPageAdminMenuContent />} />
@@ -57,8 +59,8 @@ export default function PostsPage() {
             >
               Latest
             </h2>
-            <Suspense>
-              <LatestPosts />
+            <Suspense fallback={<p>Loading posts...</p>}>
+              <LatestPosts searchParams={searchParams} />
             </Suspense>
           </article>
         </div>
