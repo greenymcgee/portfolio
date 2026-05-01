@@ -1,10 +1,8 @@
 import clsx from 'clsx'
-import Link from 'next/link'
 
 import { Experience, Projects } from '@/features/landing/components'
 import { LANDING_PAGE_CLASS_NAMES } from '@/features/landing/constants'
-import { GitHub, LinkedIn } from '@/globals/components'
-import { EXTERNAL_LINKS } from '@/globals/constants'
+import { Socials } from '@/globals/components'
 
 export default function HomePage() {
   return (
@@ -87,23 +85,7 @@ export default function HomePage() {
           'mb-20 text-right text-[1.5rem]',
         )}
       >
-        <Link
-          aria-label="GitHub profile"
-          className="mr-4"
-          href={EXTERNAL_LINKS.githubProfile}
-          rel="noopener noreferrer"
-          target="_blank"
-        >
-          <GitHub className="inline" />
-        </Link>
-        <Link
-          aria-label="LinkedIn profile"
-          href={EXTERNAL_LINKS.linkedInProfile}
-          rel="noopener noreferrer"
-          target="_blank"
-        >
-          <LinkedIn className="inline" />
-        </Link>
+        <Socials />
       </footer>
     </>
   )
