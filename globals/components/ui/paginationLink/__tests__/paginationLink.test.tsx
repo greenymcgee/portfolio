@@ -21,4 +21,12 @@ describe('<PaginationLink />', () => {
     render(<PaginationLink {...PROPS} />)
     expect(screen.getByRole('link')).toHaveAttribute('href', PROPS.href)
   })
+
+  it('should mark the link as disabled when disabled is true', () => {
+    render(<PaginationLink {...PROPS} disabled />)
+    const link = screen.getByRole('link')
+    expect(link).toHaveAttribute('aria-disabled', 'true')
+    expect(link).toHaveAttribute('tabindex', '-1')
+    expect(link).toHaveClass('pointer-events-none', 'opacity-50')
+  })
 })

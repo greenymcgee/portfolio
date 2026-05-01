@@ -1,17 +1,28 @@
-'use client'
+import { getPosts } from '@/features/posts/actions'
 
-import { Suspense } from 'react'
-
-import { useGetPaginatedPostsQuery } from '../../hooks'
+import { Pagination } from '../pagination'
 import { PostCards } from '../postCards'
 
-export function LatestPosts() {
-  const promise = useGetPaginatedPostsQuery()
+type Props = {
+  searchParams: Promise<{ page?: string }>
+}
+
+export async function LatestPosts({ searchParams }: Props) {
+  const result = await getPosts(await searchParams)
+
+  if (result.error) {
+    return (
+      <div aria-live="polite" data-testid="latest-posts">
+        <p data-testid="latest-posts-error">Something went wrong</p>
+      </div>
+    )
+  }
+
+  const { currentPage, posts, totalPages } = result
   return (
     <div aria-live="polite" data-testid="latest-posts">
-      <Suspense fallback={<p>Loading posts...</p>}>
-        <PostCards promise={promise} />
-      </Suspense>
+      <PostCards posts={posts} />
+      <Pagination currentPage={currentPage} totalPages={totalPages} />
     </div>
   )
 }

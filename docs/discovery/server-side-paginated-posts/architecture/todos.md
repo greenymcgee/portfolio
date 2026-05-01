@@ -4,59 +4,6 @@
 > marked `[engineer]`. Resolved items move to `decisions.md` with
 > rationale.
 
-## Open
-
-### PR 3 — frontend cutover
-
-- [ ] **`deletePost` → `revalidateTag` swap (missed in PR 2).**
-      `features/posts/actions/deletePost.ts` still has the two
-      `revalidatePath` calls. This swap MUST land in PR 3 for
-      `revalidateTag('posts')` to fire after deletes. Changes:
-      - Remove `import { revalidatePath } from 'next/cache'`
-      - Add `import { revalidateTag } from 'next/cache'`
-      - Replace `revalidatePath(ROUTES.post(state.id))` + `revalidatePath(ROUTES.posts)` with `revalidateTag('posts')`
-      - Update `deletePost.db.test.ts` success branch to assert `expect(revalidateTag).toHaveBeenCalledWith('posts')`
-      - Grep for `revalidatePath` in `features/` and `app/` before shipping to confirm zero remaining hits. `[skill]`
-- [ ] **`Pagination` primitive import aliasing.** Inside
-      `features/posts/components/pagination/pagination.tsx`, the file
-      both exports `Pagination` (the feature wrapper) and imports
-      `Pagination` from `@/globals/components/ui` (the primitive).
-      Use an alias at the import: `import { Pagination as PaginationNav,
-      PaginationContent, ... } from '@/globals/components/ui'`. Use
-      `PaginationNav` as the JSX tag internally. `[skill]`
-- [ ] **Wrapper accessibility audit (PR 3).** Pin down at the
-      feature-level wrapper (`features/posts/components/pagination/`):
-      - `<Pagination aria-label="Posts pagination">` on the outer
-        element (overriding the primitive's default).
-      - Keyboard navigation: tab through links works, Enter navigates,
-        focus ring matches `Button`'s
-        `focus-visible:ring-3 ring-ring/50`.
-      - Boundary disable state — page 0 → "Previous" inert; last page
-        → "Next" inert — implemented via `aria-disabled="true"` plus
-        `pointer-events-none` so the link doesn't navigate.
-      Acceptance: `pagination.test.tsx` (the wrapper test) covers
-      each. `[skill]`
-- [ ] **`LatestPosts` — do not destructure `getPosts` result upfront.**
-      `getPosts` returns a discriminated union: success branch has
-      `error: null`; error branch has `error: <ErrorObj>` with
-      everything else as `null`. TypeScript can narrow this union if
-      you check `result.error` on the undestructured result. If you
-      destructure upfront (`const { error, posts, totalPages } = await
-      getPosts(...)`), TypeScript loses the narrowing and will flag
-      `posts` and `totalPages` as possibly null after the `if (error)`
-      check. Pattern: `const result = await getPosts(...); if
-      (result.error) { return <error JSX> }; const { currentPage,
-      posts, totalPages } = result`. `[skill]`
-- [ ] **`features/posts/components/index.ts` — do NOT add `pagination`
-      to the barrel.** The feature-level `Pagination` wrapper is only
-      consumed by `LatestPosts` via a relative import (`'../pagination'`).
-      Consistent with `postCards`, which is also not in the barrel. `[skill]`
-- [ ] **Primitives accessibility audit (PR 1) — verify shipped.**
-      PR 1 landed — confirm the per-component test files in
-      `globals/components/ui/*/` cover the a11y assertions from the
-      testing-strategy: `aria-label`, `aria-current="page"`,
-      `aria-label` on Previous/Next, `aria-hidden` on Ellipsis. If any
-      were omitted, add them in PR 3 while the context is fresh. `[skill]`
 
 ### Post-launch
 
@@ -99,7 +46,13 @@
 | `getPaginatedPosts` signature — no `limit`, awaited `searchParams` object | Implemented as `getPosts(searchParams: { page?: string })`. `limit` is not exposed at any public boundary. `FindAndCountPostsDto` receives `{ page?: string }` and handles all normalization via Zod. Action returns `currentPage` (normalized integer) alongside `posts`, `totalPages`, `error` so callers never re-derive it. See `decisions.md` → "`getPaginatedPosts` signature". |
 | One component per file for pagination primitives | Engineer-specified during the 4-PR refinement. Each of the seven primitives lives in its own `<componentName>.tsx` with a co-located test; barrel `index.ts` re-exports the public surface. `<PaginationLink>` reuses `BUTTON_VARIANTS` rather than a parallel variants table. See `decisions.md` → "One component per file for pagination primitives". |
 | Barrel export for pagination primitives | One directory per primitive under `globals/components/ui/`; each directory has its own `index.ts`; `globals/components/ui/index.ts` gains 7 new export lines. Consumers import from `@/globals/components/ui`. Consistent with `button/`, `heading/`, `spinner/`, `toaster/`. See `decisions.md` → "Barrel export: one directory per primitive, re-exported from `globals/components/ui/index.ts`". |
-| Truncation logic placement principle | Implementation-time call, made by the engineer during PR 3. Default inline; extract to `getTruncatedPageList.ts` if the logic sprawls. See `decisions.md` → "Truncation logic placement: implementation-time call". |
+| Truncation logic placement principle | Extracted to `getTruncatedPageList.ts` (functional entry point for tests) which delegates to `globals/facades/PaginationFacade`. Logic was complex enough to warrant extraction. See `decisions.md` → "Truncation logic extracted to getTruncatedPageList + PaginationFacade". |
 | `?page` beyond `totalPages` behavior | Option (a): leave as-is. Empty list → explicit empty-state message; `<Pagination>` still renders if `totalPages > 1`. See `decisions.md` → "Out-of-range `?page`: leave as-is (option a)". |
-| Empty-state UX | Explicit `<p data-testid="latest-posts-empty">No posts on this page</p>` when `posts.length === 0`. `PostCards` only called when `posts.length > 0`. See `decisions.md` → "Empty-state UX: explicit message when `posts.length === 0`". |
-| Page-list truncation spec (`totalPages=0` edge case) | `<Pagination>` renders only when `totalPages > 1`; `totalPages=0` and `totalPages=1` rows collapse into the no-render condition. Remaining table is complete in `architecture.md` → "Page-list truncation rule". See `decisions.md` → "Pagination renders only when `totalPages > 1`". |
+| Empty-state UX | Explicit `<p data-testid="latest-posts-empty">` in `PostCards` (not `LatestPosts`). `PostCards` guards with `if (!posts.length)`. See `decisions.md` → "Empty state moved to PostCards". |
+| Page-list truncation spec (`totalPages=0` edge case) | `<Pagination>` self-collapses via `if (totalPages <= 1) return null`. `LatestPosts` renders `<Pagination>` unconditionally. See `decisions.md` → "totalPages <= 1 guard internalized in Pagination". |
+| `deletePost` → `revalidateTag` swap (missed in PR 2) | Shipped in PR 3. Both `revalidatePath` calls removed; `revalidateTag(CACHE_TAGS.posts, {})` added. Second arg required by Next.js 16. `cacheTag: vi.fn()` added to `vitest.setup.tsx`. See `decisions.md` → "revalidateTag second argument (Next.js 16)" and "CACHE_TAGS constant". |
+| `Pagination` primitive import aliasing | Done. `import { Pagination as PaginationNav, ... }` in `features/posts/components/pagination/pagination.tsx`. |
+| Wrapper accessibility audit (PR 3) | Done. `aria-label="Posts pagination"`, `aria-disabled`, `pointer-events-none` boundary behavior, `aria-current="page"` on active link — all covered in `pagination.test.tsx`. |
+| `LatestPosts` — do not destructure `getPosts` result upfront | Done. Pattern followed: `const result = await getPosts(...); if (result.error) { ... }; const { currentPage, posts, totalPages } = result`. |
+| `features/posts/components/index.ts` — do NOT add `pagination` | Done. `Pagination` wrapper remains internal; `LatestPosts` imports via relative path `'../pagination'`. |
+| Primitives accessibility audit (PR 1) | Confirmed shipped. Per-component tests in `globals/components/ui/*/` cover `aria-label`, `aria-current="page"`, `aria-label` on Previous/Next, `aria-hidden` on Ellipsis. |

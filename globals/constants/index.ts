@@ -1,4 +1,5 @@
 export * from './apiRoutes'
+export * from './cacheTags'
 export * from './env'
 export * from './experiences'
 export * from './externalLinks'

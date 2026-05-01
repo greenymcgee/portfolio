@@ -1,22 +1,22 @@
-import { use } from 'react'
-
 import { Card, CardGroup } from '@/globals/components'
 import { ROUTES } from '@/globals/constants'
 
-import { PaginatedPostsQuery } from '../../types'
-
 type Props = {
-  promise: PaginatedPostsQuery
+  posts: AuthoredPost[]
 }
 
-export function PostCards({ promise }: Props) {
-  const { data, error } = use(promise)
-
-  if (error) return <p data-testid="latest-posts-error">Something went wrong</p>
+export function PostCards({ posts }: Props) {
+  if (!posts.length) {
+    return (
+      <p className="mb-6" data-testid="latest-posts-empty">
+        There are no posts available yet.
+      </p>
+    )
+  }
 
   return (
-    <CardGroup>
-      {data.posts.map((post) => (
+    <CardGroup className="mb-6">
+      {posts.map((post) => (
         <Card
           description={post.description}
           id={String(post.id)}
