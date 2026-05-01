@@ -15,4 +15,4 @@ export default async function proxy(request: NextRequest) {
   return NextResponse.next()
 }
 
-export const config = { matcher: ['/posts/new', '/users/new'] }
+export const config = { matcher: ['/posts/new'] }

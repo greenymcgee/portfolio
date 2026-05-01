@@ -18,6 +18,7 @@ export default defineConfig({
         'lib/prisma/client.ts',
         'components/svgs/**',
         'globals/constants/**',
+        '**/.DS_Store',
       ],
       thresholds: {
         branches: 98,

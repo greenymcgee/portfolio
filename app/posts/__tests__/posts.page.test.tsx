@@ -5,6 +5,18 @@ import { renderWithProviders } from '@/test/helpers/utils'
 
 import PostsPage from '../page'
 
+const neverResolvingPromise = vi.hoisted(() => new Promise<never>(() => {}))
+
+vi.mock('@/features/posts/components', async () => {
+  const actual = await vi.importActual('@/features/posts/components')
+  return {
+    ...actual,
+    LatestPosts: () => {
+      throw neverResolvingPromise
+    },
+  }
+})
+
 const PROPS = { searchParams: Promise.resolve({}) }
 
 describe('PostsPage', () => {
