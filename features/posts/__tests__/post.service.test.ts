@@ -13,7 +13,7 @@ import {
   UNAUTHORIZED,
   UNPROCESSABLE_CONTENT,
 } from '@/globals/constants'
-import { NotFoundError, PrismaError, RequestJSONError } from '@/lib/errors'
+import { NotFoundError, PrismaError } from '@/lib/errors'
 import { LEXICAL_EDITOR_JSON, POSTS, PUBLISHED_POST } from '@/test/fixtures'
 import { mockServerSession } from '@/test/helpers/utils'
 
@@ -34,9 +34,7 @@ vi.mock('../post.repository', () => ({
 describe('PostService', () => {
   describe('create', () => {
     it('should return unauthorized when there is no session user', async () => {
-      const dto = new CreatePostDto(
-        new Request('http://greeny.no/posts', { body: '{}', method: 'POST' }),
-      )
+      const dto = new CreatePostDto({})
       const result = await PostService.create(dto)
       expect(result).toEqual(
         new Err({ status: UNAUTHORIZED, type: 'unauthorized' }),
@@ -45,36 +43,14 @@ describe('PostService', () => {
 
     it('should return forbidden when the user cannot create posts', async () => {
       mockServerSession('USER')
-      const dto = new CreatePostDto(
-        new Request('http://greeny.no/posts', { body: '{}', method: 'POST' }),
-      )
+      const dto = new CreatePostDto({})
       const result = await PostService.create(dto)
       expect(result).toEqual(new Err({ status: FORBIDDEN, type: 'forbidden' }))
     })
 
-    it('should return a dto error when JSON is invalid', async () => {
-      mockServerSession('ADMIN')
-      vi.mocked(PostRepository.create).mockResolvedValueOnce(
-        new RequestJSONError(new Error('bad')),
-      )
-      const dto = new CreatePostDto(
-        new Request('http://greeny.no/posts', { body: '{', method: 'POST' }),
-      )
-      const result = await PostService.create(dto)
-      expect(result).toEqual(
-        new Err({
-          details: expect.any(RequestJSONError),
-          status: UNPROCESSABLE_CONTENT,
-          type: 'dto',
-        }),
-      )
-    })
-
     it('should return a dto error when params fail validation', async () => {
       mockServerSession('ADMIN')
-      const dto = new CreatePostDto(
-        new Request('http://greeny.no/posts', { body: '{}', method: 'POST' }),
-      )
+      const dto = new CreatePostDto({})
       vi.mocked(PostRepository.create).mockResolvedValueOnce(new ZodError([]))
       const result = await PostService.create(dto)
       expect(result).toEqual(
@@ -90,16 +66,11 @@ describe('PostService', () => {
       mockServerSession('ADMIN')
       const error = new PrismaError(new Error('bad'))
       vi.mocked(PostRepository.create).mockResolvedValueOnce(error)
-      const dto = new CreatePostDto(
-        new Request('http://greeny.no/posts', {
-          body: JSON.stringify({
-            content: LEXICAL_EDITOR_JSON,
-            publishedAt: null,
-            title: faker.book.title(),
-          }),
-          method: 'POST',
-        }),
-      )
+      const dto = new CreatePostDto({
+        content: LEXICAL_EDITOR_JSON,
+        publishedAt: null,
+        title: faker.book.title(),
+      })
       const result = await PostService.create(dto)
       expect(result).toEqual(
         new Err({
@@ -114,35 +85,25 @@ describe('PostService', () => {
       mockServerSession('ADMIN')
       const error = new Error('Post content validation failed')
       vi.mocked(PostRepository.create).mockResolvedValueOnce(error)
-      const dto = new CreatePostDto(
-        new Request('http://greeny.no/posts', {
-          body: JSON.stringify({
-            content: LEXICAL_EDITOR_JSON,
-            publishedAt: null,
-            title: faker.book.title(),
-          }),
-          method: 'POST',
-        }),
-      )
+      const dto = new CreatePostDto({
+        content: LEXICAL_EDITOR_JSON,
+        publishedAt: null,
+        title: faker.book.title(),
+      })
       const result = await PostService.create(dto)
       expect(result).toEqual(
-        new Err({ details: error, status: BAD_REQUEST, type: 'entity' }),
+        new Err({ details: error, status: BAD_REQUEST, type: 'lexical' }),
       )
     })
 
     it('should return created when the repository returns a post', async () => {
       mockServerSession('ADMIN')
       vi.mocked(PostRepository.create).mockResolvedValueOnce(PUBLISHED_POST)
-      const dto = new CreatePostDto(
-        new Request('http://greeny.no/posts', {
-          body: JSON.stringify({
-            content: LEXICAL_EDITOR_JSON,
-            publishedAt: null,
-            title: 'Title',
-          }),
-          method: 'POST',
-        }),
-      )
+      const dto = new CreatePostDto({
+        content: LEXICAL_EDITOR_JSON,
+        publishedAt: null,
+        title: 'Title',
+      })
       const result = await PostService.create(dto)
       expect(result).toEqual(new Ok({ post: PUBLISHED_POST, status: CREATED }))
     })

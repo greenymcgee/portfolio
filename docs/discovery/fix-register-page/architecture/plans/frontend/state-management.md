@@ -49,7 +49,7 @@ initial design. Rejected because:
 
 1. **Drift from precedent.** `CreatePostForm` already uses
    `withCallbacks` for the same role; mirroring that keeps
-   `CreateUserState` a near-clone of `PostCreateState` and avoids
+   `CreateUserState` a near-clone of `CreatePostState` and avoids
    inventing a parallel error-surfacing shape.
 2. **Conflation risk.** A `error?: ZodError | string` union on
    `CreateUserState` would mix field-level and form-level rendering

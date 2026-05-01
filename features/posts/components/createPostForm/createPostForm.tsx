@@ -17,17 +17,18 @@ import { ROUTES } from '@/globals/constants'
 import { hasPermission } from '@/lib/permissions'
 
 import { CreatePostFormBody } from '../createPostFormBody'
+import { INITIAL_CREATE_POST_STATE } from './constants'
 
 export function CreatePostForm() {
   const router = useRouter()
   const { data: session, status } = useSession()
   const pathname = usePathname()
   const [errorMessage, setErrorMessage] = useState('')
-  const [state, action, pending] = useActionState(
+  const [state = INITIAL_CREATE_POST_STATE, action, pending] = useActionState(
     withCallbacks(createPost, {
       onError: () => setErrorMessage('Something went wrong'),
     }),
-    { status: 'IDLE' },
+    INITIAL_CREATE_POST_STATE,
   )
   const permitted = useMemo(
     () => hasPermission(session?.user, 'posts', 'create'),

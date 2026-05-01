@@ -504,7 +504,7 @@ export interface CreateUserState extends ActionState {
 }
 ```
 
-Mirrors `PostCreateState` (form-value preservation + `error?: ZodError`).
+Mirrors `CreatePostState` (form-value preservation + `error?: ZodError`).
 No string error field — generic message lives in client state via
 `withCallbacks`. See `decisions.md` → "Generic error string via
 `withCallbacks`."

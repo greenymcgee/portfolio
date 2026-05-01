@@ -208,7 +208,7 @@
   this codebase. `withCallbacks` fires `onError` whenever the action
   returns `state.status === 'ERROR'` (the `ActionState` interface from
   `@greenymcgee/typescript-utils`). Keeps `CreateUserState` a near-mirror
-  of `PostCreateState` and avoids inventing a parallel error-surfacing
+  of `CreatePostState` and avoids inventing a parallel error-surfacing
   shape.
 - **Alternatives considered:** Add `errorMessage?: string` to
   `CreateUserState` (my initial recommendation) — rejected once the
@@ -276,7 +276,7 @@
   `createUserSchema`, `createUserState`. Matches `clean-authoring`
   guidance that names should be descriptive phrases.
 - **Alternatives considered:** `UserCreateState` (mirrors the legacy
-  `PostCreateState`) — rejected; the engineer explicitly called the
+  `CreatePostState`) — rejected; the engineer explicitly called the
   legacy name out as a mistake and asked us not to repeat it.
 - **Step:** 3 — Iterative Refinement
 - **Resolves:** Naming inconsistency surfaced after Step 2 write.

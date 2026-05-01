@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker'
 import { ZodError } from 'zod'
 
 import { NO_CONTENT } from '@/globals/constants'
-import { NotFoundError, PrismaError, RequestJSONError } from '@/lib/errors'
+import { NotFoundError, PrismaError } from '@/lib/errors'
 import { postFactory } from '@/test/factories'
 import {
   ADMIN_USER,
@@ -18,41 +18,22 @@ import { PostRepository } from '../post.repository'
 
 describe('PostRepository', () => {
   describe('create', () => {
-    it('should return a json error', async () => {
-      const request = new Request('http://greeny.no/posts', {
-        body: '{',
-        method: 'POST',
-      })
-      const dto = new CreatePostDto(request)
-      const result = await PostRepository.create(dto, ADMIN_USER)
-      expect(result).toEqual(expect.any(RequestJSONError))
-    })
-
     it('should return a Zod error', async () => {
-      const params = {
-        content: 1,
+      const dto = new CreatePostDto({
+        content: 1 as unknown as string,
         publishedAt: null,
         title: faker.book.title(),
-      }
-      const request = new Request('http://greeny.no/posts', {
-        body: JSON.stringify(params),
-        method: 'POST',
       })
-      const dto = new CreatePostDto(request)
       const result = await PostRepository.create(dto, ADMIN_USER)
       expect(result).toEqual(expect.any(ZodError))
     })
 
     it('should return a Lexical validation error', async () => {
-      const request = new Request('http://greeny.no/posts', {
-        body: JSON.stringify({
-          content: 'not-json',
-          publishedAt: null,
-          title: faker.book.title(),
-        }),
-        method: 'POST',
+      const dto = new CreatePostDto({
+        content: 'not-json',
+        publishedAt: null,
+        title: faker.book.title(),
       })
-      const dto = new CreatePostDto(request)
       const result = await PostRepository.create(dto, ADMIN_USER)
       expect(result).toEqual(new Error('Post content validation failed'))
     })
@@ -60,16 +41,11 @@ describe('PostRepository', () => {
     it('should return a Prisma error', async () => {
       const error = new Error('Bad')
       prismaMock.post.create.mockRejectedValueOnce(error)
-      const params = {
+      const dto = new CreatePostDto({
         content: LEXICAL_EDITOR_JSON,
         publishedAt: null,
         title: faker.book.title(),
-      }
-      const request = new Request('http://greeny.no/posts', {
-        body: JSON.stringify(params),
-        method: 'POST',
       })
-      const dto = new CreatePostDto(request)
       const result = await PostRepository.create(dto, ADMIN_USER)
       expect(result).toEqual(new PrismaError(error))
     })
@@ -77,17 +53,12 @@ describe('PostRepository', () => {
     it('should return the created post', async () => {
       const created = postFactory.build()
       prismaMock.post.create.mockResolvedValueOnce(created)
-      const params = {
+      const dto = new CreatePostDto({
         content: LEXICAL_EDITOR_JSON,
         description: created.description,
-        publishedAt: created.publishedAt,
+        publishedAt: created.publishedAt?.toISOString(),
         title: created.title,
-      }
-      const request = new Request('http://greeny.no/posts', {
-        body: JSON.stringify(params),
-        method: 'POST',
       })
-      const dto = new CreatePostDto(request)
       const result = await PostRepository.create(dto, ADMIN_USER)
       expect(result).toBe(created)
     })

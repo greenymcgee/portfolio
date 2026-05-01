@@ -11,7 +11,7 @@ import {
   UNPROCESSABLE_CONTENT,
 } from '@/globals/constants'
 import { authenticateAPISession } from '@/lib/auth'
-import { NotFoundError, PrismaError, RequestJSONError } from '@/lib/errors'
+import { NotFoundError, PrismaError } from '@/lib/errors'
 import { logger } from '@/lib/logger'
 import { hasPermission } from '@/lib/permissions'
 
@@ -33,10 +33,6 @@ export class PostService {
       return this.respondWithPrismaError(post, 'create')
     }
 
-    if (post instanceof RequestJSONError) {
-      return this.respondWithJSONError(post, 'create')
-    }
-
     if (post instanceof ZodError) {
       return this.respondWithZodError(post, 'create')
     }
@@ -45,7 +41,7 @@ export class PostService {
       return errAsync({
         details: post,
         status: BAD_REQUEST,
-        type: 'entity',
+        type: 'lexical',
       } as const)
     }
 
@@ -155,18 +151,6 @@ export class PostService {
     return errAsync({
       status: UNAUTHORIZED,
       type: 'unauthorized' as const,
-    } as const)
-  }
-
-  private static respondWithJSONError(
-    error: RequestJSONError,
-    method: 'create',
-  ) {
-    logger.error({ error }, `PostService RequestJSONError error: ${method}`)
-    return errAsync({
-      details: error,
-      status: error.status,
-      type: 'dto' as const,
     } as const)
   }
 

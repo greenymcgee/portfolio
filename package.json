@@ -22,7 +22,6 @@
   },
   "dependencies": {
     "@greenymcgee/react-components": "^0.1.1",
-    "@greenymcgee/summon": "^0.2.2",
     "@greenymcgee/typescript-utils": "^0.1.8",
     "@lexical/headless": "^0.42.0",
     "@lexical/react": "^0.42.0",

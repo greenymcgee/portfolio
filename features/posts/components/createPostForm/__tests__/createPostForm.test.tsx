@@ -7,23 +7,29 @@ import {
 } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { EditorState } from 'lexical'
+import { redirect } from 'next/navigation'
 import mockRouter from 'next-router-mock'
 
+import { PostRepository } from '@/features/posts/post.repository'
 import { RichTextEditor } from '@/globals/components'
-import { INTERNAL_SERVER_ERROR, ROUTES } from '@/globals/constants'
+import { ROUTES } from '@/globals/constants'
 import { LEXICAL_EDITOR_JSON, UNPUBLISHED_POST } from '@/test/fixtures'
-import { mockCookieHeader, renderWithProviders } from '@/test/helpers/utils'
 import {
-  mockPostsAuthSession,
-  mockPostsCreateResponse,
-  postsServer,
-} from '@/test/servers'
+  mockAuthSessionResponse,
+  mockServerSession,
+  renderWithProviders,
+} from '@/test/helpers/utils'
+import { postsServer } from '@/test/servers'
 
 import { CreatePostForm } from '..'
 
-beforeAll(() => postsServer.listen())
 beforeEach(() => {
   mockRouter.push(ROUTES.newPost)
+})
+beforeAll(() => postsServer.listen())
+afterEach(() => {
+  vi.resetAllMocks()
+  vi.restoreAllMocks()
   postsServer.resetHandlers()
 })
 afterAll(() => postsServer.close())
@@ -58,14 +64,16 @@ vi.mock('@/globals/components', async (importActual) => {
 
 describe('<CreatePostForm />', () => {
   it('should redirect an unauthorized user', async () => {
-    mockPostsAuthSession({ role: 'USER' })
+    mockAuthSessionResponse(postsServer, { role: 'USER' })
     renderWithProviders(<CreatePostForm />, { includesSession: true })
     await waitFor(() => expect(mockRouter.pathname).toBe(ROUTES.home))
   })
 
   it('should render an error message when the POST request errors', async () => {
-    await mockCookieHeader()
-    mockPostsCreateResponse({ status: INTERNAL_SERVER_ERROR })
+    vi.spyOn(PostRepository, 'create').mockResolvedValueOnce(
+      new Error('Internal Server Error'),
+    )
+    mockServerSession('ADMIN')
     renderWithProviders(<CreatePostForm />, { includesSession: true })
     await userEvent.type(screen.getByLabelText(/Title/), 'title')
     const editor = screen
@@ -79,7 +87,8 @@ describe('<CreatePostForm />', () => {
   })
 
   it('should render a form that calls the createPost action', async () => {
-    await mockCookieHeader()
+    vi.spyOn(PostRepository, 'create').mockResolvedValueOnce(UNPUBLISHED_POST)
+    mockServerSession('ADMIN')
     renderWithProviders(<CreatePostForm />, { includesSession: true })
     await userEvent.type(screen.getByLabelText(/Title/), faker.book.title())
     await userEvent.type(
@@ -93,6 +102,6 @@ describe('<CreatePostForm />', () => {
     const submitButton = screen.getByTestId('submit-post-button')
     fireEvent.click(submitButton)
     await waitForElementToBeRemoved(screen.getByRole('status'))
-    expect(mockRouter.pathname).toBe(ROUTES.post(UNPUBLISHED_POST.id))
+    expect(redirect).toHaveBeenCalledWith(ROUTES.post(UNPUBLISHED_POST.id))
   })
 })
