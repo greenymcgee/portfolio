@@ -1,27 +1,13 @@
-import type { SummonError, SummonResponse } from '@greenymcgee/summon'
-import { ActionState } from '@greenymcgee/typescript-utils'
-import { ZodError } from 'zod'
+import type { ActionState } from '@greenymcgee/typescript-utils'
+import type { $ZodFlattenedError } from 'zod/v4/core'
 
-import { Post } from '@/prisma/generated/client'
+import type { Post } from '@/prisma/generated/client'
 
-export interface PostCreateState extends ActionState {
+export interface CreatePostState extends ActionState {
   content?: FormDataEntryValue | null
   description?: FormDataEntryValue | null
-  error?: ZodError
+  error?: $ZodFlattenedError<unknown>
   response?: { message: string; post: Post }
   publishedAt?: FormDataEntryValue | null
   title?: FormDataEntryValue | null
 }
-
-export interface PostCreateResponseData {
-  message: string
-  post: Post
-}
-
-export interface PostCreateErrorData {
-  message: string
-}
-
-export type PostCreateResponse = SummonResponse<PostCreateResponseData>
-
-export type PostCreateError = SummonError<PostCreateErrorData>

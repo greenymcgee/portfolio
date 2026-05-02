@@ -1,39 +1,77 @@
-import { tryCatch } from '@greenymcgee/typescript-utils'
+import type { ZodError } from 'zod'
 
-import { RequestJSONError } from '@/lib/errors'
+import { createHeadlessBlogEditor } from '@/lib/lexical'
 import { logger } from '@/lib/logger'
+import type { Post } from '@/prisma/generated/client'
 
-import { type CreatePostParams, createPostSchema } from '../schemas'
+import { createPostSchema } from '../schemas'
+
+type Params = {
+  content?: string | null
+  description?: string | null
+  publishedAt?: string | null
+  title?: string | null
+}
 
 export class CreatePostDto {
-  private request: Request
+  private content: Post['content'] = null
 
-  constructor(request: Request) {
-    this.request = request
+  private description: Post['description'] = ''
+
+  private error: ZodError | Error | null = null
+
+  private publishedAt: Post['publishedAt'] = null
+
+  private title: Post['title'] = ''
+
+  constructor(params: Params) {
+    this.validateParams(params)
   }
 
-  public async getParams() {
-    const json = await this.parseJSON()
-    if (json instanceof RequestJSONError) return json
+  public get params() {
+    if (this.error) return this.error
 
-    const { data, error } = createPostSchema.safeParse(json)
+    return {
+      content: this.content,
+      description: this.description,
+      publishedAt: this.publishedAt,
+      title: this.title,
+    }
+  }
+
+  /**
+   * Ensures the content passes a parseEditorState check before saving in the
+   * DB.
+   *
+   * @returns void
+   */
+  private validateContentSafety() {
+    const editor = createHeadlessBlogEditor()
+    try {
+      if (typeof this.content !== 'string' || !this.content.length) return
+
+      editor.parseEditorState(this.content)
+    } catch (error) {
+      logger.error({ error }, 'CreatePostDto Lexical content validation error:')
+      this.error = new Error('Post content validation failed', {
+        cause: { error },
+      })
+    }
+  }
+
+  private validateParams(params: Params) {
+    const { data, error } = createPostSchema.strict().safeParse(params)
     if (error) {
       logger.error({ error }, 'CreatePostDto Zod error:')
+      this.error = error
       return error
     }
 
+    this.content = data.content
+    this.validateContentSafety()
+    this.description = data.description
+    this.publishedAt = data.publishedAt
+    this.title = data.title
     return data
-  }
-
-  private async parseJSON() {
-    const { error, response: json } = await tryCatch<CreatePostParams>(
-      this.request.json(),
-    )
-    if (error) {
-      logger.error({ error }, 'CreatePostDto JSON error:')
-      return new RequestJSONError(error)
-    }
-
-    return json
   }
 }

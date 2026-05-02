@@ -3,8 +3,7 @@ import type { Session } from 'next-auth'
 import { ZodError } from 'zod'
 
 import { NO_CONTENT } from '@/globals/constants'
-import { NotFoundError, PrismaError, RequestJSONError } from '@/lib/errors'
-import { createHeadlessBlogEditor } from '@/lib/lexical'
+import { NotFoundError, PrismaError } from '@/lib/errors'
 import { logger } from '@/lib/logger'
 import { prisma } from '@/lib/prisma'
 
@@ -14,24 +13,14 @@ import type { FindPostDto } from './dto/find-post.dto'
 
 export class PostRepository {
   public static async create(dto: CreatePostDto, user: Session['user']) {
-    const params = await dto.getParams()
-    if (params instanceof RequestJSONError || params instanceof ZodError) {
-      return params
-    }
-
-    const editor = createHeadlessBlogEditor()
-    try {
-      editor.parseEditorState(params.content.toString())
-    } catch (error) {
-      logger.error({ error }, 'PostRepository editorState error:')
-      return new Error('Post content validation failed')
-    }
+    const { params } = dto
+    if (params instanceof ZodError || params instanceof Error) return params
 
     const { error, response: post } = await tryCatch(
       prisma.post.create({
         data: {
           authorId: user.id,
-          content: params.content.toString(),
+          content: params.content?.toString(),
           description: params.description,
           publishedAt: params.publishedAt,
           title: params.title,

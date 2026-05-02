@@ -1,16 +1,24 @@
-import { coerce, infer as zodInfer, object, string } from 'zod'
+import { coerce, object, string } from 'zod'
+
+function transformString(value: string | undefined | null) {
+  return typeof value === 'string' ? value : ''
+}
 
 export const createPostSchema = object({
-  content: string().min(2),
+  content: string().optional().nullable().transform(transformString),
   description: string()
     .max(100)
     .optional()
     .nullable()
-    .transform((description) =>
-      typeof description === 'string' ? description : '',
-    ),
-  publishedAt: coerce.date().nullable(),
-  title: string().min(1),
-})
+    .transform(transformString),
+  publishedAt: coerce
+    .date()
+    .nullable()
+    .optional()
+    .transform((date) => {
+      if (typeof date === 'string' || typeof date === 'object') return date
 
-export type CreatePostParams = zodInfer<typeof createPostSchema>
+      return null
+    }),
+  title: string().nullable().optional().transform(transformString),
+})

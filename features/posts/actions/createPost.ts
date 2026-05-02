@@ -1,35 +1,48 @@
 'use server'
 
-import { headers } from 'next/headers'
+import { revalidateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { flattenError } from 'zod'
 
-import { FORBIDDEN, ROUTES, UNAUTHORIZED } from '@/globals/constants'
+import { CACHE_TAGS, ROUTES } from '@/globals/constants'
+import { logger } from '@/lib/logger'
 
-import { createPostSchema } from '../schemas'
-import { PostCreateState } from '../types'
-import { getPostCreateFormValues, tryPostNewPost } from '../utils'
+import { CreatePostDto } from '../dto/create-post.dto'
+import { PostService } from '../post.service'
+import { CreatePostState } from '../types'
 
-type State = PostCreateState
-
-export async function createPost(_: State, formData: FormData): Promise<State> {
-  const formValues = getPostCreateFormValues(formData)
-  const validate = createPostSchema.safeParse(formValues)
-  if (validate.error) {
-    return { ...formValues, error: validate.error, status: 'ERROR' }
-  }
-
-  const headersList = await headers()
-  const cookie = headersList.get('cookie')
-  if (!cookie) return redirect(ROUTES.loginWithRedirect(ROUTES.newPost))
-
-  const { error, response } = await tryPostNewPost(validate.data, cookie)
-  if (!error) return redirect(ROUTES.post(response.data.post.id))
-
-  if (error.response.status === UNAUTHORIZED) {
-    return redirect(ROUTES.loginWithRedirect(ROUTES.newPost))
-  }
-
-  if (error.response.status === FORBIDDEN) return redirect(ROUTES.home)
-
-  return { ...formValues, status: 'ERROR' }
+export async function createPost(state: CreatePostState, formData: FormData) {
+  const result = await PostService.create(
+    new CreatePostDto(Object.fromEntries(formData)),
+  )
+  return result.match(
+    (response) => {
+      revalidateTag(CACHE_TAGS.posts, {})
+      redirect(ROUTES.post(response.post.id))
+    },
+    (error) => {
+      switch (error.type) {
+        case 'unauthorized':
+          return redirect(ROUTES.loginWithRedirect(ROUTES.newPost))
+        case 'forbidden':
+          return redirect(ROUTES.home)
+        case 'lexical':
+        case 'entity':
+          return { ...state, status: 'ERROR' } as CreatePostState
+        case 'dto':
+          return {
+            ...state,
+            error: flattenError(error.details),
+            status: 'ERROR',
+          } as CreatePostState
+        default: {
+          logger.error(
+            { error: error satisfies never },
+            'UNHANDLED_CREATE_POST_ERROR',
+          )
+          return { ...state, status: 'ERROR' } as CreatePostState
+        }
+      }
+    },
+  )
 }

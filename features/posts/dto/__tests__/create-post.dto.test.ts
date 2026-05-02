@@ -1,65 +1,41 @@
 import { faker } from '@faker-js/faker'
 import { ZodError } from 'zod'
 
-import { RequestJSONError } from '@/lib/errors'
 import { LEXICAL_EDITOR_JSON } from '@/test/fixtures'
-import { getApiUrl } from '@/test/helpers/utils'
 
 import { CreatePostDto } from '../create-post.dto'
 
 describe('CreatePostDto', () => {
   describe('getParams', () => {
-    it('should return RequestJSONError', async () => {
-      const url = getApiUrl('posts')
-      const body = '{'
-      const request = new Request(url, { body, method: 'POST' })
-      const dto = new CreatePostDto(request)
-      const result = await dto.getParams()
-      expect(result).toEqual(expect.any(RequestJSONError))
+    it('should return a ZodError', () => {
+      const params = {
+        notAllowed: 1,
+      } as FirstConstructorParameterOf<typeof CreatePostDto>
+      const dto = new CreatePostDto(params)
+      expect(dto.params).toEqual(expect.any(ZodError))
     })
 
-    it('should return ZodError', async () => {
-      const url = getApiUrl('posts')
-      const body = '{}'
-      const request = new Request(url, { body, method: 'POST' })
-      const dto = new CreatePostDto(request)
-      const result = await dto.getParams()
-      expect(result).toEqual(expect.any(ZodError))
-    })
-
-    it('should return parsed data', async () => {
-      const url = getApiUrl('posts')
+    it('should return parsed data', () => {
       const publishedAt = new Date()
-      const body = {
+      const params = {
         content: LEXICAL_EDITOR_JSON,
         description: faker.lorem.word(),
         publishedAt: publishedAt.toISOString(),
         title: faker.book.title(),
       }
-      const request = new Request(url, {
-        body: JSON.stringify(body),
-        method: 'POST',
-      })
-      const dto = new CreatePostDto(request)
-      const result = await dto.getParams()
-      expect(result).toEqual({ ...body, publishedAt })
+      const dto = new CreatePostDto(params)
+      expect(dto.params).toEqual({ ...params, publishedAt })
     })
 
-    it('should allow an optional description and publishedAt for work in progress', async () => {
-      const url = getApiUrl('posts')
-      const body = {
-        content: LEXICAL_EDITOR_JSON,
-        description: null,
+    it('should allow all params as optional params', () => {
+      const params = {}
+      const dto = new CreatePostDto(params)
+      expect(dto.params).toEqual({
+        content: '',
+        description: '',
         publishedAt: null,
-        title: faker.book.title(),
-      }
-      const request = new Request(url, {
-        body: JSON.stringify(body),
-        method: 'POST',
+        title: '',
       })
-      const dto = new CreatePostDto(request)
-      const result = await dto.getParams()
-      expect(result).toEqual({ ...body, description: '' })
     })
   })
 })

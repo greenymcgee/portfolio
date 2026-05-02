@@ -15,9 +15,6 @@ importers:
       '@greenymcgee/react-components':
         specifier: ^0.1.1
         version: 0.1.1(@types/react-dom@19.2.3(@types/react@19.2.10))(@types/react@19.2.10)(date-fns-tz@3.2.0(date-fns@4.1.0))(date-fns@4.1.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      '@greenymcgee/summon':
-        specifier: ^0.2.2
-        version: 0.2.2
       '@greenymcgee/typescript-utils':
         specifier: ^0.1.8
         version: 0.1.8
@@ -946,9 +943,6 @@ packages:
       date-fns-tz: '>=3.2.0'
       react: '>=18.0.0'
       react-dom: '>=18.0.0'
-
-  '@greenymcgee/summon@0.2.2':
-    resolution: {integrity: sha512-AfChdS1FL+dWDa5i7uZ7aGXUreSdsV/7mRFvbRtEl7m371DnVzFabPGfdZYceZZ0BQPz8jS5ZGD/KewvfDIEYw==}
 
   '@greenymcgee/tailwind-prettier-config@0.1.1':
     resolution: {integrity: sha512-JGxPVd3HJvkG3yF1TXAqyxCKrNToBmmYfJjVoneQGWiz7xr6qtGMejip8fv208OBPI4X+S78/xZ+oPu9F034Ag==}
@@ -5904,8 +5898,6 @@ snapshots:
       date-fns-tz: 3.2.0(date-fns@4.1.0)
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
-
-  '@greenymcgee/summon@0.2.2': {}
 
   '@greenymcgee/tailwind-prettier-config@0.1.1(prettier-plugin-tailwindcss@0.7.2(prettier@3.8.1))(prettier@3.8.1)':
     dependencies:

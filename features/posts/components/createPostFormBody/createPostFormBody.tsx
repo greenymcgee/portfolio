@@ -33,14 +33,13 @@ export function CreatePostFormBody({
       ) : null}
       <div>
         <label className="mb-2 text-lg font-medium" htmlFor="title">
-          Title <span aria-label="Required">*</span>
+          Title
         </label>
         <input
           className="w-full rounded-lg border px-4 py-2"
           defaultValue={defaultTitle ? String(defaultTitle) : ''}
           id="title"
           name="title"
-          required
           type="text"
         />
       </div>

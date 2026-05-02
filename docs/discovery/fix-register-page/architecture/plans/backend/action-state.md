@@ -21,7 +21,7 @@ export interface CreateUserState extends ActionState {
 
 ## Shape rationale
 
-Mirrors `PostCreateState` (form-value preservation + `error?: ZodError`).
+Mirrors `CreatePostState` (form-value preservation + `error?: ZodError`).
 No string error field — the generic message lives in client `useState`
 inside the `RegisterForm` orchestrator, set by `withCallbacks`. See
 [`../../decisions.md`](../../decisions.md) → "Generic error string via
@@ -33,7 +33,7 @@ the wiring on the form side.
 
 `CreateUserState` (verb-first), not `UserCreateState`. Aligns with the
 rest of the feature's verb-first naming: `createUser` (action),
-`CreateUserDto`, `createUserSchema`. The legacy `PostCreateState` name
+`CreateUserDto`, `createUserSchema`. The legacy `CreatePostState` name
 is intentionally not mirrored — see [`../../decisions.md`](../../decisions.md)
 → "Action-state type named `CreateUserState`" for the rationale.
 
