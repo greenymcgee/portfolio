@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|-------|
-| **Phase** | Step 2 complete — architecture.md generated; 2 open refinement todos (T13, T14) |
+| **Phase** | Step 3 — refinement complete; all todos resolved |
 | **Current PR** | None — no PRs opened yet |
 | **Blocked** | No |
 | **Last updated** | 2026-05-04 |
@@ -29,14 +29,15 @@
 | 2 | Backend: `updatePost` | Not started |
 | 3 | Backend: `getPosts` unpublished filter | Not started |
 | 4 | `createPost` draft flow + remove `/posts/new` + Edit button | Not started |
-| 5 | Edit post page — core structure + autosave | Not started |
-| 6 | Edit post page — title + RTE styles | Not started |
-| 7 | Edit post page — sticky action bar + RTE controls | Not started |
-| 8 | Modal component (Shadcn Dialog) | Not started |
-| 9 | Description button + Close button | Not started |
-| 10 | Publish/Unpublish button | Not started |
-| 11 | PostsPageAdminMenuContent unpublished filter | Not started |
+| 5 | `LegacyRichTextEditor` rename | Not started |
+| 6 | Edit post page — core structure + autosave | Not started |
+| 7 | Edit post page — title + RTE styles | Not started |
+| 8 | Edit post page — sticky action bar + RTE controls | Not started |
+| 9 | Modal component (Shadcn Dialog) | Not started |
+| 10 | Description button + Close button | Not started |
+| 11 | Publish/Unpublish button | Not started |
+| 12 | PostsPageAdminMenuContent unpublished filter | Not started |
 
 ## Open Todos
 
-None — all todos resolved (T9 → D16, T10 → D17, T11 → D18, T12 → D19).
+None — all refinement todos resolved.

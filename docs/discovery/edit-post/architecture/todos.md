@@ -129,33 +129,24 @@ Implement in PR 10.
 
 ## T13: `PublishPostDto` and `publishPost` implementation
 
-**Status:** Open
+**Status:** Resolved → D20
 
-The architecture specifies that `publishPost` reads from the DB to validate
-fields before setting `publishedAt` (→ D19), but the service section does not
-fully specify the path. Needs resolution:
-
-- Does `PostService.publish` call `PostRepository.findOne` internally before
-  calling `PostRepository.publish`?
-- Does the DTO only carry `{ id, publish: boolean }`, with all content
-  validation happening at the service layer against the DB-read values?
-- What error type is returned when publish validation fails (empty title /
-  description / content)?
+`PublishPostDto` carries `{ id, publishing: boolean, title, description, content }`.
+`publishPost` is atomic — saves content fields and sets/clears `publishedAt` in
+one DB write. No prior `updatePost` flush needed; Publish button handler simply
+cancels the debounce and calls `publishPost` with current form state.
 
 ---
 
 ## T14: `RichTextEditor` `omitToolbar` changes
 
-**Status:** Open
+**Status:** Resolved → D21
 
-The architecture describes lifting `ToolbarPlugin` out of `RichTextEditor`
-(→ D5) but does not specify the implementation detail:
-
-- Does `ToolbarPlugin` become a separately exported component from its own
-  file, or is it re-exported from `RichTextEditor`?
-- What does the internal structure of `RichTextEditor` look like after the
-  split — does the plugin list inside the composer shrink, or is it replaced?
-- Are there any prop changes to `RichTextEditor` beyond `omitToolbar`?
+No `omitToolbar` prop. The existing `RichTextEditor` is renamed
+`LegacyRichTextEditor` in PR 5. A new `RichTextEditor` purpose-built for the
+edit page (no internal `LexicalComposer`, no embedded toolbar) is introduced
+alongside it. `ToolbarPlugin` is re-exported from `richTextEditor/index.ts`.
+`EditPostClient` owns the `LexicalComposer`.
 
 ---
 

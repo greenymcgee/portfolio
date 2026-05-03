@@ -63,7 +63,7 @@ than to a form. The existing `/posts/new` page and `CreatePostForm` are deleted.
 
 **Backend components:**
 - `UpdatePostDto` + `update-post.schema.ts` — validates `{ id, title, description, content }`
-- `PublishPostDto` + `publish-post.schema.ts` — validates `{ id, publish: boolean }`
+- `PublishPostDto` + `publish-post.schema.ts` — validates `{ id, publishing: boolean, title, description, content }`
 - `PostService.update` + `PostRepository.update`
 - `PostService.publish` + `PostRepository.publish`
 - `PostService.findAndCount` — updated to accept `unpublished` flag with auth check
@@ -75,7 +75,9 @@ than to a form. The existing `/posts/new` page and `CreatePostForm` are deleted.
 - `EditPostContent` — async RSC that fetches the post before rendering the client
 - `EditPostClient` — client component; owns all editor state and autosave logic
 - `ActionBar` — sticky top bar; contains toolbar, save indicator, and action buttons
-- `ToolbarPlugin` — lifted out of `RichTextEditor`, rendered inside `ActionBar` within the same `LexicalComposer`
+- `ToolbarPlugin` — rendered inside `ActionBar` within the shared `LexicalComposer` owned by `EditPostClient`
+- `LegacyRichTextEditor` — the existing `RichTextEditor` renamed in its own PR before the edit page work begins
+- New `RichTextEditor` — purpose-built for the edit page; no embedded toolbar, no internal `LexicalComposer`; exported alongside `ToolbarPlugin` from `globals/components/richTextEditor`
 - `useAutoSave` — custom debounce hook
 - Shadcn `Dialog` component — new, installed via `npx shadcn add dialog`
 
@@ -136,14 +138,14 @@ than to a form. The existing `/posts/new` page and `CreatePostForm` are deleted.
 1. Admin navigates to `/posts/[id]/edit` via the Edit button.
 2. Admin fills out title, description, and content (all required for publish).
 3. Admin clicks "Publish" — button is enabled only when all three fields are non-empty.
-4. Pending debounce is cancelled; `updatePost` flushes; `publishPost` fires.
+4. Pending debounce is cancelled; `publishPost` fires with current form state.
 5. Admin is redirected to the post detail page showing the published date.
 
 #### Flow 6: Unpublishing a Post (Admin)
 
 1. Admin navigates to `/posts/[id]/edit` via the Edit button on a published post.
 2. Admin clicks "Unpublish".
-3. `publishPost({ id, publish: false })` fires — no content validation.
+3. `publishPost({ id, publishing: false, ...currentFormState })` fires — `publishedAt` is set to `null`; content fields are saved but content validation is skipped.
 4. Admin stays on the edit page; the button label toggles to "Publish". No redirect.
 
 #### Flow 7: Viewing Unpublished Posts (Admin)
@@ -193,7 +195,7 @@ than to a form. The existing `/posts/new` page and `CreatePostForm` are deleted.
 | Unpublish fails — generic error | Sonner toast shown. Button label does not toggle. |
 | Close fails — generic error | Sonner toast shown. Admin remains on the edit page. |
 | Close clicked with no title | Pending debounce cancelled; `updatePost` attempted; on failure with no title, delete confirmation dialog is shown. |
-| Autosave and Publish fire simultaneously | Publish cancels the debounce, flushes `updatePost`, then calls `publishPost`. Subsequent autosaves are safe because `updatePost` never touches `publishedAt`. (→ D19) |
+| Autosave and Publish fire simultaneously | Publish cancels the debounce and calls `publishPost` with current form state — no prior `updatePost` flush needed. Subsequent autosaves are safe because `updatePost` never touches `publishedAt`. (→ D20) |
 | Publish button clicked with empty title, description, or content | Button is disabled client-side; `publishPost` validates server-side as a second gate. |
 | Admin arrives at the edit page without a valid session | Server-side RSC redirect to home before the client component renders. `useLayoutEffect` guard fires as belt-and-suspenders. |
 
@@ -257,7 +259,7 @@ export const CACHE_TAGS = {
 
 **Input validation:** all inputs validated via Zod DTOs before reaching the
 service layer. `UpdatePostDto` validates `{ id, title, description, content }`.
-`PublishPostDto` validates `{ id, publish: boolean }`.
+`PublishPostDto` validates `{ id, publishing: boolean, title, description, content }`.
 
 ### Services / Workers
 
@@ -270,9 +272,9 @@ service layer. `UpdatePostDto` validates `{ id, title, description, content }`.
 #### `PostService.publish` (new)
 
 - Calls `authenticateAPISession()` then `authorizeUser(token, 'posts', 'publish')`.
-- When `publish: true`: validates title, description, and content are non-empty before setting `publishedAt = now()`.
-- When `publish: false`: clears `publishedAt` unconditionally.
-- Delegates to `PostRepository.publish({ id, publishedAt })`.
+- When `publishing: true`: validates title, description, and content are non-empty before proceeding.
+- When `publishing: false`: skips content validation; `publishedAt` is set to `null`.
+- Delegates to `PostRepository.publish({ id, title, description, content, publishedAt })`.
 - Returns `ResultAsync<Post, ValidationError | UnknownError>`.
 
 #### `PostService.findAndCount` (updated)
@@ -311,16 +313,24 @@ app/posts/[id]/edit/page.tsx          ← sync RSC; auth guard; <Suspense>
                     │     └── CloseButton
                     ├── TitleInput               ← auto-focused on mount
                     ├── PublishedAtSubtitle       ← static <time>, set on load
-                    └── RichTextEditor           ← omitToolbar={true}
+                    └── RichTextEditor
 ```
 
-#### `LexicalComposer` strategy (→ D5)
+#### `LexicalComposer` strategy (→ D5, D21)
 
 `ToolbarPlugin` uses `useLexicalComposerContext()` and must be a descendant of
-`LexicalComposer`. The composer is lifted to wrap the entire page (action bar +
-editor area). `RichTextEditor` gains an `omitToolbar` prop (default `false`) that
-skips the `ToolbarPlugin` render when `true`. This is backwards-compatible for
-all existing consumers.
+the same `LexicalComposer` as the editor content. `EditPostClient` owns and
+renders the `LexicalComposer`, wrapping both `ActionBar` (which contains
+`ToolbarPlugin`) and the new `RichTextEditor`.
+
+The new `RichTextEditor` is purpose-built for this page: no internal
+`LexicalComposer`, no embedded `ToolbarPlugin`. `ToolbarPlugin` is exported
+alongside `RichTextEditor` from `globals/components/richTextEditor/index.ts`.
+
+The existing `RichTextEditor` is renamed `LegacyRichTextEditor` in a dedicated
+PR (PR 5 in the rollout) before the edit page work begins. It is otherwise
+unchanged — existing consumers are unaffected. The new `RichTextEditor` becomes
+the foundation going forward.
 
 #### `useAutoSave` hook (→ D4)
 
@@ -358,8 +368,7 @@ input (field-specific guidance) alongside the indicator error (→ D12 amended b
 #### Publish/Unpublish button (→ D3, D9, D19)
 
 - Disabled when any of title, description, or content is empty.
-- On Publish click: cancel debounce → flush `updatePost` → on success call
-  `publishPost` → on success redirect to `ROUTES.post(id)`.
+- On Publish click: cancel debounce → call `publishPost` with current form state → on success redirect to `ROUTES.post(id)`.
 - On Unpublish click: call `publishPost({ id, publish: false })` → on success
   toggle label in-place. No redirect.
 
@@ -453,18 +462,20 @@ prop — when `true`, page links are built as
 | 2 | Backend: `updatePost` | `UpdatePostDto`, `PostService.update`, `PostRepository.update`, `updatePost` action, `getPost` caching, `deletePost` cache fix, tests |
 | 3 | Backend: `getPosts` filter | `unpublished` param in DTO/schema; `PostService.findAndCount` auth check; repository WHERE clause; tests |
 | 4 | `createPost` + edit button | Draft redirect; remove `/posts/new`; `PostsPageAdminMenuContent` → form; `PostPageAdminMenuContent` → Edit link + form; `ROUTES.editPost`; tests |
-| 5 | Edit page — core | `page.tsx`, `EditPostContent`, `EditPostClient`, `useAutoSave`, auth guard, tests |
-| 6 | Title + RTE styles | Invisible title input; editor area styles matching `design-reference.png`; `publishedAt` subtitle |
-| 7 | Sticky action bar + RTE controls | `ActionBar`; `ToolbarPlugin` lifted; `RichTextEditor` `omitToolbar` prop |
-| 8 | Modal component | `globals/components/ui/dialog/`; Shadcn Dialog install; tests |
-| 9 | Description + Close buttons | Description modal; Close flush-and-redirect; no-title confirmation dialog; tests |
-| 10 | Publish/Unpublish button | `publishPost` action; `PublishUnpublishButton`; disabled state; Publish flush sequence; tests |
-| 11 | Unpublished filter | `PostsPageAdminMenuContent` toggle; `Pagination` `unpublished` prop; tests |
+| 5 | `LegacyRichTextEditor` rename | Rename existing `RichTextEditor` → `LegacyRichTextEditor`; update all consumers; no behaviour changes |
+| 6 | Edit page — core | `page.tsx`, `EditPostContent`, `EditPostClient`, `useAutoSave`, auth guard, tests |
+| 7 | Title + RTE styles | Invisible title input; editor area styles matching `design-reference.png`; `publishedAt` subtitle |
+| 8 | Sticky action bar + RTE controls | `ActionBar`; new `RichTextEditor`; `ToolbarPlugin` in `ActionBar`; `LexicalComposer` in `EditPostClient` |
+| 9 | Modal component | `globals/components/ui/dialog/`; Shadcn Dialog install; tests |
+| 10 | Description + Close buttons | Description modal; Close flush-and-redirect; no-title confirmation dialog; tests |
+| 11 | Publish/Unpublish button | `publishPost` action; `PublishUnpublishButton`; disabled state; Publish flush sequence; tests |
+| 12 | Unpublished filter | `PostsPageAdminMenuContent` toggle; `Pagination` `unpublished` prop; tests |
 
 **Hard dependencies:**
 - PR 1 gates everything (index must exist before unique errors are meaningful; content default must be gone before `createPost` stops relying on it).
 - PR 2 gates PR 4 (`updatePost` must exist before autosave is wired up).
-- PR 8 gates PR 9 (Dialog must exist before Description modal and confirmation dialog).
+- PR 5 gates PR 6–8 (`LegacyRichTextEditor` rename must land before any edit page work touches `RichTextEditor`).
+- PR 9 gates PR 10 (Dialog must exist before Description modal and confirmation dialog).
 - PR 4 is the only PR that removes user-visible functionality (`/posts/new`) — ship after PR 2 is verified.
 
 **Rollback:** Each PR is independently revertable. PRs 1–3 are backend-only with no user-visible changes. The feature becomes externally visible in PR 4 when `/posts/new` is removed.
@@ -475,11 +486,11 @@ prop — when `true`, page links are built as
 
 | Risk | Severity | Mitigation |
 |------|----------|-----------|
-| R1: `ToolbarPlugin` in the action bar requires `LexicalComposer` to wrap both areas — highest frontend complexity | Medium | Decided (→ D5): single `LexicalComposer` wraps the full page. `omitToolbar` prop is backwards-compatible. |
+| R1: `ToolbarPlugin` in the action bar requires `LexicalComposer` to wrap both areas — highest frontend complexity | Medium | Decided (→ D5, D21): `EditPostClient` owns the `LexicalComposer`. New `RichTextEditor` has no internal composer. Existing consumers use `LegacyRichTextEditor` unchanged. |
 | R2: Partial unique index via raw SQL migration — Prisma may overwrite on future `migrate dev` runs | Low | The migration is hand-authored; Prisma will not regenerate it. The `prisma/migrations/` folder is the source of truth. |
 | R3: `createPost` relied on `@default("{}")` at the DB level | Low | Decided (→ D2): `CreatePostDto` generates the initial Lexical state when no `content` is provided. Migration drops the default in PR 1. |
 | R4: `getPosts` cache + unpublished filter create two cache entries | Low | Decided (→ D7, D11): both entries are tagged `'posts'`; `revalidateTag('posts')` invalidates both. |
-| R5: Autosave / Publish race condition | Low | Decided (→ D19): Publish cancels the debounce and flushes `updatePost` first. `updatePost` never touches `publishedAt`, so no subsequent autosave can clear the published state. |
+| R5: Autosave / Publish race condition | Low | Decided (→ D20): Publish cancels the debounce and calls `publishPost` directly with current form state. `updatePost` never touches `publishedAt`, so no subsequent autosave can clear the published state. |
 
 ---
 

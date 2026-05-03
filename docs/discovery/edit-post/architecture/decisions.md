@@ -418,3 +418,44 @@ before `publishedAt` is set.
 responsibilities (save + publish). Letting the debounce fire naturally before
 publish — introduces a race window. A two-button "save then publish" UX —
 unnecessary complexity.
+
+---
+
+## D20: `publishPost` is atomic — saves content fields and sets `publishedAt` together
+
+**Decision:** `PublishPostDto` carries `{ id, publishing: boolean, title: string,
+description: string, content: string }`. `PostRepository.publish` performs a
+single `prisma.post.update` that writes `title`, `description`, `content`, and
+`publishedAt` in one call. `publishedAt` is set to `new Date()` when
+`publishing: true`, or `null` when `publishing: false`.
+
+The Publish/Unpublish button handler becomes: (1) cancel the pending debounce,
+(2) call `publishPost` with current form state, (3) on success redirect to
+`ROUTES.post(id)` (publish) or stay in place (unpublish). No prior `updatePost`
+flush is needed.
+
+The field is named `publishing` (present-participle adjective describing the
+intended state) rather than `publish` (a verb command).
+
+**Why:** Since `publishPost` carries all content fields itself, there is no need
+to flush `updatePost` first — the atomic write guarantees the DB reflects the
+current client state and sets `publishedAt` in a single round-trip. The same
+concern about clients sending arbitrary values applies equally to `updatePost`,
+so there is no additional risk. Eliminating the flush step simplifies the button
+handler and removes a sequential async dependency.
+
+**Ruled out:** Separate flush (`updatePost`) then `publishPost` (D19 approach) —
+requires two sequential server round-trips and a brittle "flush succeeded" gate.
+DB-read approach (service fetches post to validate fields) — an extra read that
+provides no additional safety over DTO validation.
+
+**Supersedes:** D19 (the flush-first rationale no longer applies).
+
+---
+
+## D21: New `RichTextEditor` for the edit page; existing component renamed `LegacyRichTextEditor`
+
+- **Decision:** The existing `RichTextEditor` is renamed `LegacyRichTextEditor` in a dedicated PR before the edit page work begins. A new `RichTextEditor` is built specifically for the edit page: no internal `LexicalComposer`, no embedded `ToolbarPlugin`. `EditPostClient` owns the `LexicalComposer` and wraps both `ActionBar` (which renders `ToolbarPlugin`) and the new `RichTextEditor`. `ToolbarPlugin` is re-exported from `globals/components/richTextEditor/index.ts` alongside `RichTextEditor`. The new component becomes the foundation going forward.
+- **Why:** Adding an `omitToolbar` branch to the existing component introduces conditional logic that serves only the edit page use case. A purpose-built component is simpler, has no backwards-compatibility surface, and makes the edit page's `LexicalComposer` ownership explicit. The rename keeps existing consumers working without any changes.
+- **Alternatives considered:** `omitToolbar` prop on the existing `RichTextEditor` — requires the component to conditionally skip its own `LexicalComposer`, which is confusing and creates an implicit contract that the caller must provide one. Portal-based toolbar rendering — unnecessary indirection when a shared composer achieves the same result cleanly.
+- **Step:** Step 3 — refinement (T14)
