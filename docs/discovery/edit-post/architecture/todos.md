@@ -182,19 +182,11 @@ Prisma-managed — no partial index, no `--create-only`. D1 and D22 superseded.
 
 ## T17: Relax UpdatePostDto validation — description and content are optional
 
-**Status:** Open
+**Status:** Resolved → D26 (supersedes D25)
 
-`UpdatePostDto` must not error when `description` or `content` are missing.
-Autosave fires continuously as the admin types, including before any
-description or rich-text content has been entered. Rejecting partial state
-defeats the purpose of autosaving.
-
-The correct shape is `create-post.schema.ts` — use it as the reference for
-`update-post.schema.ts`. Only `id` and `title` need to be required (or `id`
-only, depending on how the create schema is shaped).
-
-Impacts: `update-post.schema.ts`, `UpdatePostDto`, `services.md`,
-`testing-strategy.md`, Jira ticket EDIT-POST-2.
+`id` (`coerce.number().int().min(1)`) and `title` (`string().min(1)`) are
+required. `description` and `content` are optional/nullable with transform to
+`''`. Updated: `services.md`, `testing-strategy.md`, `pr-04.md`.
 
 ---
 

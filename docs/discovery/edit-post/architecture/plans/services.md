@@ -8,6 +8,7 @@ _Source: [`../architecture.md`](../architecture.md) § Services / Workers_
 - Delegates to `PostRepository.update({ id, title, description, content })`.
 - Returns `ResultAsync<Post, UniqueConstraintError | UnknownError>`.
 - **Never writes `publishedAt`.**
+- **Required fields:** `id` (`coerce.number().int().min(1)`) and `title` (`string().min(1)`). `description` and `content` are optional/nullable — absent fields are coerced to `''` by the schema transform. Autosave fires before description or rich-text content is entered, but the post always has a title (placeholder on creation), so requiring title is safe.
 
 ## `PostService.publish` (new)
 

@@ -15,7 +15,7 @@ Real test DB, `maxWorkers: 1` to avoid parallelism issues.
 
 | Subject | Cases |
 |---------|-------|
-| `UpdatePostDto` | Valid input; missing required fields; unique constraint path |
+| `UpdatePostDto` | Valid input; missing `id`; non-numeric `id`; missing `title`; empty `title`; partial payload (no description, no content) accepted; unique constraint path |
 | `PublishPostDto` | Valid input; `publishing: true` validation (empty title / description / content) |
 | `PostService.update` | Success; auth failure; permission failure; unique constraint |
 | `PostService.publish` | Publish success; unpublish success; validation failure (empty fields on publish) |

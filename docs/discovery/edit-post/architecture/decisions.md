@@ -490,3 +490,25 @@ provides no additional safety over DTO validation.
 - **Alternatives considered:** Feature-flagging `/posts/new` removal — rejected (no feature flags per constraints). Keeping the unpublished filter last — leaves the admin blind to drafts during the entire build; the toggle is low-risk and should land as soon as the backend is ready.
 - **Resolves:** T18, T20
 - **Step:** Step 3 — Iterative Refinement (T18, T20)
+
+---
+
+## D25: `UpdatePostDto` requires only `id`; `title`, `description`, `content` are optional
+
+- **Decision:** `id` is the only required field in `UpdatePostDto`. It is coerced from form data string to an integer via `coerce.number().int().min(1)`. `title`, `description`, and `content` are `optional().nullable()` with a `transformString` coercion (absent/null → `''`), mirroring the existing `create-post.schema.ts` pattern.
+- **Why:** Autosave fires continuously as the admin types — including before any description or rich-text content has been entered. Requiring `description` or `content` on every save would cause autosave to fail the moment a new post is opened. The transform-to-empty-string approach ensures the repository always receives a complete `{ title, description, content }` payload regardless of which fields are present.
+- **Alternatives considered:** Requiring `title` in addition to `id` — rejected because autosave should not block when the admin clears the title (the UX handles the no-title state separately via `CloseButton` confirmation). Optional fields without transform — rejected because downstream code (repository, service) expects strings, not `undefined`.
+- **Resolves:** T17
+- **Step:** Step 3 — Iterative Refinement (T17)
+- **Superseded by:** D26
+
+---
+
+## D26: `UpdatePostDto` requires `id` and `title`; supersedes D25
+
+- **Decision:** Both `id` (`coerce.number().int().min(1)`) and `title` (`string().min(1)`) are required in `UpdatePostDto`. `description` and `content` remain optional/nullable with transform to `''`.
+- **Why:** The post always has a title — `createPost` writes a timestamped placeholder so the admin can never open an edit page with a blank title field. Requiring `title` ensures the DB is never written with an empty string, which avoids collisions on the `@unique` constraint (D23) and keeps the data model clean. When the admin clears the title, autosave fails validation and the SaveStateIndicator surfaces an error — which is the correct UX signal.
+- **Alternatives considered:** Title optional (D25) — rejected because it would allow autosave to write `title: ''`, risking a unique constraint error on a second no-title post and leaving silent empty-title records in the DB.
+- **Supersedes:** D25
+- **Resolves:** T17 (amended)
+- **Step:** Step 3 — Iterative Refinement (T17)
