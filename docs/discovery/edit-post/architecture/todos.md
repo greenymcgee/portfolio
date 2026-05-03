@@ -200,7 +200,7 @@ Impacts: `update-post.schema.ts`, `UpdatePostDto`, `services.md`,
 
 ## T18: Restructure rollout — defer /posts/new deletion; move rename and modal earlier
 
-**Status:** Open
+**Status:** Resolved → D24
 
 PR 4 (deleting `/posts/new` and `CreatePostForm`) currently lands at position
 4 — far too early. The admin has no way to create posts for the duration of
@@ -243,7 +243,7 @@ and the `DescriptionModal` acceptance criteria.
 
 ## T20: Move unpublished filter earlier in the rollout sequence
 
-**Status:** Open
+**Status:** Resolved → D24
 
 The unpublished toggle is currently PR 12 (last). The admin needs visibility
 into unpublished posts throughout the entire edit page build — not just after

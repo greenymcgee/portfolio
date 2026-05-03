@@ -3,7 +3,7 @@
 | Field | Value |
 |-------|-------|
 | **Phase** | Step 5 complete — resolving engineer notes (T16–T20) |
-| **Current Focus** | Step 3 refinement — T16 resolved, T17–T20 open |
+| **Current Focus** | Step 3 refinement — T16, T18, T20 resolved; T17, T19 open |
 | **Current PR** | None — no PRs opened yet |
 | **Blocked** | No |
 | **Last updated** | 2026-05-03 |
@@ -26,25 +26,25 @@
 
 | # | Title | Ticket | Status |
 |---|-------|--------|--------|
-| 1 | Database migration | [EDIT-POST-1](../jira/pr-01.md) | Not started |
-| 2 | Backend: `updatePost` | [EDIT-POST-2](../jira/pr-02.md) | Not started |
-| 3 | Backend: `getPosts` unpublished filter | [EDIT-POST-3](../jira/pr-03.md) | Not started |
-| 4 | `createPost` draft flow + remove `/posts/new` + Edit button | [EDIT-POST-4](../jira/pr-04.md) | Not started |
-| 5 | `LegacyRichTextEditor` rename | [EDIT-POST-5](../jira/pr-05.md) | Not started |
-| 6 | Edit post page — core structure + autosave | [EDIT-POST-6](../jira/pr-06.md) | Not started |
-| 7 | Edit post page — title + RTE styles | [EDIT-POST-7](../jira/pr-07.md) | Not started |
-| 8 | Edit post page — sticky action bar + RTE controls | [EDIT-POST-8](../jira/pr-08.md) | Not started |
-| 9 | Modal component (Shadcn Dialog) | [EDIT-POST-9](../jira/pr-09.md) | Not started |
+| 1 | `LegacyRichTextEditor` rename | [EDIT-POST-1](../jira/pr-01.md) | Not started |
+| 2 | Modal component (Shadcn Dialog) | [EDIT-POST-2](../jira/pr-02.md) | Not started |
+| 3 | Database migration | [EDIT-POST-3](../jira/pr-03.md) | Not started |
+| 4 | Backend: `updatePost` | [EDIT-POST-4](../jira/pr-04.md) | Not started |
+| 5 | Backend: `getPosts` unpublished filter | [EDIT-POST-5](../jira/pr-05.md) | Not started |
+| 6 | `PostsPageAdminMenuContent` unpublished toggle | [EDIT-POST-6](../jira/pr-06.md) | Not started |
+| 7 | Edit page — core structure + autosave | [EDIT-POST-7](../jira/pr-07.md) | Not started |
+| 8 | Edit page — title + RTE styles | [EDIT-POST-8](../jira/pr-08.md) | Not started |
+| 9 | Edit page — sticky action bar + RTE controls | [EDIT-POST-9](../jira/pr-09.md) | Not started |
 | 10 | Description button + Close button | [EDIT-POST-10](../jira/pr-10.md) | Not started |
 | 11 | Publish/Unpublish button | [EDIT-POST-11](../jira/pr-11.md) | Not started |
-| 12 | PostsPageAdminMenuContent unpublished filter | [EDIT-POST-12](../jira/pr-12.md) | Not started |
+| 12 | `createPost` draft flow + remove `/posts/new` + Edit button | [EDIT-POST-12](../jira/pr-12.md) | Not started |
 
 ## Open Todos
 
 | # | Summary | Impact |
 |---|---------|--------|
 | T16 | ~~Re-assess partial unique index on Post.title~~ | Resolved → D23 |
-| T17 | Relax UpdatePostDto — description and content are optional for autosave | update-post.schema.ts, PR 2 |
-| T18 | Restructure rollout — defer /posts/new deletion; move rename + modal earlier | All 12 PRs, rollout-strategy.md |
+| T17 | Relax UpdatePostDto — description and content are optional for autosave | update-post.schema.ts, PR 4 |
+| T18 | ~~Restructure rollout — defer /posts/new deletion; move rename + modal earlier~~ | Resolved → D24 |
 | T19 | Description modal — manual Save button instead of autosave on close | components.md, state-management.md, PR 10 |
-| T20 | Move unpublished filter earlier in rollout (after migration, not last) | rollout-strategy.md, PR 3, PR 12 |
+| T20 | ~~Move unpublished filter earlier in rollout (after migration, not last)~~ | Resolved → D24 |

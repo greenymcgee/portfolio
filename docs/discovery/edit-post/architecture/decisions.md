@@ -480,3 +480,13 @@ provides no additional safety over DTO validation.
 - **Supersedes:** D1 (partial index motivation is gone), D22 (`--create-only` workflow no longer needed)
 - **Resolves:** T16
 - **Step:** Step 3 — refinement (T16)
+
+---
+
+## D24: Rollout resequenced — rename and Dialog install first; /posts/new deletion last; unpublished filter early
+
+- **Decision:** All 12 PRs resequenced. PR 1: `LegacyRichTextEditor` rename (no deps — safe refactor that unblocks edit page work without depending on the migration). PR 2: Shadcn Dialog install (no deps — safe prerequisite). PR 3: DB migration (gates all backend work). PRs 4–5: backend (`updatePost`, `getPosts` unpublished filter). PR 6: `PostsPageAdminMenuContent` unpublished toggle (admin can now see unpublished drafts throughout the entire build). PRs 7–11: full edit page build. PR 12: `createPost` draft redirect + `/posts/new` deletion (last — edit page fully functional before any user-visible removal).
+- **Why:** The original sequence removed `/posts/new` at PR 4, leaving no way to create posts during the entire edit page build (PRs 5–11). Moving the rename (T18) and Dialog install to the front gives the edit page build clean, dep-free prerequisites. Moving the unpublished toggle to PR 6 (T20) ensures the admin has visibility into unpublished drafts from the start. Moving `/posts/new` deletion to last ensures it ships only after the replacement flow is proven end-to-end.
+- **Alternatives considered:** Feature-flagging `/posts/new` removal — rejected (no feature flags per constraints). Keeping the unpublished filter last — leaves the admin blind to drafts during the entire build; the toggle is low-risk and should land as soon as the backend is ready.
+- **Resolves:** T18, T20
+- **Step:** Step 3 — Iterative Refinement (T18, T20)
