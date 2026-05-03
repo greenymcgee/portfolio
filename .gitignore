@@ -51,3 +51,5 @@ next-env.d.ts
 
 .cursor/skills/architecture-discovery/**
 .claude/skills/architecture-discovery/**
+
+tmp/
