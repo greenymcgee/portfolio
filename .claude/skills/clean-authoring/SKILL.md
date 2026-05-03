@@ -30,6 +30,7 @@ Before finishing any new or refactored unit, verify:
 - [ ] No single-letter names anywhere.
 - [ ] Each if block includes a line break after the condition.
 - [ ] No comments unless the WHY is non-obvious (hidden constraint, surprising invariant, known workaround).
+- [ ] Keep things in alphabetical order when possible.
 
 If any box is unchecked, refactor before moving on.
 

@@ -1,0 +1,265 @@
+# Edit Post — Product Requirements (MVP)
+
+> **For Product**: Fill out each section below. The more specific you are here, the fewer mid-sprint surprises engineering will encounter. Sections marked (optional) can be skipped if not applicable, but consider whether they're truly irrelevant or just not yet decided.
+>
+> **For LLMs**: This is the primary input for engineering discovery. Read carefully — do not invent requirements that aren't stated here. If information is missing, add it to the Open Questions section and flag it during discovery.
+
+---
+
+## Definitions
+
+There aren't any unique terms to define for this feature.
+
+---
+
+## Overview
+
+### What is this feature?
+
+Currently, there is only a new post page. The goal for this feature is to avoid
+the new post page entirely, and instead create a new post when the new post
+button is clicked and immediately take the user to the edit post page. The page
+will work similar to a Confluence page, but with far fewer features.
+
+Features include:
+
+- **Title**: Edited in a text input at the top of the page. The input is not
+visible just like a Confluence input isn't visible. Clicking on the title allows
+editing. This is the immediately focused input on load. A title is required
+before a post can be published.
+- **Published At**: In a subtitle below the title just like the current
+posts/[id] page. This is auto-populated to the current date and time, unless the
+"Publish" form has been clicked and a publishedAt exists for the post.
+- **Description**: This is a button in the top action bar that opens a modal
+with a textarea for the description. A description is required before a post can
+be published.
+- **Content**: This is a rich text editor that is used to edit the content of
+the post. It's also not an obvious input like a Confluence page's content
+editor. It is required before a post can be published.
+- **Action Bar**: This is a sticky action bar at the top of the page like a Confluence page. It contains the following:
+  - "Description" button: Opens a modal with a textarea for the description.
+  - "Publish/Unpublish" button: Publishes the post if it is not published (then navigates to the post detail page), or unpublishes the post in-place if it is already published (no navigation).
+  - "Close" button: Saves the post and returns to the post page, but does not publish the post.
+  - "Rich Text Editor Controls": These are the controls that appear when the rich text editor is focused. They are the same as the controls that appear in the rich text editor today.
+
+### What problem does it solve?
+
+It eliminates the new post page, and consolidates editing a post into a single page.
+
+### What does success look like?
+
+- The new post page is no longer accessible.
+- Clicking the new post button creates a new post and takes the user to the edit post page
+- The PostPageAdminMenuContent includes an edit button that takes the user to the edit post page when clicked.
+- The edit post page is accessible and works as expected, including the title, description, content, and action bar.
+- The post is updated and published when the "Publish" button is clicked.
+- The post is updated and unpublished when the "Unpublish" button is clicked.
+- A new admin only feature is added to the PostsPageAdminMenuContent that allows the admin to add unpublished posts to the posts page.
+- The getPosts backend (dto, service, repository, etc.) is updated to include unpublished posts if the admin has the "unpublished" filter enabled, but only sends published posts by default.
+- The post autosaves 1 second after the last change.
+- The post is not publishable without a title, description, and content.
+- The "Publish" button is disabled if the title, description, or content is missing.
+- Clicking the "Close" button saves the post and returns to the post page.
+
+---
+
+## Personas & Permissions
+
+Who interacts with this feature? For each persona, clarify their role, what they can do, and how they authenticate.
+
+| Persona | Description | What They Do | Authentication |
+|---------|-------------|-------------|----------------|
+| Admin | Authenticated admin | Creates, edits, and publishes posts | NextAuth.js v4 session, `posts.create`, `posts.update`, and `posts.publish` permissions |
+| User | Anonymous user | Views published posts | None |
+
+---
+
+## User Flows
+
+Describe each major user flow step by step. Be specific about what the user sees and does — not how it's implemented.
+
+### Flow 1: Creating a Post (Admin)
+
+1. Admin navigates to the posts page...
+2. Admin sees the AdminMenuDialog and opens...
+3. Admin clicks on the "New Post" button...
+4. Admin is taken to the edit post page...
+5. Admin fills out the form...
+6. Admin clicks on the "Publish" button...
+7. Admin is taken to the post detail page...
+8. Admin sees the published post...
+
+### Flow 2: Editing a Post Title (Admin)
+
+1. Admin navigates to the posts page...
+2. Admin sees the AdminMenuDialog and opens...
+3. Admin clicks on the "Edit" button...
+4. Admin is taken to the edit post page...
+5. Admin begins typing in the auto-focused title input...
+6. Admin clicks on the "Close" button...
+7. Admin is taken back to the updated post page...
+8. Admin sees the updated post...
+
+### Flow 3: Editing a Post Description (Admin)
+
+1. Admin navigates to the posts page...
+2. Admin sees the AdminMenuDialog and opens...
+3. Admin clicks on the "Edit" button...
+4. Admin is taken to the edit post page...
+5. Admin clicks on the "Description" button in the action bar...
+6. Admin sees a modal with a "Description" heading and a textarea for the description...
+7. Admin begins typing in the textarea...
+8. Admin clicks on the "Close modal" button and the modal closes...
+9. Admin clicks on the "Close" button and is taken back to the updated post page...
+10. Admin sees the updated post...
+
+### Flow 4: Editing Post Content (Admin)
+
+1. Admin navigates to the posts page...
+2. Admin sees the AdminMenuDialog and opens...
+3. Admin clicks on the "Edit" button...
+4. Admin is taken to the edit post page...
+5. Admin clicks in the rich text editor...
+6. Admin clicks the heading dropdown and selects an h2 heading...
+7. Admin types a heading...
+8. Admin presses enter and types a paragraph...
+10. Admin clicks on the "Close" button and is taken back to the updated post page...
+11. Admin sees the updated post...
+
+### Flow 5: Publishing a Post (Admin)
+
+1. Admin navigates to the posts page...
+2. Admin clicks on a post...
+3. Admin sees the AdminMenuDialog and opens...
+4. Admin clicks on the "Edit" button...
+5. Admin is taken to the edit post page...
+6. Admin fills out the title, description, and content...
+7. Admin clicks on the "Publish" button...
+8. Admin is taken to the post detail page...
+9. Admin sees the published post with the date set to the current date and time...
+
+### Flow 6: Unpublishing a Post (Admin)
+
+1. Admin navigates to the posts page...
+2. Admin clicks on a post...
+3. Admin sees the AdminMenuDialog and opens...
+4. Admin clicks on the "Edit" button...
+5. Admin is taken to the edit post page...
+7. Admin clicks on the "Unpublish" button...
+8. Admin stays on the edit post page — the "Unpublish" button toggles to "Publish".
+
+### Flow 7: Viewing an Unpublished Post (Admin)
+
+1. Admin navigates to the posts page...
+2. Admin sees the AdminMenuDialog and opens...
+3. Admin clicks on the "Unpublished" filter...
+4. Admin sees the unpublished posts...
+5. Admin clicks on a post...
+6. Admin is taken to the post page...
+7. Admin sees the post...
+
+### Flow 8: Creating a Post With a Duplicate Title (Admin)
+
+1. Admin navigates to the posts page...
+2. Admin sees the AdminMenuDialog and opens...
+3. Admin clicks on "New Post" button...
+4. Admin is taken to the edit post page...
+5. Admin fills out the title...
+6. Autosave is attempted...
+7. Admin sees an error message stating the title must be unique.
+8. Admin changes the title...
+9. Autosave is attempted again...
+10. Admin sees the post is saved and the error message is removed...
+
+---
+
+## Designs
+
+- **Status**: Design reference only — no hi-fi mockup
+- **Design map**: See the design-reference.png file for the reference.
+
+---
+
+## Data & Fields
+
+The data that is collected, displayed, or modified is the post data.
+
+### Fields / Inputs
+
+| Field | Type | Required | Validation Rules | Notes |
+|-------|------|----------|-----------------|-------|
+| Title | String | Required | Must be unique | The title of the post. |
+| Description | String | Required | Must be less than 100 characters | The description of the post. |
+| Content | JSON | Required | Must be valid JSON | The content of the post. |
+| Published At | DateTime | Optional | Must be a valid date and time | The date and time the post was published. |
+
+### Data Lifecycle
+
+- How is this data created?
+  - Only admins can create, edit, and publish posts.
+  - User can view published posts.
+  - Admins can view all posts.
+  - Admins can edit all posts.
+  - Admins can publish all posts.
+  - Users can view published posts.
+- Is it ever deleted? Under what conditions?
+  - Posts are deleted when the admin clicks the "Delete" button.
+- Is any of this data sensitive (PII, financial, etc.)? No
+
+---
+
+## Scope & Constraints (MVP)
+
+- Posts are created when the admin clicks the "New Post" button. The post is immediately given a timestamped placeholder title (e.g. "Untitled — 2026-05-02 10:30:45") so the row is always created with a non-empty, unique title. The placeholder is replaced when the admin types a title and autosave fires.
+- Posts are edited when the admin clicks the "Edit" button.
+- Posts are published when the admin clicks the "Publish" button.
+- Posts are unpublished when the admin clicks the "Unpublish" button.
+- Posts are autosaved 1 second after the last change.
+- Posts are not publishable without a title, description, and content (backend validation).
+- The "Publish" button is disabled if the title, description, or content is missing (frontend validation).
+- The "Close" button saves the post and returns to the post page, but does not publish the post.
+- The title must be unique, and an error message is displayed if it is not upon autosave.
+- Users can view published posts.
+- The new post page is no longer in production.
+- The edit post page has middleware protection and a useLayoutEffect that redirects just like the new post page currently implements.
+- The `updatePost` backend (dto, service, repository, etc.) is created with auth and permission checks.
+
+### Out of Scope
+
+- The delete flow is already implemented
+
+### Constraints
+- **Dependencies**: A modal does not exist yet. Shadcn's modal needs to be audited for accessibility vs the native dialog element.
+- **Technical constraints**: A migration of the posts table is needed to add the unique constraint on the title, and remove the default value for the content because it would actually break the RichTextEditor if it ever saved.
+
+---
+
+## Rollout & Feature Flags
+
+This feature will go straight to main in a number of PRs separated by migrations, backend, frontend, and complexity in each area.
+
+- **Feature flag**: Not needed.
+
+---
+
+## Edge Cases & Error States
+
+What happens when things go wrong or users do something unexpected?
+
+| Scenario | Expected Behavior |
+|----------|------------------|
+| Admin closes the browser, closes the tab, navigates away via the back button, or follows an external link without changing the title | The timestamped placeholder draft persists in the database. It is findable via the unpublished filter and can be deleted via the existing delete flow. No data is lost. |
+| The autosave fails because of a unique constraint violation | An error message is displayed to the user. |
+| The autosave fails for an unknown reason | An error message is displayed to the user. |
+| Autosave and Publish fire at the same time | TBD — see open question in discovery. |
+| The publish request fails for an unknown reason | An error message is displayed to the user. |
+| The unpublish request fails for an unknown reason | An error message is displayed to the user. |
+| The close request fails for an unknown reason | An error message is displayed to the user. |
+
+---
+
+## References
+
+https://greenhouston.atlassian.net/wiki/x/AgAx
+
+-
