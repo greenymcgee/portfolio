@@ -59,3 +59,15 @@ never written back after mount.
 | Publish / Unpublish failure | Sonner toast |
 | Close failure (with title) | Sonner toast |
 | Close failure (no title) | Delete confirmation `Dialog` |
+| Description modal Save failure | Inline error in `DescriptionModal` |
+
+## Description Modal State (→ D27)
+
+`DescriptionModal` manages its own temporary local state (`localDescription`) while open. It does **not** touch `EditPostClient.description` until Save succeeds.
+
+| Action | Effect |
+|--------|--------|
+| Open modal | `localDescription` initialised from current `EditPostClient.description` |
+| Save (success) | `EditPostClient.description` updated → `cancelPendingDebounce` called → modal closes |
+| Save (failure) | Inline error shown in modal; `EditPostClient.description` unchanged |
+| Cancel | `localDescription` discarded; modal closes; no autosave triggered |

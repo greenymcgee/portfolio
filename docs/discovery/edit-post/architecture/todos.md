@@ -213,23 +213,13 @@ tickets will need to be updated once the new sequence is agreed.
 
 ## T19: Description modal — replace autosave trigger with manual Save button
 
-**Status:** Open
+**Status:** Resolved → D27
 
-The current design (components.md, Jira EDIT-POST-10) triggers autosave 1
-second after the description modal closes. This conflicts with the modal
-having a Cancel button — cancelling should discard changes, not save them.
-
-New behavior:
-- The modal holds temporary local state initialized from the current
-  description prop.
-- A **Save** button in the modal: writes the temp value to a hidden form
-  input (or directly updates `EditPostClient`'s `description` state), then
-  calls `updatePost` manually and closes the modal.
-- A **Cancel** button: discards temp state and closes the modal without saving.
-- Autosave does **not** fire on modal close.
-
-Impacts: `components.md`, `state-management.md`, Jira ticket EDIT-POST-10,
-and the `DescriptionModal` acceptance criteria.
+~~The current design triggers autosave 1 second after the modal closes.~~ Modal
+now uses a manual Save + Cancel pattern (Option A). Save calls `updatePost`
+directly, on success updates `EditPostClient.description` + calls
+`cancelPendingDebounce` + closes. Cancel discards temp state with no save.
+Updated: `components.md`, `state-management.md`, `jira/pr-10.md`.
 
 ---
 

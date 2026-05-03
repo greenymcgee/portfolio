@@ -2,8 +2,8 @@
 
 | Field | Value |
 |-------|-------|
-| **Phase** | Step 5 complete — resolving engineer notes (T16–T20) |
-| **Current Focus** | Step 3 refinement — T17 resolved; T19 open |
+| **Phase** | Step 5 complete — all engineer notes resolved (T16–T20) |
+| **Current Focus** | — |
 | **Current PR** | None — no PRs opened yet |
 | **Blocked** | No |
 | **Last updated** | 2026-05-03 |
@@ -46,5 +46,5 @@
 | T16 | ~~Re-assess partial unique index on Post.title~~ | Resolved → D23 |
 | T17 | ~~Relax UpdatePostDto — description and content are optional for autosave~~ | Resolved → D26 |
 | T18 | ~~Restructure rollout — defer /posts/new deletion; move rename + modal earlier~~ | Resolved → D24 |
-| T19 | Description modal — manual Save button instead of autosave on close | components.md, state-management.md, PR 10 |
+| T19 | ~~Description modal — manual Save button instead of autosave on close~~ | Resolved → D27 |
 | T20 | ~~Move unpublished filter earlier in rollout (after migration, not last)~~ | Resolved → D24 |

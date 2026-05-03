@@ -512,3 +512,13 @@ provides no additional safety over DTO validation.
 - **Supersedes:** D25
 - **Resolves:** T17 (amended)
 - **Step:** Step 3 — Iterative Refinement (T17)
+
+---
+
+## D27: Description modal — manual Save + Cancel (Option A)
+
+- **Decision:** `DescriptionModal` holds temporary local state (`localDescription`) initialised from the current description prop when the modal opens. The **Save** button calls `updatePost` directly with `{ id, title, description: localDescription, content }`, on success updates `EditPostClient.description` and calls `cancelPendingDebounce`, then closes the modal. Inline error is shown in the modal on failure. The **Cancel** button discards temp state and closes without saving. Autosave does not fire on modal close.
+- **Why:** Cancel-button semantics require that closing without Save truly discards changes. Triggering autosave on close — even 1 second later — conflicts with this: any description state change propagates to `useAutoSave` regardless of how the modal closed. The manual Save + cancel-debounce pattern gives the modal deterministic save/discard semantics.
+- **Alternatives considered:** Option B — update `EditPostClient.description` then call `flushPendingDebounce`. Rejected because the modal cannot display an inline error if the flush fails; the failure surface is the `SaveStateIndicator`, which is outside the modal and easy to miss.
+- **Resolves:** T19
+- **Step:** Step 3 — Iterative Refinement (T19)
