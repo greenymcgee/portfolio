@@ -7,11 +7,12 @@
 
 ## T15: Revisit migration approach — raw SQL vs Prisma migration
 
-**Status:** Resolved → D22
+**Status:** Resolved → D22 (superseded by D23)
 
-Use `prisma migrate dev --create-only` to generate the migration scaffold, then
-hand-edit the generated `migration.sql` to append the partial index. Standard
-Prisma workflow; only the `WHERE`-clause index line is hand-authored.
+~~Use `prisma migrate dev --create-only` to generate the migration scaffold, then
+hand-edit the generated `migration.sql` to append the partial index.~~ D22 is
+superseded — the migration is now fully Prisma-managed via `@unique` on
+`Post.title`. See D23.
 
 ---
 
@@ -26,11 +27,11 @@ no navigation. requirements.md (Action Bar description, Flows 1, 5, 6) updated.
 
 ## T0b: New plan for the auto-saved title problem
 
-**Status:** Resolved → D1, D8 confirmed
+**Status:** Resolved → D8 confirmed; D1 superseded by D23
 
-Timestamped placeholder title approach stands. Partial unique index
-(WHERE title != '') and createPost draft flow are confirmed as designed.
-"UNDER REVIEW" markers removed from D1 and D8.
+Timestamped placeholder title approach stands (D8). The partial unique index
+(D1) was later replaced by a full `@unique` constraint in `schema.prisma` (D23).
+"UNDER REVIEW" markers removed from D1 and D8 at this step.
 
 ---
 
@@ -172,21 +173,10 @@ when set. Implement in PR 11.
 
 ## T16: Re-assess partial unique index on Post.title (D1)
 
-**Status:** Open
+**Status:** Resolved → D23
 
-The decision to add a partial unique index on `Post.title WHERE title != ''`
-was not intentional — it was overlooked during refinement. D1 must be
-revisited before PR 1 is cut.
-
-Questions to resolve:
-- Should title uniqueness be enforced at the DB level at all? If not, D1
-  is reverted and the migration only drops the `content` default.
-- If enforcement is desired, is a partial index still the right mechanism,
-  or is application-layer validation sufficient?
-- Does the timestamped placeholder approach (D8) still make sense if
-  uniqueness is not enforced at the DB?
-
-Impacts: `data-models.md`, `migration.sql`, Jira ticket EDIT-POST-1, D1, D8.
+Full `@unique` on `Post.title` in `schema.prisma`. Migration is fully
+Prisma-managed — no partial index, no `--create-only`. D1 and D22 superseded.
 
 ---
 

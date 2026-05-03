@@ -24,6 +24,7 @@
 | Ship PRs in the right order (12-PR plan + hard dependencies) | [`./rollout-strategy.md`](./rollout-strategy.md) |
 | Look up open risks | [`./risks-open-questions.md`](./risks-open-questions.md) |
 | See why a decision was made (with alternatives) | [`../decisions.md`](../decisions.md) |
+| Pick up an implementation ticket for a specific PR | [`../jira/`](../jira/) |
 
 ## Document Info
 
@@ -49,7 +50,7 @@ trigger, a Publish/Unpublish toggle, and a Close button.
 On the backend, a new `updatePost` action handles autosave and a `publishPost`
 action handles publish/unpublish state. The `getPosts` read path gains an
 admin-only `?unpublished=true` filter. The `Post` table receives a migration:
-a partial unique index on non-empty titles, and the `content` column drops its
+a `@unique` constraint on `Post.title`, and the `content` column drops its
 `{}` default.
 
 **Personas:** Admin only. Anonymous users are unaffected — they continue to see
@@ -99,7 +100,7 @@ Unpublished filter path:
 
 Numbered for cross-reference — each links to [`../decisions.md`](../decisions.md) for full rationale.
 
-1. **Partial unique index, not schema-level `@unique`.** Allows multiple simultaneous empty-title drafts. Hand-written raw SQL migration; Prisma DSL has no `WHERE`-clause support. (D1)
+1. **Full `@unique` on `Post.title` in `schema.prisma`.** Migration is fully Prisma-managed — no hand-authored SQL. Timestamped placeholder ensures no draft is ever created with an empty title. (D23)
 2. **Remove `@default("{}")` from `Post.content`; `CreatePostDto` generates the initial Lexical state.** Eliminates the latent footgun where the `{}` default would break `RichTextEditor`. (D2)
 3. **Two separate server actions: `updatePost` (autosave) and `publishPost` (publish/unpublish).** Single responsibility per action; maps cleanly to existing `posts.update` and `posts.publish` permissions. (D3)
 4. **Custom `useAutoSave` hook — no new dependency.** `useRef` + `setTimeout`. `startTransition` keeps autosave non-blocking. (D4)
@@ -119,7 +120,7 @@ Numbered for cross-reference — each links to [`../decisions.md`](../decisions.
 | Area | Key decision summary | Doc |
 | --- | --- | --- |
 | Services (`PostService.update`, `PostService.publish`, `findAndCount`, `getPost` caching) | Two new service methods; permission check for `unpublished` flag outside cache boundary | [`./services.md`](./services.md) |
-| Data models (migration, cache tags, lifecycle) | Partial unique index via raw SQL; `CACHE_TAGS.post` added; `updatePost` never touches `publishedAt` | [`./data-models.md`](./data-models.md) |
+| Data models (migration, cache tags, lifecycle) | `@unique` on `Post.title`; fully Prisma-managed migration; `CACHE_TAGS.post` added; `updatePost` never touches `publishedAt` | [`./data-models.md`](./data-models.md) |
 | Security (route guard, action auth, DTO validation) | RSC redirect + `useLayoutEffect`; auth checked per action; no auth inside cache | [`./security-considerations.md`](./security-considerations.md) |
 
 ### Frontend (`./frontend/`)

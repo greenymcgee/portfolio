@@ -25,7 +25,7 @@ and a Close button.
 On the backend, a new `updatePost` action handles autosave and a `publishPost`
 action handles publish/unpublish state. The `getPosts` read path gains an
 admin-only `?unpublished=true` filter. The `Post` table receives a migration:
-a partial unique index on non-empty titles, and the `content` column drops its
+a `@unique` constraint on `Post.title`, and the `content` column drops its
 `{}` default.
 
 **Personas:** Admin only. Anonymous users are unaffected — they continue to see
@@ -205,20 +205,19 @@ than to a form. The existing `/posts/new` page and `CreatePostForm` are deleted.
 
 ### Data Model
 
-**Migration (PR 1)** — hand-written raw SQL migration, no Prisma schema changes
-beyond removing `@default("{}")` from `content`:
+**Migration (PR 1)** — fully Prisma-managed. Two `schema.prisma` changes: remove
+`@default("{}")` from `Post.content`; add `@unique` to `Post.title`. Prisma
+generates the migration SQL:
 
 ```sql
--- Partial unique index: enforce uniqueness only for non-empty titles.
--- Allows multiple simultaneous empty-title drafts (placeholder approach).
-CREATE UNIQUE INDEX "Post_title_key" ON "Post" (title) WHERE title != '';
-
 -- Remove the {} default; createPost will always supply a valid Lexical state.
 ALTER TABLE "Post" ALTER COLUMN "content" DROP DEFAULT;
+
+-- Enforce unique titles at the database level.
+CREATE UNIQUE INDEX "Post_title_key" ON "Post"("title");
 ```
 
-`schema.prisma` change: remove `@default("{}")` from `Post.content`. Do **not**
-add `@unique` to `title` — Prisma's schema DSL has no `WHERE` clause support.
+See `decisions.md` → D23 (supersedes D1 and D22).
 
 **New `CACHE_TAGS` entry:**
 
@@ -458,7 +457,7 @@ prop — when `true`, page links are built as
 
 | PR | Scope | Key deliverables |
 |----|-------|-----------------|
-| 1 | Migration | Partial unique index on `Post.title`; remove `content` default |
+| 1 | Migration | `@unique` constraint on `Post.title`; remove `content` default |
 | 2 | Backend: `updatePost` | `UpdatePostDto`, `PostService.update`, `PostRepository.update`, `updatePost` action, `getPost` caching, `deletePost` cache fix, tests |
 | 3 | Backend: `getPosts` filter | `unpublished` param in DTO/schema; `PostService.findAndCount` auth check; repository WHERE clause; tests |
 | 4 | `createPost` + edit button | Draft redirect; remove `/posts/new`; `PostsPageAdminMenuContent` → form; `PostPageAdminMenuContent` → Edit link + form; `ROUTES.editPost`; tests |
@@ -487,7 +486,7 @@ prop — when `true`, page links are built as
 | Risk | Severity | Mitigation |
 |------|----------|-----------|
 | R1: `ToolbarPlugin` in the action bar requires `LexicalComposer` to wrap both areas — highest frontend complexity | Medium | Decided (→ D5, D21): `EditPostClient` owns the `LexicalComposer`. New `RichTextEditor` has no internal composer. Existing consumers use `LegacyRichTextEditor` unchanged. |
-| R2: Partial unique index via raw SQL migration — Prisma may overwrite on future `migrate dev` runs | Low | The migration is hand-authored; Prisma will not regenerate it. The `prisma/migrations/` folder is the source of truth. |
+| R2: ~~Partial unique index via raw SQL migration~~ | — | Resolved → D23. Full `@unique` on `Post.title` in `schema.prisma`; migration is fully Prisma-managed. |
 | R3: `createPost` relied on `@default("{}")` at the DB level | Low | Decided (→ D2): `CreatePostDto` generates the initial Lexical state when no `content` is provided. Migration drops the default in PR 1. |
 | R4: `getPosts` cache + unpublished filter create two cache entries | Low | Decided (→ D7, D11): both entries are tagged `'posts'`; `revalidateTag('posts')` invalidates both. |
 | R5: Autosave / Publish race condition | Low | Decided (→ D20): Publish cancels the debounce and calls `publishPost` directly with current form state. `updatePost` never touches `publishedAt`, so no subsequent autosave can clear the published state. |

@@ -4,33 +4,24 @@ _Source: [`../architecture.md`](../architecture.md) § Data Model_
 
 ## Database Migration (PR 1)
 
-A standard Prisma-managed migration with one hand-authored SQL statement added.
-Workflow:
+A fully Prisma-managed migration — no hand-authored SQL required. Workflow:
 
 1. Remove `@default("{}")` from `Post.content` in `schema.prisma`.
-2. Run `prisma migrate dev --create-only` — Prisma generates a timestamped
-   migration directory with the schema-diff SQL (`ALTER COLUMN "content" DROP DEFAULT`).
-3. Hand-edit the generated `migration.sql` to append the partial unique index
-   (which Prisma's DSL cannot express):
-   ```sql
-   CREATE UNIQUE INDEX "Post_title_key" ON "Post" (title) WHERE title != '';
-   ```
-4. Run `prisma migrate dev` to apply the migration and record it in `_prisma_migrations`.
+2. Add `@unique` to `Post.title` in `schema.prisma`.
+3. Run `prisma migrate dev` — Prisma generates and applies both changes.
 
-The final `migration.sql` contains both statements:
+Prisma generates the following `migration.sql`:
 
 ```sql
 -- Remove the {} default; createPost will always supply a valid Lexical state.
 ALTER TABLE "Post" ALTER COLUMN "content" DROP DEFAULT;
 
--- Partial unique index: enforce uniqueness only for non-empty titles.
--- Allows multiple simultaneous empty-title drafts (placeholder approach).
-CREATE UNIQUE INDEX "Post_title_key" ON "Post" (title) WHERE title != '';
+-- Enforce unique titles at the database level.
+CREATE UNIQUE INDEX "Post_title_key" ON "Post"("title");
 ```
 
-**`schema.prisma` change:** remove `@default("{}")` from `Post.content`. Do **not**
-add `@unique` to `title` — Prisma's schema DSL has no `WHERE` clause support for
-partial unique indexes. See [decisions.md](../decisions.md) → D22.
+**`schema.prisma` changes:** remove `@default("{}")` from `Post.content`; add
+`@unique` to `Post.title`. See [decisions.md](../decisions.md) → D23.
 
 ## New Cache Tag
 
@@ -78,6 +69,6 @@ that fires after a publish cannot clear the published state. See [`../decisions.
 - **`content`:** result of `createHeadlessBlogEditor()` serialized to JSON
 - **`description`:** `""`
 
-The partial unique index uses `WHERE title != ''`, so the timestamped placeholder
-(non-empty string) is subject to the uniqueness constraint. Two simultaneous drafts
-opened within the same second would collide — acceptable at this scale.
+The full unique constraint covers all titles. Two simultaneous drafts opened within
+the same second would produce identical timestamped placeholders and collide —
+acceptable at this scale.

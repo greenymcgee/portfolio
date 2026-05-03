@@ -469,3 +469,14 @@ provides no additional safety over DTO validation.
 - **Alternatives considered:** Standalone raw SQL file outside `prisma/migrations/` — not tracked by Prisma, easy to mis-order or miss during deployment. Two separate migrations (one generated, one hand-written for the index) — unnecessary split; one logical change belongs in one migration.
 - **Resolves:** T15
 - **Step:** Step 3 — refinement (T15)
+
+---
+
+## D23: Full `@unique` on `Post.title` — supersedes D1 and D22
+
+- **Decision:** Add `@unique` to `Post.title` in `schema.prisma`. Prisma generates the unique constraint SQL automatically. No hand-authored partial index and no `--create-only` workaround are needed. The migration is fully Prisma-managed.
+- **Why:** The partial index (`WHERE title != ''`) was motivated by a design that allowed multiple empty-title drafts. The timestamped placeholder approach (D8) means `createPost` never writes `title = ''`, so the empty-string exclusion serves no purpose. `UpdatePostDto` requires a non-empty title, so blank-title autosaves are rejected before reaching the DB. A full unique constraint is simpler, directly expressible in the Prisma schema, and provides complete integrity coverage.
+- **Ruled out:** Partial index — the `WHERE title != ''` exclusion is no longer needed; retaining it would be complexity with no benefit. Application-layer-only uniqueness — risks integrity if the DTO path is bypassed.
+- **Supersedes:** D1 (partial index motivation is gone), D22 (`--create-only` workflow no longer needed)
+- **Resolves:** T16
+- **Step:** Step 3 — refinement (T16)

@@ -6,7 +6,7 @@ _Source: [`../architecture.md`](../architecture.md) § Rollout Plan_
 
 | PR | Scope | Key Deliverables |
 |----|-------|-----------------|
-| 1 | Migration | Partial unique index on `Post.title`; remove `content` `@default("{}")` |
+| 1 | Migration | `@unique` constraint on `Post.title`; remove `content` `@default("{}")` |
 | 2 | Backend: `updatePost` | `UpdatePostDto`, `PostService.update`, `PostRepository.update`, `updatePost` action, `getPost` caching, `deletePost` cache fix, tests |
 | 3 | Backend: `getPosts` filter | `unpublished` param in DTO/schema; `PostService.findAndCount` auth check; repository `WHERE` clause; tests |
 | 4 | `createPost` + edit button | Draft redirect; remove `/posts/new`; `PostsPageAdminMenuContent` → form; `PostPageAdminMenuContent` → Edit link + form; `ROUTES.editPost`; tests |

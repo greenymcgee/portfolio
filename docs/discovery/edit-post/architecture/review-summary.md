@@ -15,8 +15,8 @@ redirects the admin to the editor — no intermediate form. The editor autosaves
 Description modal, a Publish/Unpublish toggle, and a Close button. On the
 backend, `updatePost` handles autosave and `publishPost` handles publish state.
 The `getPosts` read path gains an admin-only `?unpublished=true` filter. The
-`Post` table gets one migration: a partial unique index on non-empty titles, and
-the `content` column drops its `{}` default.
+`Post` table gets one fully Prisma-managed migration: a `@unique` constraint on
+`Post.title`, and the `content` column drops its `{}` default.
 
 ### How It Fits Into the Existing System
 
@@ -34,8 +34,7 @@ the `content` column drops its `{}` default.
 
 | Decision | Rationale | Alternatives Considered |
 |----------|-----------|------------------------|
-| **Partial unique index, not `@unique`** (D1) | Allows multiple simultaneous empty-title drafts. Prisma DSL has no `WHERE`-clause support. | `@unique` — blocks multiple empty drafts. Application-layer enforcement only — data integrity risk. |
-| **Migration via `prisma migrate dev --create-only` + hand-edit** (D22) | Prisma generates the scaffold (`ALTER COLUMN DROP DEFAULT`); one line is hand-authored (`CREATE UNIQUE INDEX ... WHERE title != ''`). Tracked in `_prisma_migrations`, standard ordering. | Standalone raw SQL file outside `prisma/migrations/` — not tracked, easy to mis-order. Two separate migrations — unnecessary split for one logical change. |
+| **Full `@unique` on `Post.title` in `schema.prisma`** (D23) | `createPost` uses a timestamped placeholder so no draft is ever created with `title = ''`. `UpdatePostDto` requires a non-empty title, so blank-title autosaves fail DTO validation before reaching the DB. A full constraint is simpler and fully Prisma-managed. | Partial index (`WHERE title != ''`) — exclusion no longer needed; unnecessary complexity. Application-layer-only enforcement — data integrity risk if DTO path is bypassed. |
 | **Two server actions: `updatePost` (autosave) and `publishPost` (atomic)** (D3, D20) | Single responsibility per action. `publishPost` carries all content fields and sets `publishedAt` in one DB write — no sequential flush needed. `updatePost` never touches `publishedAt`. | Single `updatePost` with `publishedAt` field — ambiguous; can't distinguish autosave from publish intent without an extra flag. |
 | **Single `LexicalComposer` owned by `EditPostClient`** (D5, D21) | `ToolbarPlugin` uses `useLexicalComposerContext()` and must be a descendant of the same composer as the editor. Wrapping both the action bar and the editor in one composer is the only clean approach. | Portal-based toolbar rendering — unnecessary indirection. Keeping toolbar inside `RichTextEditor` — breaks when editor is not a descendant. |
 | **New `RichTextEditor` purpose-built for the edit page; existing renamed `LegacyRichTextEditor`** (D21) | New component has no internal `LexicalComposer` and no embedded `ToolbarPlugin`. `EditPostClient` owns the composer explicitly. No conditional logic in the existing component. | `omitToolbar` prop on the existing component — implicit contract that the caller must provide a composer; confusing interface. |
@@ -62,7 +61,7 @@ identified and how each was mitigated, for reviewer awareness.
 | Risk | Severity | Mitigation |
 |------|----------|-----------|
 | `ToolbarPlugin` in the action bar requires `LexicalComposer` to wrap both areas | Medium | `EditPostClient` owns the `LexicalComposer`. New `RichTextEditor` has no internal composer. (D5, D21) |
-| Partial unique index not expressible in Prisma schema DSL | Low | `--create-only` migration with hand-authored index line. Prisma will not regenerate it. (D1, D22) |
+| ~~Partial unique index not expressible in Prisma schema DSL~~ | — | Resolved → D23. Full `@unique` on `Post.title` in `schema.prisma`; migration is fully Prisma-managed. |
 | `createPost` relied on `@default("{}")` at the DB level | Low | `CreatePostDto` generates the initial Lexical state. Migration drops the default in PR 1. (D2) |
 | `getPosts` cache + unpublished filter could bypass auth | Low | Permission check in `PostService.findAndCount`, outside the `'use cache'` boundary. (D7) |
 | Autosave / Publish race condition | Low | `publishPost` is atomic and carries current form state. `updatePost` never touches `publishedAt`. (D20) |
@@ -88,12 +87,6 @@ identified and how each was mitigated, for reviewer awareness.
   Reviewers should check that `PostService.findAndCount`'s permission check for
   `unpublished` is outside the cache boundary, and that this pattern is visible
   enough to deter future violations.
-
-- **Migration hand-edit discipline.** The generated `migration.sql` must be
-  edited before `prisma migrate dev` is run. If the migration is applied before
-  the index line is added, the unique constraint will be absent with no error.
-  Reviewers should verify PR 1 includes both the `ALTER COLUMN` and the
-  `CREATE UNIQUE INDEX` in the same migration file.
 
 - **`deletePost` cache fix bundled into PR 2.** `deletePost` does not currently
   call `revalidateTag(CACHE_TAGS.post)`. This is a pre-existing bug being fixed
