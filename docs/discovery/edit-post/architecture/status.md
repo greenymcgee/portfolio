@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|-------|
-| **Phase** | Step 4 complete — all todos resolved |
+| **Phase** | Step 5 complete — review-summary.md generated |
 | **Current PR** | None — no PRs opened yet |
 | **Blocked** | No |
 | **Last updated** | 2026-05-03 |
