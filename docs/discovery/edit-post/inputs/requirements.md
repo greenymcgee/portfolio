@@ -19,7 +19,7 @@ There aren't any unique terms to define for this feature.
 Currently, there is only a new post page. The goal for this feature is to avoid
 the new post page entirely, and instead create a new post when the new post
 button is clicked and immediately take the user to the edit post page. The page
-will work similiar to a Confluence page, but with far fewer features.
+will work similar to a Confluence page, but with far fewer features.
 
 Features include:
 
@@ -38,8 +38,8 @@ the post. It's also not an obvious input like a Confluence page's content
 editor. It is required before a post can be published.
 - **Action Bar**: This is a sticky action bar at the top of the page like a Confluence page. It contains the following:
   - "Description" button: Opens a modal with a textarea for the description.
-  - "Publish/Unpublish" button: Publishes the post if it is not published, and unpublishes the post if it is published.
-  - "Close" button: Saves the post and returns to the posts page, but does not publish the post.
+  - "Publish/Unpublish" button: Publishes the post if it is not published (then navigates to the post detail page), or unpublishes the post in-place if it is already published (no navigation).
+  - "Close" button: Saves the post and returns to the post page, but does not publish the post.
   - "Rich Text Editor Controls": These are the controls that appear when the rich text editor is focused. They are the same as the controls that appear in the rich text editor today.
 
 ### What problem does it solve?
@@ -57,9 +57,9 @@ It eliminates the new post page, and consolidates editing a post into a single p
 - A new admin only feature is added to the PostsPageAdminMenuContent that allows the admin to add unpublished posts to the posts page.
 - The getPosts backend (dto, service, repository, etc.) is updated to include unpublished posts if the admin has the "unpublished" filter enabled, but only sends published posts by default.
 - The post autosaves 1 second after the last change.
-- The post is not publisheable without a title, description, and content.
+- The post is not publishable without a title, description, and content.
 - The "Publish" button is disabled if the title, description, or content is missing.
-- Clicking the "Close" button saves the post and returns to the posts page.
+- Clicking the "Close" button saves the post and returns to the post page.
 
 ---
 
@@ -86,8 +86,8 @@ Describe each major user flow step by step. Be specific about what the user sees
 4. Admin is taken to the edit post page...
 5. Admin fills out the form...
 6. Admin clicks on the "Publish" button...
-7. Admin is taken back to the posts page...
-8. Admin sees the new post...
+7. Admin is taken to the post detail page...
+8. Admin sees the published post...
 
 ### Flow 2: Editing a Post Title (Admin)
 
@@ -135,8 +135,8 @@ Describe each major user flow step by step. Be specific about what the user sees
 5. Admin is taken to the edit post page...
 6. Admin fills out the title, description, and content...
 7. Admin clicks on the "Publish" button...
-8. Admin is taken back to the posts page...
-9. Admin sees the updated post with the date set to the current date and time...
+8. Admin is taken to the post detail page...
+9. Admin sees the published post with the date set to the current date and time...
 
 ### Flow 6: Unpublishing a Post (Admin)
 
@@ -146,9 +146,7 @@ Describe each major user flow step by step. Be specific about what the user sees
 4. Admin clicks on the "Edit" button...
 5. Admin is taken to the edit post page...
 7. Admin clicks on the "Unpublish" button...
-8. Admin is taken back to the posts page...
-9. Admin sees the updated post...
-10. Admin sees the post is unpublished when the "unpublished" filter is not applied...
+8. Admin stays on the edit post page — the "Unpublish" button toggles to "Publish".
 
 ### Flow 7: Viewing an Unpublished Post (Admin)
 
@@ -177,7 +175,7 @@ Describe each major user flow step by step. Be specific about what the user sees
 
 ## Designs
 
-- **Status**: No design
+- **Status**: Design reference only — no hi-fi mockup
 - **Design map**: See the design-reference.png file for the reference.
 
 ---
@@ -217,9 +215,9 @@ The data that is collected, displayed, or modified is the post data.
 - Posts are published when the admin clicks the "Publish" button.
 - Posts are unpublished when the admin clicks the "Unpublish" button.
 - Posts are autosaved 1 second after the last change.
-- Posts are not publisheable without a title, description, and content (backend validation).
+- Posts are not publishable without a title, description, and content (backend validation).
 - The "Publish" button is disabled if the title, description, or content is missing (frontend validation).
-- The "Close" button saves the post and returns to the posts page, but does not publish the post.
+- The "Close" button saves the post and returns to the post page, but does not publish the post.
 - The title must be unique, and an error message is displayed if it is not upon autosave.
 - Users can view published posts.
 - The new post page is no longer in production.
@@ -232,7 +230,7 @@ The data that is collected, displayed, or modified is the post data.
 
 ### Constraints
 - **Dependencies**: A modal does not exist yet. Shadcn's modal needs to be audited for accessibility vs the native dialog element.
-- **Technical constraints**: A migration of the posts table is needed to add the unique constraint on the title, and remove the default value for the content because it would actuall break the RichTextEditor if it ever saved.
+- **Technical constraints**: A migration of the posts table is needed to add the unique constraint on the title, and remove the default value for the content because it would actually break the RichTextEditor if it ever saved.
 
 ---
 

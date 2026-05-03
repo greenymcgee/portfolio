@@ -5,6 +5,25 @@
 
 ---
 
+## T0: Publish/Unpublish navigation behavior
+
+**Status:** Resolved → D9
+
+Publish redirects to the post detail page. Unpublish is an in-place toggle —
+no navigation. requirements.md (Action Bar description, Flows 1, 5, 6) updated.
+
+---
+
+## T0b: New plan for the auto-saved title problem
+
+**Status:** Resolved → D1, D8 confirmed
+
+Timestamped placeholder title approach stands. Partial unique index
+(WHERE title != '') and createPost draft flow are confirmed as designed.
+"UNDER REVIEW" markers removed from D1 and D8.
+
+---
+
 ## T1: Debounce utility approach
 
 **Status:** Resolved → D4
@@ -34,150 +53,116 @@ not in the cached `getPosts` function.
 
 ## T4: Confirm revalidation tags for updatePost / publishPost
 
-**Status:** Open
+**Status:** Resolved → D11
 
-Both `updatePost` and `publishPost` modify a `Post` record. Determine
-which cache tags they should revalidate:
-- `revalidateTag('posts')` — invalidates the paginated posts list
-- Does the individual post detail page (`/posts/[id]`) participate in
-  any cache? Currently `PostPageContent` calls `getPost` which is marked
-  `'use server'`, not `'use cache'`. If it has no cache tag, no
-  revalidation is needed for the detail page.
-- Confirm during PR 2 implementation whether `getPost` needs a cache tag
-  added, or whether the server-component render is sufficient.
+`getPost` will be cached with a new `CACHE_TAGS.post` tag. `updatePost` and
+`publishPost` revalidate both `CACHE_TAGS.post` and `CACHE_TAGS.posts`.
+`deletePost` must also be updated to revalidate `CACHE_TAGS.post`.
 
 ---
 
 ## T5: Autosave error UX details
 
-**Status:** Open
+**Status:** Resolved → D12
 
-The requirements call for an error message on unique-title conflict and a
-generic error on other autosave failures. Decide the exact display
-mechanism before PR 5:
-- Options: `sonner` toast (consistent with `deletePost` error), or an
-  inline error below the title input (closer to the field).
-- Recommendation: inline error below the title for the unique constraint
-  case (user needs to fix the field), toast for generic failures (not
-  field-specific).
-- Confirm this decision before implementing `useAutoSave`.
+Inline error below the title input for unique constraint violations. Sonner
+toast for all other autosave failures.
 
 ---
 
 ## T6: Close button behavior when autosave is in-flight
 
-**Status:** Open
+**Status:** Resolved → D13
 
-If the admin clicks "Close" while an autosave `setTimeout` is pending or
-a `updatePost` transition is in progress, what happens?
-- Option A: flush the pending save before redirecting (call `updatePost`
-  synchronously on close).
-- Option B: redirect immediately — the most recent saved state is the
-  final state; the pending debounced change is lost.
-- Recommendation: Option A — explicitly save on close to prevent data
-  loss. The Close button triggers `updatePost` then redirects on success.
-  If `updatePost` fails and there is no title, show the delete confirmation
-  instead.
-- Confirm before implementing PR 9.
+Close cancels the pending debounce, calls `updatePost` directly, then
+redirects on success. Shows delete confirmation if save fails with no title.
 
 ---
 
 ## T7: "Saved" status indicator
 
-**Status:** Open
+**Status:** Resolved → D14
 
-The design reference shows "Saved" text in the action bar. Decide the
-states and transitions:
-- `idle` → no indicator (or "Saved" persists from last save)
-- `saving` → "Saving..." with spinner
-- `saved` → "Saved" for ~3 seconds, then fades
-- `error` → "Save failed" (inline, near the indicator)
-- Confirm exact timing/UX before PR 5.
+idle: nothing. saving: spinner only. saved: "Saved" persists. error: inline
+error text. All autosave errors go through the indicator; Sonner is for
+publish/unpublish/close failures only (amends D12).
 
 ---
 
 ## T8: publishedAt display on edit page
 
-**Status:** Open
+**Status:** Resolved → D15
 
-The requirements say publishedAt is "auto-populated to the current date
-and time, unless the 'Publish' form has been clicked and a publishedAt
-exists for the post." This means:
-- Draft (publishedAt is null): show current date/time, update in real-time
-  as a read-only `<time>` element
-- Published (publishedAt is set): show the actual publish date/time
-- Decide whether the live clock updates every minute or is static (set
-  on page load).
-- Recommendation: static display set on page load, formatted as
-  `MMMM do, yyyy` to match the post detail page.
+Static `<time>` set on page load. Format: `"MMMM do, yyyy 'at' h:mm a"`.
+Draft shows current date/time; published shows actual publish date/time.
 
 ---
 
 ## T9: Edit page auth guard implementation
 
-**Status:** Open
+**Status:** Resolved → D16
 
-The constraint says "The edit post page has middleware protection and a
-useLayoutEffect that redirects just like the new post page currently
-implements." Decide how to implement this:
-- Option A: `useLayoutEffect` in the `EditPostClient` component (mirrors
-  `CreatePostForm` today).
-- Option B: The page route (`app/posts/[id]/edit/page.tsx`) is an async
-  RSC that calls `authenticateAPISession()` directly and redirects server-
-  side — faster and avoids the flash of unauthenticated content.
-- These are not mutually exclusive; the constraint may intend both.
-- Recommendation: server-side redirect in the async RSC (no flash), plus
-  `useLayoutEffect` in the client component as a belt-and-suspenders guard
-  matching existing patterns.
-- Confirm before implementing PR 5.
+Server-side redirect in the async RSC page + `useLayoutEffect` in
+`EditPostClient` as belt-and-suspenders. Implement in PR 5.
 
 ---
 
 ## T10: PostPageAdminMenuContent "New Post" button
 
-**Status:** Open
+**Status:** Resolved → D17
 
-Currently `PostPageAdminMenuContent` has a "New Post" `<Link href={ROUTES.newPost}>`.
-After PR 4, `ROUTES.newPost` is removed. Decide whether:
-- The "New Post" form/button is added to `PostPageAdminMenuContent` in
-  PR 4 (alongside the existing delete form), or
-- The component is left with only Delete + Edit and "New Post" is admin-
-  menu-dialog-level behavior only (in `PostsPageAdminMenuContent`).
-- The requirements say "PostPageAdminMenuContent includes an edit button"
-  but don't mention "New Post" staying there. Confirm scope before PR 4.
+"New Post" stays — converted from `<Link>` to `<form action={createPost}>`.
+Edit button added. Component ends up with New Post, Edit, Delete. Implement
+in PR 4.
 
 ---
 
 ## T12: Autosave / Publish race condition
 
-**Status:** Open — flagged in requirements.md Edge Cases table
+**Status:** Resolved → D19
 
-If the admin clicks Publish while a 1-second debounce is still pending,
-the publish request may not include the latest typed content. Possible
-outcomes:
-- The published post has stale content (autosave fires after publish,
-  re-saving the latest content but without `publishedAt` being set
-  from the autosave path).
-- The publish request itself saves the latest client state, making
-  autosave's subsequent call a no-op or a conflict.
+Publish cancels the debounce, flushes `updatePost`, then calls `publishPost`.
+`updatePost` never touches `publishedAt` so subsequent autosaves are safe.
+Implement in PR 10.
 
-Resolve the intended behavior and the implementation strategy before PR 9
-(Close / Publish buttons). Questions to answer:
-- Should the Publish button flush the pending autosave before publishing?
-- Should autosave be cancelled when Publish is in-flight?
-- Is there a risk of `publishedAt` being cleared by a subsequent
-  autosave that doesn't include it?
+---
+
+## T13: `PublishPostDto` and `publishPost` implementation
+
+**Status:** Open
+
+The architecture specifies that `publishPost` reads from the DB to validate
+fields before setting `publishedAt` (→ D19), but the service section does not
+fully specify the path. Needs resolution:
+
+- Does `PostService.publish` call `PostRepository.findOne` internally before
+  calling `PostRepository.publish`?
+- Does the DTO only carry `{ id, publish: boolean }`, with all content
+  validation happening at the service layer against the DB-read values?
+- What error type is returned when publish validation fails (empty title /
+  description / content)?
+
+---
+
+## T14: `RichTextEditor` `omitToolbar` changes
+
+**Status:** Open
+
+The architecture describes lifting `ToolbarPlugin` out of `RichTextEditor`
+(→ D5) but does not specify the implementation detail:
+
+- Does `ToolbarPlugin` become a separately exported component from its own
+  file, or is it re-exported from `RichTextEditor`?
+- What does the internal structure of `RichTextEditor` look like after the
+  split — does the plugin list inside the composer shrink, or is it replaced?
+- Are there any prop changes to `RichTextEditor` beyond `omitToolbar`?
 
 ---
 
 ## T11: Unpublished filter and pagination interaction
 
-**Status:** Open
+**Status:** Resolved → D18
 
-When the `?unpublished=true` filter is active, pagination still uses
-`?page=N`. The URL would be `?page=1&unpublished=true`. Confirm that:
-- `FindAndCountPostsDto` accepts both params simultaneously.
-- `getPosts` passes both through to the DTO.
-- The pagination component (`features/posts/components/pagination/`) links
-  include `unpublished=true` when the filter is active (not just `?page=N`).
-- Resolve during PR 11 planning.
+`FindAndCountPostsDto` adds `unpublished?: string`. `Pagination` receives an
+`unpublished?: boolean` prop and appends `&unpublished=true` to page links
+when set. Implement in PR 11.

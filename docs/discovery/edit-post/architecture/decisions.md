@@ -177,3 +177,244 @@ required for the button — progressive enhancement works out of the box.
 **Ruled out:** A client-side `fetch` call on button click — adds
 unnecessary client complexity when a form action works. Keeping
 `/posts/new` as a redirect to the draft — extra hop with no benefit.
+
+---
+
+## D9: Publish redirects to post detail page; Unpublish is an in-place toggle
+
+**Decision:** On successful `publishPost` with `publish: true`, the server
+action calls `redirect(ROUTES.post(id))` — the admin lands on the published
+post detail page. On successful `publishPost` with `publish: false`, no
+redirect occurs; the client receives the updated post and toggles the button
+label from "Unpublish" to "Publish" in-place.
+
+**Why:** The post detail page is the natural confirmation surface after
+publishing — the admin immediately sees the live result. Unpublish is a
+lower-stakes, reversible toggle; navigating away would interrupt the edit
+context unnecessarily. The asymmetric behavior (redirect on publish,
+in-place on unpublish) matches the product intent: publish is a "done with
+this" action, unpublish is a "pause, then keep editing" action.
+
+**Ruled out:** Redirecting to the posts list on Publish — the list view
+doesn't confirm the published content. Redirecting on Unpublish — breaks
+the edit flow when the admin's intent is to continue working.
+
+---
+
+## D10: Close redirects to post detail page
+
+**Decision:** The "Close" button calls `updatePost` with the current field
+values, then redirects to `ROUTES.post(id)` on success. No navigation to
+the posts list (`/posts`).
+
+**Why:** All editing flows (2, 3, 4) end on the post detail page — the
+admin sees the result of their edits immediately. Returning to the list
+would require an additional click to verify the change. The post detail
+page is the canonical confirmation surface for all non-publish exits from
+the editor.
+
+**Ruled out:** Returning to the posts list — inconsistent with all three
+editing flows and requires an extra click to verify the saved result.
+
+---
+
+## D11: `getPost` cached with a dedicated `CACHE_TAGS.post` tag
+
+**Decision:** Add `'use cache'` and `cacheTag(CACHE_TAGS.post)` to `getPost`.
+Add `post: 'post'` to the `CACHE_TAGS` constant. `updatePost` and
+`publishPost` each call `revalidateTag(CACHE_TAGS.post)` and
+`revalidateTag(CACHE_TAGS.posts)`. `deletePost` (already implemented) must also be updated to call
+`revalidateTag(CACHE_TAGS.post)`; this fix is bundled into PR 2 alongside
+`updatePost`. `createPost` does
+not need to revalidate `CACHE_TAGS.post` — it creates a new record and
+affects no existing detail-page caches.
+
+**Why:** The app runs on a free server where performance is limited; caching
+`getPost` reduces DB hits on every post detail page render. A dedicated `post`
+tag enables targeted invalidation — writing post A evicts only post A's detail
+cache, not the cached detail pages for all other posts.
+
+**Ruled out:** Reusing `CACHE_TAGS.posts` for `getPost` — any write to a
+single post would evict all other posts' detail-page caches unnecessarily.
+Leaving `getPost` uncached — misses the performance improvement that motivated
+this decision.
+
+---
+
+## D12: Autosave error UX — inline for unique constraint, toast for generic failures
+
+**Decision:** A unique-constraint autosave failure renders an inline error
+message below the title input. All other autosave failures render a `sonner`
+toast.
+
+**Why:** The unique constraint error is field-specific — the user must change
+the title to resolve it, so the error belongs next to the title input. Generic
+failures (network error, unknown server error) are not tied to a specific
+field; a toast is consistent with the existing `deletePost` error pattern and
+does not require a field to anchor to.
+
+**Ruled out:** Toast for unique constraint — puts the error far from the field
+that needs fixing. Inline error for all failures — non-field errors have no
+obvious anchor point in the UI.
+
+**Amended by D14** — Sonner is no longer used for generic autosave failures;
+the save-state indicator handles all autosave error states.
+
+---
+
+## D13: Close button flushes pending autosave before redirecting
+
+**Decision:** The Close button cancels the pending debounce timer and calls
+`updatePost` directly with the current field values. On success it redirects
+to `ROUTES.post(id)`. If `updatePost` fails and the post has no title, the
+delete confirmation dialog is shown instead of redirecting. The debounce is
+cancelled regardless of outcome so autosave never fires after Close is clicked.
+
+**Why:** Redirecting with a pending debounce in flight would silently discard
+the admin's most recent changes. Explicitly saving on close is the lowest-
+surprise behavior. Cancelling the debounce prevents a redundant `updatePost`
+call after the save already happened.
+
+**Ruled out:** Redirect immediately without saving — risks data loss if the
+admin typed after the last autosave fired. Letting the debounce run and then
+redirecting — introduces a delay and a race between the debounce and the
+redirect.
+
+---
+
+## D14: Save-state indicator states; amends D12 autosave error surface
+
+**Decision:** The action bar contains a save-state indicator with four states:
+
+| State | Display |
+|-------|---------|
+| `idle` (no autosave has fired this session) | Nothing |
+| `saving` | Spinner only — no text |
+| `saved` | "Saved" — persists until the next save cycle begins |
+| `error` | Inline error text in the indicator area |
+
+All autosave errors (unique constraint and generic) are surfaced through the
+indicator's `error` state. The unique constraint case additionally renders an
+inline error below the title input (field-specific guidance), but the Sonner
+toast originally specified in D12 for generic autosave failures is removed.
+Sonner is reserved for non-autosave failures: publish, unpublish, and close.
+
+**Why:** A persistent inline indicator and a disappearing toast are redundant
+for the same event. Routing all autosave feedback through one surface is
+simpler and more consistent. The "Saved" state persisting (no fade) matches
+the Confluence reference and avoids re-reading the indicator to confirm state.
+Spinner-only during saving avoids a jarring text swap between "Saving…" and
+"Saved".
+
+**Ruled out:** Fading "Saved" after a timeout — the original T7 recommendation;
+rejected to match the design reference. "Saving…" text alongside the spinner —
+unnecessary; the spinner alone communicates in-progress state. Sonner for
+generic autosave errors — superseded by the inline indicator.
+
+---
+
+## D15: `publishedAt` display on the edit page — static, set on load, with time
+
+**Decision:** Render `publishedAt` as a static `<time>` element set once on
+page load using the format `"MMMM do, yyyy 'at' h:mm a"` (e.g. `May 3rd,
+2026 at 10:30 AM`) via the existing `Time` component. When `publishedAt` is
+null (draft), display the current date/time captured at render time. When
+`publishedAt` is set (published), display the actual publish date/time. No
+live clock.
+
+**Why:** The format matches the post detail page (`"MMMM do, yyyy"`) extended
+with time, keeping the two pages visually consistent. A static value set on
+load is simpler than a ticking clock and sufficient — the edit page is not
+a dashboard where real-time accuracy matters. Including the time distinguishes
+posts created on the same date.
+
+**Ruled out:** Live clock updating every minute — unnecessary complexity; the
+draft timestamp is a placeholder, not a precision instrument. Date only without
+time — loses the ability to distinguish same-day drafts.
+
+---
+
+## D16: Edit page auth guard — server-side RSC redirect + client `useLayoutEffect`
+
+**Decision:** The edit post page route (`app/posts/[id]/edit/page.tsx`) is an
+async RSC that calls `authenticateAPISession()` and checks
+`hasPermission(token.user, 'posts', 'update')` before rendering. If either
+check fails it calls `redirect(ROUTES.home)` server-side. `EditPostClient`
+additionally implements `useLayoutEffect` mirroring the existing
+`CreatePostForm` pattern as a belt-and-suspenders guard.
+
+**Why:** The server-side redirect prevents any flash of unauthenticated content
+— the RSC never renders the client component for unpermitted users. The
+`useLayoutEffect` guard matches the existing pattern the constraint doc
+explicitly references. Both coexist with no meaningful duplication cost.
+
+**Ruled out:** `useLayoutEffect` only — causes a visible flash before the
+redirect fires. Server-side only — departs from the established pattern the
+constraint doc describes.
+
+---
+
+## D17: PostPageAdminMenuContent — convert "New Post" to form action, add Edit link
+
+**Decision:** `PostPageAdminMenuContent` gains an "Edit" `<Link
+href={ROUTES.editPost(post.id)}>`. The existing "New Post" `<Link
+href={ROUTES.newPost}>` is converted to `<form action={createPost}>` matching
+the pattern in `PostsPageAdminMenuContent` (per D8). The component ends up
+with three actions: New Post (form), Edit (link), Delete (form).
+
+**Why:** Admins frequently navigate to a post detail page and then want to
+create a new post — removing "New Post" from this context would add an
+unnecessary detour back to the posts list. The link-to-form conversion is
+required because `ROUTES.newPost` is removed in PR 4. Edit is a new
+requirement for this component.
+
+**Ruled out:** Removing "New Post" from `PostPageAdminMenuContent` — forces
+the admin to navigate away just to create a post. Keeping "New Post" as a
+link — `ROUTES.newPost` no longer exists after PR 4.
+
+---
+
+## D18: Pagination preserves `unpublished` query param in page links
+
+**Decision:** `FindAndCountPostsDto` adds `unpublished?: string` to its
+schema. `getPosts` passes the `unpublished` param through to the DTO. The
+`Pagination` component receives an optional `unpublished?: boolean` prop; when
+`true`, each page link is built as `${ROUTES.posts}?page=${N}&unpublished=true`
+instead of `${ROUTES.posts}?page=${N}`. The posts page passes `unpublished`
+down to `Pagination` when the URL param is present.
+
+**Why:** The current pagination component hardcodes `?page=N` with no
+mechanism to carry additional params. Without this change, navigating to page
+2 while the unpublished filter is active silently drops the filter. Passing
+`unpublished` as a prop keeps the link-building logic self-contained and
+avoids reading `useSearchParams` inside a server-rendered component.
+
+**Ruled out:** Reading `useSearchParams` inside `Pagination` — couples the
+component to the URL shape and complicates testing. A generic `extraParams`
+prop — over-engineered; only one extra param is needed here.
+
+---
+
+## D19: Publish button flushes pending autosave before calling `publishPost`
+
+**Decision:** The Publish button is a client-side handler that: (1) cancels
+the pending debounce timer, (2) calls `updatePost` with the current field
+values, (3) on success calls `publishPost`, (4) on success redirects to
+`ROUTES.post(id)`. If `updatePost` fails the error surfaces via the save-state
+indicator and `publishPost` is not called. If `publishPost` fails a Sonner
+toast is shown (per D14).
+
+A subsequent autosave after a successful publish is safe: `updatePost` updates
+only `{ title, description, content }` and does not touch `publishedAt`, so no
+autosave can clear the published state.
+
+**Why:** `publishPost` reads from the DB to validate fields — it does not
+accept field values directly. A pending 1-second debounce at click time means
+`publishPost` would read stale content. Flushing `updatePost` first (the same
+pattern as Close in D13) guarantees the DB reflects the current client state
+before `publishedAt` is set.
+
+**Ruled out:** Passing field values directly to `publishPost` — gives it two
+responsibilities (save + publish). Letting the debounce fire naturally before
+publish — introduces a race window. A two-button "save then publish" UX —
+unnecessary complexity.
