@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|-------|
-| **Phase** | Step 4 complete — 1 open todo (T15: migration approach) |
+| **Phase** | Step 4 complete — all todos resolved |
 | **Current PR** | None — no PRs opened yet |
 | **Blocked** | No |
 | **Last updated** | 2026-05-03 |
@@ -40,6 +40,4 @@
 
 ## Open Todos
 
-| # | Title | Status |
-|---|-------|--------|
-| T15 | Revisit migration approach — raw SQL vs Prisma migration | Open |
+None.

@@ -4,25 +4,33 @@ _Source: [`../architecture.md`](../architecture.md) § Data Model_
 
 ## Database Migration (PR 1)
 
-Hand-written raw SQL migration — no Prisma schema changes beyond removing
-`@default("{}")` from `content`:
+A standard Prisma-managed migration with one hand-authored SQL statement added.
+Workflow:
+
+1. Remove `@default("{}")` from `Post.content` in `schema.prisma`.
+2. Run `prisma migrate dev --create-only` — Prisma generates a timestamped
+   migration directory with the schema-diff SQL (`ALTER COLUMN "content" DROP DEFAULT`).
+3. Hand-edit the generated `migration.sql` to append the partial unique index
+   (which Prisma's DSL cannot express):
+   ```sql
+   CREATE UNIQUE INDEX "Post_title_key" ON "Post" (title) WHERE title != '';
+   ```
+4. Run `prisma migrate dev` to apply the migration and record it in `_prisma_migrations`.
+
+The final `migration.sql` contains both statements:
 
 ```sql
+-- Remove the {} default; createPost will always supply a valid Lexical state.
+ALTER TABLE "Post" ALTER COLUMN "content" DROP DEFAULT;
+
 -- Partial unique index: enforce uniqueness only for non-empty titles.
 -- Allows multiple simultaneous empty-title drafts (placeholder approach).
 CREATE UNIQUE INDEX "Post_title_key" ON "Post" (title) WHERE title != '';
-
--- Remove the {} default; createPost will always supply a valid Lexical state.
-ALTER TABLE "Post" ALTER COLUMN "content" DROP DEFAULT;
 ```
 
 **`schema.prisma` change:** remove `@default("{}")` from `Post.content`. Do **not**
 add `@unique` to `title` — Prisma's schema DSL has no `WHERE` clause support for
-partial unique indexes.
-
-**Why raw SQL:** Prisma's migrate DSL cannot express a `WHERE`-clause partial
-unique index. The migration is hand-authored and lives in `prisma/migrations/`
-as the source of truth. Prisma will not regenerate or overwrite it.
+partial unique indexes. See [decisions.md](../decisions.md) → D22.
 
 ## New Cache Tag
 

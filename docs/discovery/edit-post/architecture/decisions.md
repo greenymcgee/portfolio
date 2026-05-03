@@ -459,3 +459,13 @@ provides no additional safety over DTO validation.
 - **Why:** Adding an `omitToolbar` branch to the existing component introduces conditional logic that serves only the edit page use case. A purpose-built component is simpler, has no backwards-compatibility surface, and makes the edit page's `LexicalComposer` ownership explicit. The rename keeps existing consumers working without any changes.
 - **Alternatives considered:** `omitToolbar` prop on the existing `RichTextEditor` — requires the component to conditionally skip its own `LexicalComposer`, which is confusing and creates an implicit contract that the caller must provide one. Portal-based toolbar rendering — unnecessary indirection when a shared composer achieves the same result cleanly.
 - **Step:** Step 3 — refinement (T14)
+
+---
+
+## D22: Migration workflow — `prisma migrate dev --create-only` + hand-edit
+
+- **Decision:** PR 1's migration is created via `prisma migrate dev --create-only`, which generates a timestamped migration directory with the schema-diff SQL (`ALTER COLUMN "content" DROP DEFAULT`). The generated `migration.sql` is then hand-edited to append `CREATE UNIQUE INDEX "Post_title_key" ON "Post" (title) WHERE title != ''`. `prisma migrate dev` is run to apply and record the migration.
+- **Why:** This is the canonical Prisma workflow for schema changes that include SQL Prisma's DSL cannot generate. The migration lives in `prisma/migrations/` with a standard timestamped name, is tracked in `_prisma_migrations`, and follows the same ordering and application mechanics as every other migration in the codebase. Describing the migration as "hand-written raw SQL" (D1's original phrasing) was misleading — Prisma generates the scaffold; only the partial index line is hand-authored.
+- **Alternatives considered:** Standalone raw SQL file outside `prisma/migrations/` — not tracked by Prisma, easy to mis-order or miss during deployment. Two separate migrations (one generated, one hand-written for the index) — unnecessary split; one logical change belongs in one migration.
+- **Resolves:** T15
+- **Step:** Step 3 — refinement (T15)
