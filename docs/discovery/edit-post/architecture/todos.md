@@ -5,6 +5,29 @@
 
 ---
 
+## T15: Revisit migration approach — raw SQL vs Prisma migration
+
+**Status:** Open
+
+D1 decided to use a hand-written raw SQL migration for the partial unique index
+(`WHERE title != ''`) because Prisma's schema DSL has no `WHERE`-clause support.
+The architecture currently calls this a "hand-written raw SQL migration, no
+Prisma schema changes" — but Prisma migrations are the standard mechanism in
+this codebase, and a raw SQL file outside the migrations folder may be easy to
+miss or mis-order.
+
+Questions to resolve:
+- Does `prisma migrate dev` support placing a raw SQL file inside
+  `prisma/migrations/` and will it apply it correctly without regenerating it?
+- Is there an existing example of a hand-authored migration in this codebase?
+- If we create the migration via `prisma migrate dev --create-only` and then
+  hand-edit the generated SQL to add the partial index, does that satisfy both
+  the Prisma workflow and the `WHERE`-clause requirement?
+
+Update `data-models.md`, `plans/README.md`, and `decisions.md` once resolved.
+
+---
+
 ## T0: Publish/Unpublish navigation behavior
 
 **Status:** Resolved → D9

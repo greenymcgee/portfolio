@@ -2,10 +2,10 @@
 
 | Field | Value |
 |-------|-------|
-| **Phase** | Step 3 — refinement complete; all todos resolved |
+| **Phase** | Step 4 complete — 1 open todo (T15: migration approach) |
 | **Current PR** | None — no PRs opened yet |
 | **Blocked** | No |
-| **Last updated** | 2026-05-04 |
+| **Last updated** | 2026-05-03 |
 
 ## Requirements Review Progress
 
@@ -40,4 +40,6 @@
 
 ## Open Todos
 
-None — all refinement todos resolved.
+| # | Title | Status |
+|---|-------|--------|
+| T15 | Revisit migration approach — raw SQL vs Prisma migration | Open |
