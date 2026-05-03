@@ -1,0 +1,5 @@
+1. We need to re-assess the non-unique title decision. Was overlooked and not intentional.
+2. UpdatePostDto does not need to throw errors for missing descriptions or content. This would defeate the purpose of autosaving. The create-post.schema.ts is the correct shape for what the update-post.schema.ts file should look like.
+3. PR 4 looks like it happens way too early. We're deprecating the new post page as a first step which leaves me with no way to create a post for a long time. The PR for creating the legacy editor and the modal need to come before anything, and the plan needs to include keeping the new page until the edit page is completely done.
+4. The description modal should not trigger the autosave because it has a cancel button. That needs to be temporary state that only saves to a hidden form input when the user clicks save from the description modal. The save should also hit a manual updatePost call.
+5. The unpublished toggle should happen sooner in the plan too so that I can always see the unpublished posts. This should probably happen after the migration.
