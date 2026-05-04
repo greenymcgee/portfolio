@@ -21,7 +21,7 @@ interface Props extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange'> {
   onChange?: PropsOf<typeof OnChangePlugin>['onChange']
 }
 
-export function RichTextEditor({
+export function LegacyRichTextEditor({
   editing,
   initialState,
   onChange,
