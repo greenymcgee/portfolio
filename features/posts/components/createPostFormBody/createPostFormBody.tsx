@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 
-import { RichTextEditor } from '@/globals/components'
+import { LegacyRichTextEditor } from '@/globals/components'
 import { Button, Spinner } from '@/globals/components/ui'
 
 type Props = {
@@ -8,7 +8,7 @@ type Props = {
   defaultDescription: FormDataEntryValue | null | undefined
   defaultTitle: FormDataEntryValue | null | undefined
   errorMessage: string
-  onContentChange: NonNullable<PropsOf<typeof RichTextEditor>['onChange']>
+  onContentChange: NonNullable<PropsOf<typeof LegacyRichTextEditor>['onChange']>
   pending: boolean
 }
 
@@ -66,7 +66,7 @@ export function CreatePostFormBody({
           value={content ?? ''}
         />
         <Suspense>
-          <RichTextEditor
+          <LegacyRichTextEditor
             data-testid="content-editor"
             editing
             initialState={content}

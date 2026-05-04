@@ -2,7 +2,7 @@ import { Time } from '@greenymcgee/react-components'
 
 import {
   AdminMenuContentSetter,
-  RichTextEditor,
+  LegacyRichTextEditor,
   Socials,
 } from '@/globals/components'
 import { Heading } from '@/globals/components/ui'
@@ -49,7 +49,7 @@ export async function PostPageContent({ params }: Props) {
               />
             </p>
           </header>
-          <RichTextEditor
+          <LegacyRichTextEditor
             initialState={
               typeof post.content === 'string' ? post.content : null
             }

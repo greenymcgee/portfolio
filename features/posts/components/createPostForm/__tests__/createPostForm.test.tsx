@@ -11,7 +11,7 @@ import { redirect } from 'next/navigation'
 import mockRouter from 'next-router-mock'
 
 import { PostRepository } from '@/features/posts/post.repository'
-import { RichTextEditor } from '@/globals/components'
+import { LegacyRichTextEditor } from '@/globals/components'
 import { ROUTES } from '@/globals/constants'
 import { LEXICAL_EDITOR_JSON, UNPUBLISHED_POST } from '@/test/fixtures'
 import {
@@ -40,13 +40,13 @@ vi.mock('@/globals/components', async (importActual) => {
   const json = JSON.parse(LEXICAL_EDITOR_JSON)
   return {
     ...barrel,
-    RichTextEditor: function RichTextEditorMock({
+    LegacyRichTextEditor: function LegacyRichTextEditorMock({
       onChange,
       editing,
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       initialState,
       ...rest
-    }: PropsOf<typeof RichTextEditor>) {
+    }: PropsOf<typeof LegacyRichTextEditor>) {
       React.useEffect(() => {
         if (!editing || !onChange) return
 
