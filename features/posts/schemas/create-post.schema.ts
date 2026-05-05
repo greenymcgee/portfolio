@@ -5,7 +5,10 @@ function transformString(value: string | undefined | null) {
 }
 
 export const createPostSchema = object({
-  content: string().optional().nullable().transform(transformString),
+  content: string()
+    .optional()
+    .nullable()
+    .transform((value) => value || null),
   description: string()
     .max(100)
     .optional()

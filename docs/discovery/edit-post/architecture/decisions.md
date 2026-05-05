@@ -531,3 +531,13 @@ provides no additional safety over DTO validation.
 - **Why:** The existing one-component-per-directory convention in `globals/components/ui/` is flat — pagination sub-components (`paginationContent/`, `paginationItem/`, etc.) are all peers at the top level, not nested under a `pagination/` parent. Grouping dialog sub-components under a parent would create an inconsistency with that established pattern.
 - **Alternatives considered:** All sub-components under `globals/components/ui/dialog/` with one sub-directory each — rejected because it departs from the flat convention and introduces nesting that no other component family uses.
 - **Step:** PR 2 — Implementation
+
+---
+
+## D29: `Post.content` made nullable — amends D2
+
+- **Decision:** The PR 3 migration drops `NOT NULL` from `Post.content` in addition to dropping `@default("{}")`. `schema.prisma` reflects this as `content Json?`. `createPost` continues to write a valid initial Lexical JSON string via `CreatePostDto`, so the column is never null for newly created posts in practice.
+- **Why:** Making the column nullable correctly reflects that a draft's content is genuinely optional — the schema should not pretend otherwise by requiring a value when none exists yet. Keeping `NOT NULL` without a default would leave a footgun: any write path that bypasses `CreatePostDto` would produce a Postgres error rather than a graceful failure. `Json?` documents the column's optional nature at the schema level and is consistent with the constraint doc's warning that the `{}` default "would actually break the RichTextEditor if it ever saved."
+- **Alternatives considered:** `NOT NULL` with no default (the implicit D2 approach) — more brittle; a missed DTO path causes a hard Postgres error rather than a schema-safe null. Keeping `@default("{}")` — already ruled out in D2 as a latent footgun.
+- **Amends:** D2 — the "Making content nullable — unnecessary schema churn" note in D2's ruled-out section no longer stands; this was part of the original plan and shipped in PR 3.
+- **Step:** PR 3 — Implementation

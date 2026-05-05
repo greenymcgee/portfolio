@@ -31,7 +31,7 @@ describe('CreatePostDto', () => {
       const params = {}
       const dto = new CreatePostDto(params)
       expect(dto.params).toEqual({
-        content: '',
+        content: null,
         description: '',
         publishedAt: null,
         title: '',

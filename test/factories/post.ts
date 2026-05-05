@@ -17,9 +17,7 @@ export const postFactory = Factory.define<Post>(
       faker.lorem.sentence({ max: 25, min: 10 }).slice(0, 100),
     id: sequence,
     publishedAt: params.publishedAt ?? null,
-    title:
-      params.title ??
-      `${faker.book.title()} ${faker.science.chemicalElement().name}`,
+    title: params.title ?? `${faker.book.title()} ${sequence}`,
     updatedAt: params.updatedAt ?? faker.date.past(),
   }),
 )
