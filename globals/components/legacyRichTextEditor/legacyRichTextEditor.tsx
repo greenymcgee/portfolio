@@ -30,7 +30,7 @@ export function LegacyRichTextEditor({
   const initialConfig: InitialConfigType = {
     ...BLOG_EDITOR_CONFIG,
     editable: Boolean(onChange) && editing,
-    editorState: initialState ?? null,
+    editorState: initialState,
     theme: {
       heading: {
         h2: 'mb-2 text-lg md:text-xl leading-md font-semibold',

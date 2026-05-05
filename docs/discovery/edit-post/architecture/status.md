@@ -6,8 +6,8 @@
 | **Current Focus** | PR 3 — Database migration |
 | **Current PR** | PR 3 |
 | **Blocked** | No |
-| **Last updated** | 2026-05-04 |
-| **Branch** | 149-install-shadcn-dialog |
+| **Last updated** | 2026-05-05 |
+| **Branch** | 151-schema-migration |
 
 ## Requirements Review Progress
 
@@ -29,7 +29,7 @@
 |---|-------|--------|--------|
 | 1 | `LegacyRichTextEditor` rename | [EDIT-POST-1](../jira/pr-01.md) | Done |
 | 2 | Modal component (Shadcn Dialog) | [EDIT-POST-2](../jira/pr-02.md) | Done |
-| 3 | Database migration | [EDIT-POST-3](../jira/pr-03.md) | Not started |
+| 3 | Database migration | [EDIT-POST-3](../jira/pr-03.md) | Done |
 | 4 | Backend: `updatePost` | [EDIT-POST-4](../jira/pr-04.md) | Not started |
 | 5 | Backend: `getPosts` unpublished filter | [EDIT-POST-5](../jira/pr-05.md) | Not started |
 | 6 | `PostsPageAdminMenuContent` unpublished toggle | [EDIT-POST-6](../jira/pr-06.md) | Not started |
