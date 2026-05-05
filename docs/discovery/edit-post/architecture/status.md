@@ -2,11 +2,12 @@
 
 | Field | Value |
 |-------|-------|
-| **Phase** | Step 5 complete — all engineer notes resolved (T16–T20) |
-| **Current Focus** | — |
-| **Current PR** | None — no PRs opened yet |
+| **Phase** | Implementation in progress |
+| **Current Focus** | PR 3 — Database migration |
+| **Current PR** | PR 3 |
 | **Blocked** | No |
-| **Last updated** | 2026-05-03 |
+| **Last updated** | 2026-05-04 |
+| **Branch** | 149-install-shadcn-dialog |
 
 ## Requirements Review Progress
 
@@ -26,8 +27,8 @@
 
 | # | Title | Ticket | Status |
 |---|-------|--------|--------|
-| 1 | `LegacyRichTextEditor` rename | [EDIT-POST-1](../jira/pr-01.md) | Not started |
-| 2 | Modal component (Shadcn Dialog) | [EDIT-POST-2](../jira/pr-02.md) | Not started |
+| 1 | `LegacyRichTextEditor` rename | [EDIT-POST-1](../jira/pr-01.md) | Done |
+| 2 | Modal component (Shadcn Dialog) | [EDIT-POST-2](../jira/pr-02.md) | Done |
 | 3 | Database migration | [EDIT-POST-3](../jira/pr-03.md) | Not started |
 | 4 | Backend: `updatePost` | [EDIT-POST-4](../jira/pr-04.md) | Not started |
 | 5 | Backend: `getPosts` unpublished filter | [EDIT-POST-5](../jira/pr-05.md) | Not started |

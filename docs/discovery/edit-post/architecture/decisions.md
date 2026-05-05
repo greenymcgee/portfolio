@@ -522,3 +522,12 @@ provides no additional safety over DTO validation.
 - **Alternatives considered:** Option B — update `EditPostClient.description` then call `flushPendingDebounce`. Rejected because the modal cannot display an inline error if the flush fails; the failure surface is the `SaveStateIndicator`, which is outside the modal and easy to miss.
 - **Resolves:** T19
 - **Step:** Step 3 — Iterative Refinement (T19)
+
+---
+
+## D28: Dialog split — one directory per sub-component at `globals/components/ui/` level
+
+- **Decision:** Each dialog sub-component (`Dialog`, `DialogTrigger`, `DialogPortal`, `DialogClose`, `DialogOverlay`, `DialogContent`, `DialogHeader`, `DialogFooter`, `DialogTitle`, `DialogDescription`) gets its own directory directly under `globals/components/ui/`, matching the flat layout of the pagination family. No parent `dialog/` wrapper directory.
+- **Why:** The existing one-component-per-directory convention in `globals/components/ui/` is flat — pagination sub-components (`paginationContent/`, `paginationItem/`, etc.) are all peers at the top level, not nested under a `pagination/` parent. Grouping dialog sub-components under a parent would create an inconsistency with that established pattern.
+- **Alternatives considered:** All sub-components under `globals/components/ui/dialog/` with one sub-directory each — rejected because it departs from the flat convention and introduces nesting that no other component family uses.
+- **Step:** PR 2 — Implementation
