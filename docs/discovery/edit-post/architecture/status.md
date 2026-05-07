@@ -3,11 +3,11 @@
 | Field | Value |
 |-------|-------|
 | **Phase** | Implementation in progress |
-| **Current Focus** | PR 3 — Database migration |
-| **Current PR** | PR 3 |
-| **Blocked** | No |
-| **Last updated** | 2026-05-05 |
-| **Branch** | 151-schema-migration |
+| **Current Focus** | PR 4 — Backend: `updatePost` |
+| **Current PR** | PR 4 |
+| **Blocked** | Yes — T21 must be resolved before PR 7 |
+| **Last updated** | 2026-05-07 |
+| **Branch** | 154-update-post-action |
 
 ## Requirements Review Progress
 
@@ -30,7 +30,7 @@
 | 1 | `LegacyRichTextEditor` rename | [EDIT-POST-1](../jira/pr-01.md) | Done |
 | 2 | Modal component (Shadcn Dialog) | [EDIT-POST-2](../jira/pr-02.md) | Done |
 | 3 | Database migration | [EDIT-POST-3](../jira/pr-03.md) | Done |
-| 4 | Backend: `updatePost` | [EDIT-POST-4](../jira/pr-04.md) | Not started |
+| 4 | Backend: `updatePost` | [EDIT-POST-4](../jira/pr-04.md) | In progress |
 | 5 | Backend: `getPosts` unpublished filter | [EDIT-POST-5](../jira/pr-05.md) | Not started |
 | 6 | `PostsPageAdminMenuContent` unpublished toggle | [EDIT-POST-6](../jira/pr-06.md) | Not started |
 | 7 | Edit page — core structure + autosave | [EDIT-POST-7](../jira/pr-07.md) | Not started |
@@ -49,3 +49,4 @@
 | T18 | ~~Restructure rollout — defer /posts/new deletion; move rename + modal earlier~~ | Resolved → D24 |
 | T19 | ~~Description modal — manual Save button instead of autosave on close~~ | Resolved → D27 |
 | T20 | ~~Move unpublished filter earlier in rollout (after migration, not last)~~ | Resolved → D24 |
+| T21 | **Revise `useAutoSave` call-site plan — `onSave` wiring is underspecified** | Blocks PR 7; impacts `state-management.md`, `pr-07.md`, `components.md`, `pr-10.md` |

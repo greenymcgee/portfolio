@@ -71,7 +71,7 @@ title input for field-specific guidance (alongside the indicator error).
 - `DescriptionButton` in `ActionBar` opens the Shadcn `Dialog`.
 - `DescriptionModal` wraps a `<textarea>` for the post description.
 - `DescriptionModal` holds **temporary local state** (`localDescription`) initialised from `EditPostClient.description` when the modal opens.
-- **Save:** calls `updatePost` with `{ id, title, description: localDescription, content }` → on success updates `EditPostClient.description` + calls `cancelPendingDebounce` + closes the modal. Inline error shown in modal on failure.
+- **Save:** builds a `FormData` with `{ id, title, description: localDescription, content }` and calls `updatePost` → on success updates `EditPostClient.description` + calls `cancelPendingDebounce` + closes the modal. Inline error shown in modal on failure.
 - **Cancel:** discards temp state and closes without saving. Autosave does not fire.
 - `EditPostClient.description` is still included in every `publishPost` call and in any subsequent autosave triggered by title or content changes.
 

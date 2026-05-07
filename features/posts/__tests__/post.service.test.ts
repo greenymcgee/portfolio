@@ -1,10 +1,12 @@
 /* eslint-disable neverthrow/must-use-result */
 import { faker } from '@faker-js/faker'
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client'
 import { Err, Ok } from 'neverthrow'
 import { ZodError } from 'zod'
 
 import {
   BAD_REQUEST,
+  CONFLICT,
   CREATED,
   FORBIDDEN,
   NO_CONTENT,
@@ -19,6 +21,7 @@ import { mockServerSession } from '@/test/helpers/utils'
 
 import { FindAndCountPostsDto, FindPostDto } from '../dto'
 import { CreatePostDto } from '../dto/create-post.dto'
+import { UpdatePostDto } from '../dto/update-post.dto'
 import { PostRepository } from '../post.repository'
 import { PostService } from '../post.service'
 
@@ -28,6 +31,7 @@ vi.mock('../post.repository', () => ({
     delete: vi.fn(),
     findAndCount: vi.fn(),
     findOne: vi.fn(),
+    update: vi.fn(),
   },
 }))
 
@@ -238,6 +242,121 @@ describe('PostService', () => {
       // @ts-expect-error: the author isn't important for this test
       vi.mocked(PostRepository.findOne).mockResolvedValue(PUBLISHED_POST)
       const result = await PostService.findOne(new FindPostDto(1))
+      expect(result).toEqual(new Ok({ post: PUBLISHED_POST, status: SUCCESS }))
+    })
+  })
+
+  describe('update', () => {
+    it('should return unauthorized when there is no session user', async () => {
+      mockServerSession(null)
+      const dto = new UpdatePostDto({
+        id: String(PUBLISHED_POST.id),
+        title: faker.book.title(),
+      })
+      const result = await PostService.update(dto)
+      expect(result).toEqual(
+        new Err({ status: UNAUTHORIZED, type: 'unauthorized' }),
+      )
+    })
+
+    it('should return forbidden when the user cannot update posts', async () => {
+      mockServerSession('USER')
+      const dto = new UpdatePostDto({
+        id: String(PUBLISHED_POST.id),
+        title: faker.book.title(),
+      })
+      const result = await PostService.update(dto)
+      expect(result).toEqual(new Err({ status: FORBIDDEN, type: 'forbidden' }))
+    })
+
+    it('should return a dto error when params fail validation', async () => {
+      mockServerSession('ADMIN')
+      const dto = new UpdatePostDto({
+        id: String(PUBLISHED_POST.id),
+        title: faker.book.title(),
+      })
+      vi.mocked(PostRepository.update).mockResolvedValueOnce(new ZodError([]))
+      const result = await PostService.update(dto)
+      expect(result).toEqual(
+        new Err({
+          details: expect.any(ZodError),
+          status: UNPROCESSABLE_CONTENT,
+          type: 'dto',
+        }),
+      )
+    })
+
+    it('should return a unique constraint error when the repository returns a unique violation', async () => {
+      mockServerSession('ADMIN')
+      const prismaError = new PrismaError(
+        new PrismaClientKnownRequestError('Unique constraint failed', {
+          clientVersion: '',
+          code: 'P2002',
+        }),
+      )
+      vi.mocked(PostRepository.update).mockResolvedValueOnce(prismaError)
+      const dto = new UpdatePostDto({
+        content: LEXICAL_EDITOR_JSON,
+        description: PUBLISHED_POST.description,
+        id: String(PUBLISHED_POST.id),
+        title: PUBLISHED_POST.title,
+      })
+      const result = await PostService.update(dto)
+      expect(result).toEqual(
+        new Err({
+          details: prismaError,
+          status: CONFLICT,
+          type: 'unique-constraint',
+        }),
+      )
+    })
+
+    it('should return a PrismaError provided by the repository', async () => {
+      mockServerSession('ADMIN')
+      const error = new PrismaError(new Error('bad'))
+      vi.mocked(PostRepository.update).mockResolvedValueOnce(error)
+      const dto = new UpdatePostDto({
+        content: LEXICAL_EDITOR_JSON,
+        description: PUBLISHED_POST.description,
+        id: String(PUBLISHED_POST.id),
+        title: PUBLISHED_POST.title,
+      })
+      const result = await PostService.update(dto)
+      expect(result).toEqual(
+        new Err({
+          details: error.details,
+          status: error.status,
+          type: 'entity',
+        }),
+      )
+    })
+
+    it('should return an entity error when the repository returns a validation Error', async () => {
+      mockServerSession('ADMIN')
+      const error = new Error('Post content validation failed')
+      vi.mocked(PostRepository.update).mockResolvedValueOnce(error)
+      const dto = new UpdatePostDto({
+        content: LEXICAL_EDITOR_JSON,
+        description: PUBLISHED_POST.description,
+        id: String(PUBLISHED_POST.id),
+        title: PUBLISHED_POST.title,
+      })
+      const result = await PostService.update(dto)
+      expect(result).toEqual(
+        new Err({ details: error, status: BAD_REQUEST, type: 'lexical' }),
+      )
+    })
+
+    it('should return success when the repository returns a post', async () => {
+      mockServerSession('ADMIN')
+      vi.mocked(PostRepository.update).mockResolvedValueOnce(PUBLISHED_POST)
+      const dto = new UpdatePostDto({
+        content: LEXICAL_EDITOR_JSON,
+        description: PUBLISHED_POST.description,
+        id: String(PUBLISHED_POST.id),
+        title: PUBLISHED_POST.title,
+      })
+      const result = await PostService.update(dto)
       expect(result).toEqual(new Ok({ post: PUBLISHED_POST, status: SUCCESS }))
     })
   })

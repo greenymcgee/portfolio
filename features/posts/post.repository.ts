@@ -1,4 +1,5 @@
 import { tryCatch } from '@greenymcgee/typescript-utils'
+import type { JsonValue } from '@prisma/client/runtime/client'
 import type { Session } from 'next-auth'
 import { ZodError } from 'zod'
 
@@ -10,6 +11,7 @@ import { prisma } from '@/lib/prisma'
 import type { CreatePostDto } from './dto/create-post.dto'
 import type { FindAndCountPostsDto } from './dto/find-and-count-posts.dto'
 import type { FindPostDto } from './dto/find-post.dto'
+import { UpdatePostDto } from './dto/update-post.dto'
 
 export class PostRepository {
   public static async create(dto: CreatePostDto, user: Session['user']) {
@@ -91,6 +93,28 @@ export class PostRepository {
     if (error) return new PrismaError(error)
 
     if (post === null) return new NotFoundError(id, 'Post')
+
+    return post
+  }
+
+  public static async update(dto: UpdatePostDto) {
+    const { params } = dto
+    if (params instanceof ZodError || params instanceof Error) return params
+
+    const { error, response: post } = await tryCatch(
+      prisma.post.update({
+        data: {
+          content: params.content as NonNullable<JsonValue> | undefined,
+          description: params.description,
+          title: params.title,
+        },
+        where: { id: params.id },
+      }),
+    )
+
+    if (error) return new PrismaError(error)
+
+    if (post === null) return new NotFoundError(params.id, 'Post')
 
     return post
   }

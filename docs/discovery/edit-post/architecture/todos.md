@@ -123,8 +123,8 @@ Server-side redirect in the async RSC page + `useLayoutEffect` in
 **Status:** Resolved → D17
 
 "New Post" stays — converted from `<Link>` to `<form action={createPost}>`.
-Edit button added. Component ends up with New Post, Edit, Delete. Implement
-in PR 4.
+Edit button added. Component ends up with New Post, Edit, Delete. Deferred
+to PR 12 (createPost draft flow + Edit button).
 
 ---
 
@@ -220,6 +220,18 @@ now uses a manual Save + Cancel pattern (Option A). Save calls `updatePost`
 directly, on success updates `EditPostClient.description` + calls
 `cancelPendingDebounce` + closes. Cancel discards temp state with no save.
 Updated: `components.md`, `state-management.md`, `jira/pr-10.md`.
+
+---
+
+## T21: Revise `useAutoSave` call-site plan — `onSave` wiring is underspecified
+
+**Status:** Open
+
+The current docs (`state-management.md`, `pr-07.md`, `components.md`, `pr-10.md`) show `onSave` constructing a `FormData` and calling `updatePost(prevState, formData)` directly from a closure. This is technically functional but underspecified — it doesn't address how `prevState` is threaded, how the autosave state machine (`idle → saving → saved → error`) reads the result, or how `DescriptionModal` gets access to the same dispatch without prop-drilling the raw action.
+
+The likely correct approach is `useActionState(updatePost, { status: 'IDLE' })` in `EditPostClient` — the bound `updateAction` dispatch is passed to `useAutoSave.onSave` and to `DescriptionModal`, `isPending` drives the `saving` state, and `updateState.status` drives `saved`/`error`. But this needs to be confirmed and the docs updated before PR 7 begins.
+
+**Impacts:** `state-management.md`, `pr-07.md`, `components.md`, `pr-10.md`
 
 ---
 

@@ -15,6 +15,7 @@ export async function deletePost(state: DeletePostState) {
   return result.match(
     () => {
       revalidateTag(CACHE_TAGS.posts, {})
+      revalidateTag(CACHE_TAGS.post, {})
       redirect(ROUTES.posts)
     },
     (error) => {

@@ -83,6 +83,7 @@ describe('deletePost', () => {
       const post = await prisma.post.findFirst()
       await deletePost({ id: post?.id as number, status: 'IDLE' })
       expect(revalidateTag).toHaveBeenCalledWith(CACHE_TAGS.posts, {})
+      expect(revalidateTag).toHaveBeenCalledWith(CACHE_TAGS.post, {})
     })
   })
 })

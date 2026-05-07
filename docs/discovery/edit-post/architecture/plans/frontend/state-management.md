@@ -10,13 +10,21 @@ Custom hook using `useRef` + `setTimeout` / `clearTimeout`. No new dependency.
 useAutoSave({
   fields: { title, description, content },
   delay: 1000,
-  onSave: (fields) => startTransition(() => updatePost(fields)),
+  onSave: (fields) => {
+    const formData = new FormData()
+    formData.set('id', String(post.id)) // post.id from EditPostClient prop — never changes
+    formData.set('title', fields.title)
+    formData.set('description', fields.description ?? '')
+    formData.set('content', fields.content ?? '')
+    startTransition(() => updatePost(prevState, formData))
+  },
 })
 // Returns: { cancelPendingDebounce, flushPendingDebounce }
 ```
 
 `startTransition` keeps autosave non-blocking so the UI remains responsive
-while a save is in flight.
+while a save is in flight. `post.id` and `prevState` are captured from the
+`EditPostClient` closure — `id` is stable for the lifetime of the component.
 
 ## Autosave State Machine
 

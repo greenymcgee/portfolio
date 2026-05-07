@@ -534,6 +534,15 @@ provides no additional safety over DTO validation.
 
 ---
 
+## D30: `UpdatePostState` shape — FormData spread, no `id` in state, forbidden redirects home
+
+- **Decision:** `UpdatePostState` carries no `id` field. On success, error, and unique-constraint error, the action spreads `Object.fromEntries(formData)` back into the returned state (same pattern as `CreatePostState`). Forbidden sessions are redirected to `ROUTES.home` (not returned as an error state). Unauthorized sessions are redirected to `ROUTES.loginWithRedirect(ROUTES.post(id))` where `id` is read from the FormData. The unique constraint field is named `threwUniqueConstraintError`.
+- **Why:** `id` comes through FormData alongside the other post fields, so there is no reason to also carry it in state — spreading the FormData entries back covers it. The forbidden redirect to home is consistent with `createPost` (both are write actions the user has no business triggering without permission). Reading `id` from FormData for the unauthorized redirect avoids needing state to carry it as a typed field.
+- **Alternatives considered:** `id: Post['id']` required in state (initial draft) — rejected; the FormData spread subsumes it and keeping it as a separate typed field would duplicate the value. Returning an error state on forbidden — rejected; matches `createPost` which redirects on forbidden.
+- **Step:** PR 4 — Implementation
+
+---
+
 ## D29: `Post.content` made nullable — amends D2
 
 - **Decision:** The PR 3 migration drops `NOT NULL` from `Post.content` in addition to dropping `@default("{}")`. `schema.prisma` reflects this as `content Json?`. `createPost` continues to write a valid initial Lexical JSON string via `CreatePostDto`, so the column is never null for newly created posts in practice.
