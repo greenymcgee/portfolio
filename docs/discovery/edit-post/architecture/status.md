@@ -5,8 +5,8 @@
 | **Phase** | Implementation in progress |
 | **Current Focus** | PR 4 — Backend: `updatePost` |
 | **Current PR** | PR 4 |
-| **Blocked** | Yes — T21 must be resolved before PR 7 |
-| **Last updated** | 2026-05-07 |
+| **Blocked** | No |
+| **Last updated** | 2026-05-08 |
 | **Branch** | 154-update-post-action |
 
 ## Requirements Review Progress
@@ -49,4 +49,4 @@
 | T18 | ~~Restructure rollout — defer /posts/new deletion; move rename + modal earlier~~ | Resolved → D24 |
 | T19 | ~~Description modal — manual Save button instead of autosave on close~~ | Resolved → D27 |
 | T20 | ~~Move unpublished filter earlier in rollout (after migration, not last)~~ | Resolved → D24 |
-| T21 | **Revise `useAutoSave` call-site plan — `onSave` wiring is underspecified** | Blocks PR 7; impacts `state-management.md`, `pr-07.md`, `components.md`, `pr-10.md` |
+| ~~T21~~ | ~~Revise `useAutoSave` call-site plan~~ | Resolved → D31 |

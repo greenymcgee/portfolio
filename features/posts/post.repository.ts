@@ -1,5 +1,4 @@
 import { tryCatch } from '@greenymcgee/typescript-utils'
-import type { JsonValue } from '@prisma/client/runtime/client'
 import type { Session } from 'next-auth'
 import { ZodError } from 'zod'
 
@@ -7,6 +6,7 @@ import { NO_CONTENT } from '@/globals/constants'
 import { NotFoundError, PrismaError } from '@/lib/errors'
 import { logger } from '@/lib/logger'
 import { prisma } from '@/lib/prisma'
+import type { Prisma } from '@/prisma/generated/client'
 
 import type { CreatePostDto } from './dto/create-post.dto'
 import type { FindAndCountPostsDto } from './dto/find-and-count-posts.dto'
@@ -104,7 +104,7 @@ export class PostRepository {
     const { error, response: post } = await tryCatch(
       prisma.post.update({
         data: {
-          content: params.content as NonNullable<JsonValue> | undefined,
+          content: params.content as NonNullable<Prisma.JsonValue> | undefined,
           description: params.description,
           title: params.title,
         },

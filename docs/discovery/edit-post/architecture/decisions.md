@@ -550,3 +550,14 @@ provides no additional safety over DTO validation.
 - **Alternatives considered:** `NOT NULL` with no default (the implicit D2 approach) — more brittle; a missed DTO path causes a hard Postgres error rather than a schema-safe null. Keeping `@default("{}")` — already ruled out in D2 as a latent footgun.
 - **Amends:** D2 — the "Making content nullable — unnecessary schema churn" note in D2's ruled-out section no longer stands; this was part of the original plan and shipped in PR 3.
 - **Step:** PR 3 — Implementation
+
+---
+
+## 2026-05-08 - D31: Autosave wiring — `useActionState` + inline debounce; `DescriptionModal` owns separate instance
+
+- **Decision:** Replace the underspecified `useAutoSave` custom hook with `useActionState(updatePost, initialState)` in `EditPostClient`. Debounce is inlined via `useRef` + `setTimeout` — no custom hook. FormData is constructed from a `formRef` on the form element. `DescriptionModal` owns its own `useActionState(withCallbacks(updatePost, { onSuccess }), initialState)` instance; `withCallbacks` is used only for the auto-close side effect. All autosave display (spinner, "Saved", error, field errors) is derived directly from `state` and `pending` — no callbacks, no mirrored state. `state.threwUniqueConstraintError` and `state.dtoError.fieldErrors` are read independently by the components that own them.
+- **Why:** `startTransition` discards the action return value — the state machine could never observe success or failure. `useActionState` threads state automatically and exposes `pending`. The `useAutoSave` abstraction added no reusable value; debounce is 5 lines inlined. `DescriptionModal` owning a separate instance avoids ref-based "which save was mine" detection. `withCallbacks` in the modal provides a clean `onSuccess` hook for auto-close without coupling the modal's error display to callbacks.
+- **Alternatives considered:** Shared `updateAction` dispatch from `EditPostClient` passed to `DescriptionModal` (Option B) — rejected; modal would need a ref flag to distinguish its save from a concurrent autosave. `withCallbacks.onError` for field error state — rejected; `state` already carries `dtoError` and `threwUniqueConstraintError`, mirroring them into separate state variables is redundant.
+- **Supersedes:** D4 (custom `useAutoSave` hook)
+- **Resolves:** T21
+- **Step:** Step 3 — Iterative Refinement (T21)

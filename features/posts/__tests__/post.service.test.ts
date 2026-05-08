@@ -331,6 +331,23 @@ describe('PostService', () => {
       )
     })
 
+    it('should return a NotFoundError returned by the repository', async () => {
+      mockServerSession('ADMIN')
+      const id = PUBLISHED_POST.id
+      const error = new NotFoundError(id, 'Post')
+      vi.mocked(PostRepository.update).mockResolvedValueOnce(error)
+      const dto = new UpdatePostDto({
+        content: LEXICAL_EDITOR_JSON,
+        description: PUBLISHED_POST.description,
+        id: String(id),
+        title: PUBLISHED_POST.title,
+      })
+      const result = await PostService.update(dto)
+      expect(result).toEqual(
+        new Err({ details: error, status: NOT_FOUND, type: 'entity' }),
+      )
+    })
+
     it('should return an entity error when the repository returns a validation Error', async () => {
       mockServerSession('ADMIN')
       const error = new Error('Post content validation failed')

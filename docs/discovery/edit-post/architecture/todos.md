@@ -225,13 +225,9 @@ Updated: `components.md`, `state-management.md`, `jira/pr-10.md`.
 
 ## T21: Revise `useAutoSave` call-site plan — `onSave` wiring is underspecified
 
-**Status:** Open
+**Status:** Resolved → D31
 
-The current docs (`state-management.md`, `pr-07.md`, `components.md`, `pr-10.md`) show `onSave` constructing a `FormData` and calling `updatePost(prevState, formData)` directly from a closure. This is technically functional but underspecified — it doesn't address how `prevState` is threaded, how the autosave state machine (`idle → saving → saved → error`) reads the result, or how `DescriptionModal` gets access to the same dispatch without prop-drilling the raw action.
-
-The likely correct approach is `useActionState(updatePost, { status: 'IDLE' })` in `EditPostClient` — the bound `updateAction` dispatch is passed to `useAutoSave.onSave` and to `DescriptionModal`, `isPending` drives the `saving` state, and `updateState.status` drives `saved`/`error`. But this needs to be confirmed and the docs updated before PR 7 begins.
-
-**Impacts:** `state-management.md`, `pr-07.md`, `components.md`, `pr-10.md`
+`useAutoSave` custom hook removed. `EditPostClient` uses `useActionState(updatePost, initialState)` with inline debounce via `useRef` + `setTimeout`. All autosave display derived from `state` and `pending` directly. `DescriptionModal` owns its own `useActionState(withCallbacks(updatePost, { onSuccess }), initialState)` instance for auto-close. Updated: `state-management.md`, `pr-07.md`, `components.md`, `pr-10.md`, `pr-04.md`.
 
 ---
 

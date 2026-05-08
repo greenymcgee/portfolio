@@ -12,7 +12,7 @@ _Source: [`../architecture.md`](../architecture.md) § Rollout Plan_
 | 4 | Backend: `updatePost` | `UpdatePostDto`, `PostService.update`, `PostRepository.update`, `updatePost` action, `getPost` caching, `deletePost` cache fix, tests |
 | 5 | Backend: `getPosts` filter | `unpublished` param in DTO/schema; `PostService.findAndCount` auth check; repository `WHERE` clause; tests |
 | 6 | `PostsPageAdminMenuContent` unpublished toggle | Unpublished toggle UI; `Pagination` `unpublished` prop; tests |
-| 7 | Edit page — core | `page.tsx`, `EditPostContent`, `EditPostClient`, `useAutoSave`, auth guard, tests |
+| 7 | Edit page — core | `page.tsx`, `EditPostContent`, `EditPostClient`, autosave, auth guard, tests |
 | 8 | Title + RTE styles | Invisible title input; editor area styles matching `design-reference.png`; `publishedAt` subtitle |
 | 9 | Sticky action bar + RTE controls | `ActionBar`; new `RichTextEditor`; `ToolbarPlugin` in `ActionBar`; `LexicalComposer` in `EditPostClient` |
 | 10 | Description + Close buttons | Description modal; Close flush-and-redirect; no-title confirmation dialog; tests |

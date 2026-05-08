@@ -19,7 +19,7 @@
 | Implement the edit page route guard or server action auth | [`./security-considerations.md`](./security-considerations.md) |
 | Understand the component hierarchy and `LexicalComposer` strategy | [`./frontend/README.md`](./frontend/README.md) |
 | Implement any individual component (save-state, buttons, modals, publishedAt) | [`./frontend/components.md`](./frontend/components.md) |
-| Implement `useAutoSave` or understand the autosave state machine | [`./frontend/state-management.md`](./frontend/state-management.md) |
+| Understand the autosave state machine or `DescriptionModal` action wiring | [`./frontend/state-management.md`](./frontend/state-management.md) |
 | Write tests (which project, which cases, which factories) | [`./testing-strategy.md`](./testing-strategy.md) |
 | Ship PRs in the right order (12-PR plan + hard dependencies) | [`./rollout-strategy.md`](./rollout-strategy.md) |
 | Look up open risks | [`./risks-open-questions.md`](./risks-open-questions.md) |
@@ -82,7 +82,7 @@ app/posts/[id]/edit/page.tsx   ← sync RSC; auth guard; <Suspense>
                     └── RichTextEditor (new — no internal composer)
 
 Autosave path:
-  field change → useAutoSave (1s debounce) → updatePost → PostService.update
+  field change → inline debounce (1s) → updatePost → PostService.update
   → PostRepository.update → DB (title, description, content only)
 
 Publish path:
@@ -103,7 +103,7 @@ Numbered for cross-reference — each links to [`../decisions.md`](../decisions.
 1. **Full `@unique` on `Post.title` in `schema.prisma`.** Migration is fully Prisma-managed — no hand-authored SQL. Timestamped placeholder ensures no draft is ever created with an empty title. (D23)
 2. **Remove `@default("{}")` from `Post.content`; `CreatePostDto` generates the initial Lexical state.** Eliminates the latent footgun where the `{}` default would break `RichTextEditor`. (D2)
 3. **Two separate server actions: `updatePost` (autosave) and `publishPost` (publish/unpublish).** Single responsibility per action; maps cleanly to existing `posts.update` and `posts.publish` permissions. (D3)
-4. **Custom `useAutoSave` hook — no new dependency.** `useRef` + `setTimeout`. `startTransition` keeps autosave non-blocking. (D4)
+4. **Inline debounce via `useRef` + `setTimeout` in `EditPostClient`.** `useActionState` threads `UpdatePostState`; `withCallbacks` auto-closes `DescriptionModal` on success. (D31)
 5. **Single `LexicalComposer` owned by `EditPostClient`, wrapping both `ActionBar` and `RichTextEditor`.** The only viable approach for rendering `ToolbarPlugin` outside the editor DOM subtree. (D5, D21)
 6. **`publishPost` is atomic — carries all content fields and sets `publishedAt` in one DB write.** Eliminates the sequential flush-then-publish round-trip. (D20)
 7. **`createPost` creates a minimal draft and redirects to the edit page.** `/posts/new` page and `CreatePostForm` deleted in PR 4. (D8)
@@ -129,7 +129,7 @@ Numbered for cross-reference — each links to [`../decisions.md`](../decisions.
 | --- | --- | --- |
 | Component hierarchy + `LexicalComposer` strategy | Single composer in `EditPostClient`; new `RichTextEditor` has no internal composer; `ToolbarPlugin` re-exported | [`./frontend/README.md`](./frontend/README.md) |
 | Per-component specs (save-state, buttons, modals, publishedAt, filter) | Four-state indicator; atomic Publish; Close flush-and-redirect; Shadcn Dialog | [`./frontend/components.md`](./frontend/components.md) |
-| `useAutoSave` + autosave state machine | `useRef` + `setTimeout`; cancel/flush handles; four UI states | [`./frontend/state-management.md`](./frontend/state-management.md) |
+| Autosave state machine + `DescriptionModal` wiring | `useActionState` + inline debounce; `cancelDebounce`/`flushDebounce` props; display derived from `state` + `pending` | [`./frontend/state-management.md`](./frontend/state-management.md) |
 
 ### Cross-cutting
 

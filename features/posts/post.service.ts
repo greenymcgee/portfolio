@@ -122,6 +122,10 @@ export class PostService {
       return this.respondWithZodError(post, 'update')
     }
 
+    if (post instanceof NotFoundError) {
+      return this.respondWithNotFoundError(post, 'update')
+    }
+
     if (post instanceof Error) {
       return errAsync({
         details: post,
@@ -162,12 +166,13 @@ export class PostService {
 
   private static respondWithNotFoundError(
     error: NotFoundError,
-    method: 'findOne' | 'delete',
+    method: 'findOne' | 'delete' | 'update',
   ) {
     logger.error({ error }, `PostService not found error: ${method}`)
     return errAsync({
       details: error,
       status: error.status,
+      // TODO: change this to not-found
       type: 'entity' as const,
     } as const)
   }
