@@ -1,4 +1,4 @@
-import { coerce, object } from 'zod'
+import { coerce, object, stringbool } from 'zod'
 
 export const findAndCountPostsSchema = object({
   limit: coerce
@@ -14,4 +14,7 @@ export const findAndCountPostsSchema = object({
     .nonnegative()
     .optional()
     .transform((page) => page || 0),
+  unpublished: stringbool()
+    .optional()
+    .transform((value) => value ?? false),
 })

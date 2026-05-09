@@ -1,8 +1,9 @@
 import { Card, CardGroup } from '@/globals/components'
 import { ROUTES } from '@/globals/constants'
+import { Post } from '@/prisma/generated/client'
 
 type Props = {
-  posts: AuthoredPost[]
+  posts: Post[]
 }
 
 export function PostCards({ posts }: Props) {

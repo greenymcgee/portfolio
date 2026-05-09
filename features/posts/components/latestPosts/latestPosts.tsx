@@ -4,13 +4,14 @@ import { Pagination } from '../pagination'
 import { PostCards } from '../postCards'
 
 type Props = {
-  searchParams: Promise<{ page?: string }>
+  searchParams: Promise<{ limit?: string; page?: string; unpublished?: string }>
 }
 
 export async function LatestPosts({ searchParams }: Props) {
-  const result = await getPosts(await searchParams)
+  const params = await searchParams
+  const { currentPage, error, posts, totalPages } = await getPosts(params)
 
-  if (result.error) {
+  if (error) {
     return (
       <div aria-live="polite" data-testid="latest-posts">
         <p data-testid="latest-posts-error">Something went wrong</p>
@@ -18,7 +19,6 @@ export async function LatestPosts({ searchParams }: Props) {
     )
   }
 
-  const { currentPage, posts, totalPages } = result
   return (
     <div aria-live="polite" data-testid="latest-posts">
       <PostCards posts={posts} />

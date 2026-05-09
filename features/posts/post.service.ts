@@ -210,8 +210,8 @@ export class PostService {
     } as const)
   }
 
-  private static respondWithZodError(
-    error: ZodError,
+  private static respondWithZodError<Err>(
+    error: ZodError<Err>,
     method: 'create' | 'delete' | 'findAndCount' | 'findOne' | 'update',
   ) {
     logger.error({ error }, `PostService Zod error: ${method}`)

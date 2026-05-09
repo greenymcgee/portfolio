@@ -1,3 +1,4 @@
+export * from './authorizeUnpublishedPosts'
 export * from './createPost'
 export * from './deletePost'
 export * from './getPost'

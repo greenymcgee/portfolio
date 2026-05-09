@@ -9,6 +9,7 @@ export const POLICIES = {
       publish: true,
       update: true,
       view: true,
+      'view:unpublished': true,
     },
     users: {
       create: true,
@@ -26,6 +27,7 @@ export const POLICIES = {
       publish: false,
       update: false,
       view: true,
+      'view:unpublished': false,
     },
     users: {
       create: false,

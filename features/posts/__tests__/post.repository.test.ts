@@ -18,6 +18,10 @@ import { CreatePostDto } from '../dto/create-post.dto'
 import { UpdatePostDto } from '../dto/update-post.dto'
 import { PostRepository } from '../post.repository'
 
+afterEach(() => {
+  vi.resetAllMocks()
+})
+
 describe('PostRepository', () => {
   describe('create', () => {
     it('should return a Zod error', async () => {

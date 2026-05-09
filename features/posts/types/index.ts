@@ -1,4 +1,5 @@
 export * from './create'
 export * from './deletePostState'
+export * from './findAndCountPostsDtoError'
 export * from './findAndCountPostsResponse'
 export * from './updatePost'

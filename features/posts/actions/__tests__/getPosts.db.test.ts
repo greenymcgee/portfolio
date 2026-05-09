@@ -1,9 +1,12 @@
 import { errAsync } from 'neverthrow'
+import { redirect } from 'next/navigation'
 import { expect } from 'vitest'
+import { flattenError, ZodError } from 'zod'
 
 import { PostService } from '@/features/posts/post.service'
-import { BAD_REQUEST, UNPROCESSABLE_CONTENT } from '@/globals/constants'
+import { BAD_REQUEST, ROUTES, UNPROCESSABLE_CONTENT } from '@/globals/constants'
 import { logger } from '@/lib/logger'
+import { Post } from '@/prisma/generated/client'
 import { setupTestDatabase } from '@/test/helpers/utils'
 
 import { getPosts } from '..'
@@ -21,15 +24,19 @@ afterEach(() => {
 })
 
 describe('getPosts', () => {
-  it('should return an error for a dto error', async () => {
-    const error = { details: {}, status: UNPROCESSABLE_CONTENT, type: 'dto' }
+  it('should return a flattened error for a DTO error', async () => {
+    const error = {
+      details: new ZodError([]),
+      status: UNPROCESSABLE_CONTENT,
+      type: 'dto',
+    }
     findAndCountSpy.mockResolvedValueOnce(
       errAsync(error) as unknown as FindAndCountReturn,
     )
     const result = await getPosts({ page: '0' })
     expect(result).toEqual({
       currentPage: null,
-      error,
+      error: flattenError(error.details),
       posts: null,
       totalPages: null,
     })
@@ -44,6 +51,23 @@ describe('getPosts', () => {
     expect(result).toEqual({
       currentPage: null,
       error,
+      posts: null,
+      totalPages: null,
+    })
+  })
+
+  it('should require authorization for unpublished posts', async () => {
+    await getPosts({ unpublished: 'true' })
+    expect(redirect).toHaveBeenCalledWith(
+      ROUTES.loginWithRedirect(ROUTES.unpublishedPosts),
+    )
+  })
+
+  it('should return the auth Zod error when the unpublished param is invalid', async () => {
+    const result = await getPosts({ unpublished: 'not-a-bool' })
+    expect(result).toEqual({
+      currentPage: null,
+      error: { fieldErrors: expect.any(Object), formErrors: expect.any(Array) },
       posts: null,
       totalPages: null,
     })
@@ -72,18 +96,12 @@ describe('getPosts', () => {
 
     it('should return posts upon success', async () => {
       const defaultLimit = 10
-      const result = (await getPosts({ page: '0' })) as {
-        posts: AuthoredPost[]
-      }
+      const result = (await getPosts({ page: '0' })) as { posts: Post[] }
       expect(result.posts.length).toBe(defaultLimit)
       expect(result).toEqual({
         currentPage: expect.any(Number),
         error: null,
         posts: result.posts.map(() => ({
-          author: {
-            firstName: expect.any(String),
-            lastName: expect.any(String),
-          },
           authorId: expect.any(String),
           content: expect.any(String),
           createdAt: expect.any(Date),

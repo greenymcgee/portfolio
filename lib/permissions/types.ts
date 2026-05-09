@@ -3,7 +3,13 @@ import { Post, User } from '@/prisma/generated/client'
 export interface PortfolioPermissions {
   adminMenu: { action: 'view'; type: null }
   posts: {
-    action: 'create' | 'delete' | 'publish' | 'update' | 'view'
+    action:
+      | 'create'
+      | 'delete'
+      | 'publish'
+      | 'update'
+      | 'view'
+      | 'view:unpublished'
     type: Post
   }
   users: {

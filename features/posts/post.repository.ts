@@ -11,7 +11,8 @@ import type { Prisma } from '@/prisma/generated/client'
 import type { CreatePostDto } from './dto/create-post.dto'
 import type { FindAndCountPostsDto } from './dto/find-and-count-posts.dto'
 import type { FindPostDto } from './dto/find-post.dto'
-import { UpdatePostDto } from './dto/update-post.dto'
+import type { UpdatePostDto } from './dto/update-post.dto'
+import { PostEntity } from './post.entity'
 
 export class PostRepository {
   public static async create(dto: CreatePostDto, user: Session['user']) {
@@ -60,16 +61,15 @@ export class PostRepository {
     if (params instanceof ZodError) return params
 
     const { error, response: posts } = await tryCatch(
-      prisma.post.findMany({
-        include: { author: { select: { firstName: true, lastName: true } } },
-        orderBy: { createdAt: 'desc' },
-        skip: offset,
-        take: params.limit,
+      PostEntity.findMany({
+        limit: params.limit,
+        offset,
+        unpublished: params.unpublished,
       }),
     )
     if (error) return new PrismaError(error)
 
-    const count = await PostRepository.countPosts()
+    const count = await this.count(params)
     if (count instanceof PrismaError) return count
 
     return {
@@ -119,8 +119,10 @@ export class PostRepository {
     return post
   }
 
-  private static async countPosts() {
-    const { error, response: count } = await tryCatch(prisma.post.count())
+  private static async count(
+    params: FirstParameterOf<typeof PostEntity.count>,
+  ) {
+    const { error, response: count } = await tryCatch(PostEntity.count(params))
     if (error) return new PrismaError(error)
 
     return count
