@@ -1,43 +1,66 @@
 # State Management — edit-post
 
-_Source: [`../architecture.md`](../architecture.md) § Frontend — `useAutoSave` hook_
+_Source: [`../architecture.md`](../architecture.md) § Frontend_
 
-## `useAutoSave` Hook (→ D4)
+## Autosave — `useActionState` + inline debounce (→ D31)
 
-Custom hook using `useRef` + `setTimeout` / `clearTimeout`. No new dependency.
+`EditPostClient` owns the `updatePost` action state:
 
 ```ts
-useAutoSave({
-  fields: { title, description, content },
-  delay: 1000,
-  onSave: (fields) => startTransition(() => updatePost(fields)),
-})
-// Returns: { cancelPendingDebounce, flushPendingDebounce }
+const [state, updateAction, pending] = useActionState(
+  updatePost,
+  { status: 'IDLE' } as UpdatePostState,
+)
 ```
 
-`startTransition` keeps autosave non-blocking so the UI remains responsive
-while a save is in flight.
+All autosave display is derived directly from `state` and `pending` — no callbacks,
+no mirrored state.
+
+**Inline debounce (`useRef` + `setTimeout`, no custom hook):**
+
+```ts
+const formRef = useRef<HTMLFormElement>(null)
+const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+const cancelDebounce = () => {
+  if (timeoutRef.current) clearTimeout(timeoutRef.current)
+  timeoutRef.current = null
+}
+
+const flushDebounce = () => {
+  cancelDebounce()
+  if (formRef.current) updateAction(new FormData(formRef.current))
+}
+```
+
+On each field change: `cancelDebounce()`, then schedule a 1-second timeout. When it fires,
+call `updateAction(new FormData(formRef.current))`. The form ref captures all field values
+at save time without a custom helper.
+
+`cancelDebounce` and `flushDebounce` are passed as props to `CloseButton` and
+`PublishUnpublishButton`.
 
 ## Autosave State Machine
 
-`EditPostClient` tracks autosave state for `SaveStateIndicator`:
+`SaveStateIndicator` and field-error displays derive from `state` and `pending` directly:
 
-| State | Transition |
-|-------|-----------|
-| `idle` | Initial state; no autosave has fired this session |
-| `saving` | `useAutoSave.onSave` fires → state transitions to `saving` |
-| `saved` | `onSave` completes successfully → state transitions to `saved`; persists |
-| `error` | `onSave` returns an error result → state transitions to `error` |
-| `idle` → `saving` | Any field change resets error and starts debounce |
+| Condition | Display |
+|-----------|---------|
+| `state.status === 'IDLE'` | Nothing |
+| `pending` | `SaveStateIndicator` spinner |
+| `!pending && state.status === 'SUCCESS'` | `SaveStateIndicator` → "Saved" |
+| `!pending && state.status === 'ERROR'` | `SaveStateIndicator` error |
+| `state.threwUniqueConstraintError` | `TitleInput` hard-coded error message |
+| `state.dtoError?.fieldErrors?.content` | Inline errors near editor |
 
 ## Cancel and Flush
 
-`useAutoSave` exposes two imperative handles:
+`EditPostClient` exposes two callbacks passed as props:
 
 | Handle | Used by | Behavior |
 |--------|---------|---------|
-| `cancelPendingDebounce` | `PublishUnpublishButton` (on publish), `CloseButton` | Clears the timer; `onSave` is never called |
-| `flushPendingDebounce` | `CloseButton` | Clears the timer and calls `onSave` immediately with current fields |
+| `cancelDebounce` | `PublishUnpublishButton`, `DescriptionModal.onSaveSuccess`, `CloseButton` | Clears the timer; autosave does not fire |
+| `flushDebounce` | `CloseButton` | Cancels timer, calls `updateAction` with current form data immediately |
 
 ## Form State Ownership
 
@@ -52,22 +75,46 @@ never written back after mount.
 
 | Event | UI response |
 |-------|------------|
-| Autosave in flight | `SaveStateIndicator` → `saving` |
-| Autosave success | `SaveStateIndicator` → `saved` |
-| Autosave error — unique constraint | `SaveStateIndicator` → `error` + inline title error |
-| Autosave error — generic | `SaveStateIndicator` → `error` |
+| Autosave in flight | `SaveStateIndicator` spinner |
+| Autosave success | `SaveStateIndicator` → "Saved" |
+| Autosave error — unique constraint | `SaveStateIndicator` error + `TitleInput` hard-coded message |
+| Autosave error — content DTO | `SaveStateIndicator` error + inline content errors |
+| Autosave error — generic | `SaveStateIndicator` error |
 | Publish / Unpublish failure | Sonner toast |
 | Close failure (with title) | Sonner toast |
 | Close failure (no title) | Delete confirmation `Dialog` |
-| Description modal Save failure | Inline error in `DescriptionModal` |
+| Description modal Save failure — description DTO | `state.dtoError?.fieldErrors?.description` rendered in `DescriptionModal` |
+| Description modal Save failure — unique constraint | Hard-coded "copy description before closing and fix the title" in `DescriptionModal` |
+| Description modal Save failure — generic | Generic inline error in `DescriptionModal` |
 
-## Description Modal State (→ D27)
+## Description Modal State (→ D27, D31)
 
-`DescriptionModal` manages its own temporary local state (`localDescription`) while open. It does **not** touch `EditPostClient.description` until Save succeeds.
+`DescriptionModal` owns its own `useActionState` instance. `withCallbacks` is used only for
+the auto-close side effect on success:
+
+```ts
+const formRef = useRef<HTMLFormElement>(null)
+
+const [state, modalUpdateAction, saving] = useActionState(
+  withCallbacks(updatePost, {
+    onSuccess: () => onSaveSuccess(localDescription),
+  }),
+  { status: 'IDLE' } as UpdatePostState,
+)
+```
+
+`onSaveSuccess` is a prop from `EditPostClient` that updates `EditPostClient.description`,
+calls `cancelDebounce`, and closes the modal. Save submits via `new FormData(formRef.current)`.
+
+Error display is derived from `state` directly — `state.threwUniqueConstraintError` and
+`state.dtoError?.fieldErrors?.description` are checked independently:
 
 | Action | Effect |
 |--------|--------|
 | Open modal | `localDescription` initialised from current `EditPostClient.description` |
-| Save (success) | `EditPostClient.description` updated → `cancelPendingDebounce` called → modal closes |
-| Save (failure) | Inline error shown in modal; `EditPostClient.description` unchanged |
+| Save — in flight | `saving === true` → Save button disabled |
+| Save (success) | `withCallbacks.onSuccess` fires → `onSaveSuccess(localDescription)` → modal closes |
+| Save (failure — unique constraint) | `state.threwUniqueConstraintError` → hard-coded "copy description before closing and fix the title" |
+| Save (failure — description DTO) | `state.dtoError?.fieldErrors?.description` rendered inline |
+| Save (failure — generic) | Generic inline error |
 | Cancel | `localDescription` discarded; modal closes; no autosave triggered |

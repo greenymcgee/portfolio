@@ -123,8 +123,8 @@ Server-side redirect in the async RSC page + `useLayoutEffect` in
 **Status:** Resolved → D17
 
 "New Post" stays — converted from `<Link>` to `<form action={createPost}>`.
-Edit button added. Component ends up with New Post, Edit, Delete. Implement
-in PR 4.
+Edit button added. Component ends up with New Post, Edit, Delete. Deferred
+to PR 12 (createPost draft flow + Edit button).
 
 ---
 
@@ -220,6 +220,14 @@ now uses a manual Save + Cancel pattern (Option A). Save calls `updatePost`
 directly, on success updates `EditPostClient.description` + calls
 `cancelPendingDebounce` + closes. Cancel discards temp state with no save.
 Updated: `components.md`, `state-management.md`, `jira/pr-10.md`.
+
+---
+
+## T21: Revise `useAutoSave` call-site plan — `onSave` wiring is underspecified
+
+**Status:** Resolved → D31
+
+`useAutoSave` custom hook removed. `EditPostClient` uses `useActionState(updatePost, initialState)` with inline debounce via `useRef` + `setTimeout`. All autosave display derived from `state` and `pending` directly. `DescriptionModal` owns its own `useActionState(withCallbacks(updatePost, { onSuccess }), initialState)` instance for auto-close. Updated: `state-management.md`, `pr-07.md`, `components.md`, `pr-10.md`, `pr-04.md`.
 
 ---
 

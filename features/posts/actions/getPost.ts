@@ -1,11 +1,15 @@
-'use server'
+'use cache'
 
+import { cacheTag } from 'next/cache'
+
+import { CACHE_TAGS } from '@/globals/constants'
 import { logger } from '@/lib/logger'
 
 import { FindPostDto } from '../dto'
 import { PostService } from '../post.service'
 
 export async function getPost(id: AuthoredPost['id']) {
+  cacheTag(CACHE_TAGS.post)
   const result = await PostService.findOne(new FindPostDto(id))
   return result.match(
     (response) => ({ error: null, post: response.post }),

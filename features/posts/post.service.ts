@@ -4,6 +4,7 @@ import { ZodError } from 'zod'
 
 import {
   BAD_REQUEST,
+  CONFLICT,
   CREATED,
   FORBIDDEN,
   SUCCESS,
@@ -18,6 +19,7 @@ import { hasPermission } from '@/lib/permissions'
 import type { CreatePostDto } from './dto/create-post.dto'
 import type { FindAndCountPostsDto } from './dto/find-and-count-posts.dto'
 import type { FindPostDto } from './dto/find-post.dto'
+import { UpdatePostDto } from './dto/update-post.dto'
 import { PostRepository } from './post.repository'
 
 export class PostService {
@@ -106,14 +108,53 @@ export class PostService {
     return okAsync({ post, status: SUCCESS } as const)
   }
 
+  public static async update(dto: UpdatePostDto) {
+    const user = await authenticateAPISession()
+    if (user === null) return this.respondWithUnauthorizedError()
+
+    const authorizedUser = this.authorizeUser(user, 'update')
+    if (authorizedUser === null) return this.respondWithForbiddenError()
+
+    const post = await PostRepository.update(dto)
+    if (post instanceof PrismaError) return this.handleUpdatePrismaError(post)
+
+    if (post instanceof ZodError) {
+      return this.respondWithZodError(post, 'update')
+    }
+
+    if (post instanceof NotFoundError) {
+      return this.respondWithNotFoundError(post, 'update')
+    }
+
+    if (post instanceof Error) {
+      return errAsync({
+        details: post,
+        status: BAD_REQUEST,
+        type: 'lexical',
+      } as const)
+    }
+
+    return okAsync({ post, status: SUCCESS } as const)
+  }
+
   private static authorizeUser(
     user: Session['user'],
-    action: 'create' | 'delete',
+    action: 'create' | 'delete' | 'update',
   ) {
     if (hasPermission(user, 'posts', action)) return user
 
     logger.error({ userId: user.id }, 'PostService permission error:')
     return null
+  }
+
+  private static handleUpdatePrismaError<Err extends Error>(
+    error: PrismaError<Err>,
+  ) {
+    if (error.status === CONFLICT) {
+      return this.respondWithUniqueConstraintError(error)
+    }
+
+    return this.respondWithPrismaError(error, 'update')
   }
 
   private static respondWithForbiddenError() {
@@ -125,19 +166,20 @@ export class PostService {
 
   private static respondWithNotFoundError(
     error: NotFoundError,
-    method: 'findOne' | 'delete',
+    method: 'findOne' | 'delete' | 'update',
   ) {
     logger.error({ error }, `PostService not found error: ${method}`)
     return errAsync({
       details: error,
       status: error.status,
+      // TODO: change this to not-found
       type: 'entity' as const,
     } as const)
   }
 
   private static respondWithPrismaError<Err extends Error>(
     error: PrismaError<Err>,
-    method: 'create' | 'delete' | 'findAndCount' | 'findOne',
+    method: 'create' | 'delete' | 'findAndCount' | 'findOne' | 'update',
   ) {
     logger.error({ error }, `PostService Prisma error: ${method}`)
     return errAsync({
@@ -154,9 +196,23 @@ export class PostService {
     } as const)
   }
 
+  private static respondWithUniqueConstraintError<Err extends Error>(
+    error: PrismaError<Err>,
+  ) {
+    logger.error(
+      { error },
+      'PostService PrismaUniqueConstraintError error: update',
+    )
+    return errAsync({
+      details: error,
+      status: CONFLICT,
+      type: 'unique-constraint' as const,
+    } as const)
+  }
+
   private static respondWithZodError(
     error: ZodError,
-    method: 'create' | 'delete' | 'findAndCount' | 'findOne',
+    method: 'create' | 'delete' | 'findAndCount' | 'findOne' | 'update',
   ) {
     logger.error({ error }, `PostService Zod error: ${method}`)
     return errAsync({

@@ -74,6 +74,26 @@ Every write flows: **Action → DTO → Service → Repository → `Result`**.
 - Results use **neverthrow** (`okAsync` / `errAsync`). Actions call `.match()` to handle success and typed error branches.
 - On success, actions call `revalidateTag(CACHE_TAGS.*)` then `redirect(...)`.
 
+### Client component action state
+
+Use `useActionState` to wire server actions to UI state in client components. For actions that
+need side-effect callbacks (closing a modal, showing a toast), wrap with `withCallbacks` from
+`@greenymcgee/typescript-utils`:
+
+```ts
+const [state, action, pending] = useActionState(
+  withCallbacks(serverAction, {
+    onSuccess: (state) => { /* side effect, e.g. close modal */ },
+    onError: (state) => { /* side effect, e.g. Sonner toast */ },
+  }),
+  INITIAL_STATE,
+)
+```
+
+When no side effects are needed, use `useActionState(serverAction, INITIAL_STATE)` directly and
+derive all display from `state` and `pending`. See `features/posts/components/createPostForm/`
+for a full example with `withCallbacks`.
+
 ### Caching
 
 Read actions use `'use cache'` with `cacheTag()`:

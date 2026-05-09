@@ -47,5 +47,5 @@ foundation going forward.
 
 ## Detailed Specs
 
-- **Per-component specs** (useAutoSave, save-state indicator, buttons, modals, publishedAt): [`./components.md`](./components.md)
-- **State management** (autosave hook interface, state machine): [`./state-management.md`](./state-management.md)
+- **Per-component specs** (save-state indicator, buttons, modals, publishedAt): [`./components.md`](./components.md)
+- **State management** (autosave wiring, inline debounce, `DescriptionModal` action state): [`./state-management.md`](./state-management.md)

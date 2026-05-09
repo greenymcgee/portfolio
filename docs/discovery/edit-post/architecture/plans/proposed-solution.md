@@ -51,7 +51,7 @@ than to a form. The existing `/posts/new` page and `CreatePostForm` are deleted.
 | `DescriptionButton` | Client component | `features/posts/components/` | Opens description modal |
 | `DescriptionModal` | Client component | `features/posts/components/` | Shadcn Dialog wrapping textarea |
 | `CloseButton` | Client component | `features/posts/components/` | Flush + redirect; no-title confirmation |
-| `useAutoSave` | Hook | `features/posts/hooks/` | Debounce logic with cancel/flush interface |
+| Inline debounce | `EditPostClient` | `features/posts/components/editPostClient/` | `useRef`+`setTimeout`; `cancelDebounce`/`flushDebounce` callbacks |
 | New `RichTextEditor` | Component | `globals/components/richTextEditor/` | No internal composer, no embedded toolbar |
 | `globals/components/ui/dialog/` | Component | `globals/components/ui/` | Shadcn Dialog split into one-per-directory |
 

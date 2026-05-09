@@ -10,7 +10,7 @@ See [`./README.md`](./README.md) for the component hierarchy and `LexicalCompose
 
 - Auto-focused on mount.
 - Styled to be invisible (no border, no background) — visually integrated with the page content.
-- Feeds into `EditPostClient` state; triggers autosave via `useAutoSave`.
+- Feeds into `EditPostClient` state; triggers the autosave debounce.
 - Inline error rendered below this input on unique-constraint violations (→ D12 amended by D14).
 
 ---
@@ -71,7 +71,9 @@ title input for field-specific guidance (alongside the indicator error).
 - `DescriptionButton` in `ActionBar` opens the Shadcn `Dialog`.
 - `DescriptionModal` wraps a `<textarea>` for the post description.
 - `DescriptionModal` holds **temporary local state** (`localDescription`) initialised from `EditPostClient.description` when the modal opens.
-- **Save:** calls `updatePost` with `{ id, title, description: localDescription, content }` → on success updates `EditPostClient.description` + calls `cancelPendingDebounce` + closes the modal. Inline error shown in modal on failure.
+- Owns its own `useActionState(withCallbacks(updatePost, { onSuccess }), ...)` instance. `withCallbacks` handles auto-close only — errors are derived from `state` directly.
+- **Save:** submits via `new FormData(formRef.current)` → on success `withCallbacks.onSuccess` fires: updates `EditPostClient.description` + calls `cancelDebounce` + closes the modal.
+- **Save (failure):** `state.threwUniqueConstraintError` → hard-coded "copy description before closing and fix the title"; `state.dtoError?.fieldErrors?.description` → rendered inline; generic fallback otherwise.
 - **Cancel:** discards temp state and closes without saving. Autosave does not fire.
 - `EditPostClient.description` is still included in every `publishPost` call and in any subsequent autosave triggered by title or content changes.
 
@@ -89,13 +91,13 @@ existing conventions (PR 9).
 - **`description`:** `""`
 
 On success, redirects to `ROUTES.editPost(post.id)`. `ROUTES.newPost` and
-`app/posts/new/` are deleted in PR 4.
+`app/posts/new/` are deleted in PR 12.
 
 ---
 
 ## `PostPageAdminMenuContent` Update (→ D17)
 
-Three actions after PR 4:
+Three actions after PR 12:
 
 | Action | Implementation |
 |--------|---------------|

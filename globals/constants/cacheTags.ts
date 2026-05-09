@@ -1,1 +1,1 @@
-export const CACHE_TAGS = { posts: 'posts' } as const
+export const CACHE_TAGS = { post: 'post', posts: 'posts' } as const
