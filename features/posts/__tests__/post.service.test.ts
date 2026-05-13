@@ -24,6 +24,7 @@ import { CreatePostDto } from '../dto/create-post.dto'
 import { UpdatePostDto } from '../dto/update-post.dto'
 import { PostRepository } from '../post.repository'
 import { PostService } from '../post.service'
+import type { FindAndCountPostsDtoError } from '../types'
 
 vi.mock('../post.repository', () => ({
   PostRepository: {
@@ -34,6 +35,10 @@ vi.mock('../post.repository', () => ({
     update: vi.fn(),
   },
 }))
+
+afterEach(() => {
+  vi.resetAllMocks()
+})
 
 describe('PostService', () => {
   describe('create', () => {
@@ -115,6 +120,7 @@ describe('PostService', () => {
 
   describe('delete', () => {
     it('should return a PrismaError returned by the repository', async () => {
+      mockServerSession('ADMIN')
       const error = new PrismaError(new Error('bad'))
       vi.mocked(PostRepository.delete).mockResolvedValueOnce(error)
       const result = await PostService.delete(new FindPostDto(1))
@@ -128,6 +134,7 @@ describe('PostService', () => {
     })
 
     it('should return a ZodError returned by the repository', async () => {
+      mockServerSession('ADMIN')
       const error = new ZodError([])
       vi.mocked(PostRepository.delete).mockResolvedValue(
         error as ZodError<number>,
@@ -139,6 +146,7 @@ describe('PostService', () => {
     })
 
     it('should return a NotFoundError returned by the repository', async () => {
+      mockServerSession('ADMIN')
       const id = 1
       const error = new NotFoundError(id, 'Post')
       vi.mocked(PostRepository.delete).mockResolvedValue(error)
@@ -149,6 +157,7 @@ describe('PostService', () => {
     })
 
     it('should return the given status upon success', async () => {
+      mockServerSession('ADMIN')
       vi.mocked(PostRepository.delete).mockResolvedValue({ status: NO_CONTENT })
       const result = await PostService.delete(new FindPostDto(1))
       expect(result).toEqual(new Ok({ status: NO_CONTENT }))
@@ -171,9 +180,11 @@ describe('PostService', () => {
       )
     })
 
-    it('should return a ZodError', async () => {
+    it('should return a DTO error', async () => {
       const error = new ZodError([])
-      vi.mocked(PostRepository.findAndCount).mockResolvedValue(error)
+      vi.mocked(PostRepository.findAndCount).mockResolvedValue(
+        error as FindAndCountPostsDtoError,
+      )
       const result = await PostService.findAndCount(
         new FindAndCountPostsDto({ limit: 'invalid' }),
       )
@@ -185,7 +196,7 @@ describe('PostService', () => {
     it('should return posts', async () => {
       vi.mocked(PostRepository.findAndCount).mockResolvedValue({
         currentPage: 5,
-        // @ts-expect-error: the author isn't important for this test
+        offset: 2,
         posts: POSTS,
         totalPages: 22,
       })

@@ -7,4 +7,5 @@ export const ROUTES = {
   post: (id: number) => `/posts/${id}`,
   posts: '/posts',
   register: '/register',
+  unpublishedPosts: '/posts?unpublished=true',
 } as const

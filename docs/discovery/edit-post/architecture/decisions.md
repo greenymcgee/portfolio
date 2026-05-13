@@ -553,6 +553,16 @@ provides no additional safety over DTO validation.
 
 ---
 
+## 2026-05-10 - D32: `authorizeUnpublishedPosts` — auth gate outside `'use cache'` boundary; supersedes D7 auth placement
+
+- **Decision:** Auth for the unpublished filter is enforced in a dedicated `'use server'` action, `authorizeUnpublishedPosts`, called by `latestPosts.tsx` before `getPosts` is entered. `getPosts` itself contains no auth logic. No auth backstop exists deeper in the stack — callers are responsible for invoking `authorizeUnpublishedPosts` before entering the cache.
+- **Why:** D7 planned to put the auth check in `PostService.findAndCount`. That plan has two compounding problems: (1) the service is called from *within* `getPosts`, which has `'use cache'`, so the service is inside the cache boundary — not before it; (2) Next.js hard-blocks `headers()` inside `'use cache'` at runtime. `getServerSession` calls `headers()` internally, so any call to `authenticateAPISession` from inside the cache throws a runtime error. Auth cannot live anywhere in the `getPosts → PostService → PostRepository` chain. The only viable position is a separate server action invoked by the caller before entering the cache. `authorizeUnpublishedPosts` redirects on unauthorized/forbidden and short-circuits on `unpublished: false`, so there is no auth overhead on public requests.
+- **Alternatives considered:** Auth in `PostService.findAndCount` (D7 plan) — impossible; the service is inside `'use cache'`. Auth in `PostRepository.findAndCount` as a backstop — attempted; same constraint applies, `headers()` is blocked inside `'use cache'`, causing a runtime error. Passing the authenticated user as a `getPosts` argument to include it in the cache key — makes every user's posts list a separate cache entry, destroying cache effectiveness for the public (published) path.
+- **Supersedes:** D7 in part — the "why not in the cached function" rationale in D7 still holds, but the planned auth location (service layer) was wrong. Auth lives in a pre-cache action, not in the service.
+- **Step:** PR 5 — Implementation
+
+---
+
 ## 2026-05-08 - D31: Autosave wiring — `useActionState` + inline debounce; `DescriptionModal` owns separate instance
 
 - **Decision:** Replace the underspecified `useAutoSave` custom hook with `useActionState(updatePost, initialState)` in `EditPostClient`. Debounce is inlined via `useRef` + `setTimeout` — no custom hook. FormData is constructed from a `formRef` on the form element. `DescriptionModal` owns its own `useActionState(withCallbacks(updatePost, { onSuccess }), initialState)` instance; `withCallbacks` is used only for the auto-close side effect. All autosave display (spinner, "Saved", error, field errors) is derived directly from `state` and `pending` — no callbacks, no mirrored state. `state.threwUniqueConstraintError` and `state.dtoError.fieldErrors` are read independently by the components that own them.
