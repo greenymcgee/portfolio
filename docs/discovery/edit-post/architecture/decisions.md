@@ -553,6 +553,26 @@ provides no additional safety over DTO validation.
 
 ---
 
+## 2026-05-14 - D34: `Switch` variant implementation — revised color tokens; amends D33
+
+- **Decision:** The implemented color tokens deviate from the D33 discovery table. Both `default` and `inverted` tracks use `bg-subtle` in the unchecked state (not a constant per-variant color). Thumb off-states use opacity modifiers for contrast. Final token mapping:
+
+  | Variant | Track (off) | Track (on) | Thumb (off) | Thumb (on) |
+  |---------|-------------|------------|-------------|------------|
+  | `default` | `bg-subtle` | `bg-background` | `bg-background/70` | `bg-input` |
+  | `inverted` | `bg-subtle` | `bg-input` | `bg-input/80` | `bg-background` |
+  | `primary` | `bg-input` | `bg-primary` | `bg-background` (all existing dark-mode classes) | ← same |
+
+- **Why:** Visual testing revealed that a static `bg-input` track for `inverted` created insufficient contrast between the unchecked and checked states on the `#d9d9d9` admin menu background. Anchoring both variants at `bg-subtle` for the unchecked track provides a neutral starting point; the on-state track color then distinguishes the variants (`bg-background` for `default`, `bg-input` for `inverted`). Opacity modifiers on the thumb off-state (`/70`, `/80`) reduce its visual weight so the unchecked state reads as clearly inactive.
+
+- **Alternatives considered:** Static per-variant track colors as in D33 — insufficient contrast in the admin menu context. A single opacity value across all thumb states — `/70` and `/80` differ slightly between variants because the source colors differ; a uniform value would over-darken one or under-contrast the other.
+
+- **Amends:** D33 — the "Track" column in D33's table is superseded by this entry. The prop name, cva implementation pattern, and `primary` behavior are unchanged.
+
+- **Step:** PR 5.5 — Implementation
+
+---
+
 ## 2026-05-14 - D33: `Switch` three-variant color system — `default`, `inverted`, `primary`
 
 - **Decision:** `Switch` gains a `variant` prop (`'default' | 'inverted' | 'primary'`), consistent with the `Button` component's prop naming. All three variants use a constant-color track (no state-based track color change) except `primary`, which retains the existing teal-on-checked behavior as an opt-in. The thumb color indicates state in `default` and `inverted`.
@@ -571,7 +591,7 @@ provides no additional safety over DTO validation.
 
 - **Alternatives considered:** CSS-context overrides via `className` — too fragile, requires callers to know internals. A single `invert` boolean — works for two states but can't represent the three distinct color schemes needed. `theme` as the prop name — rejected in favour of `variant` to stay consistent with `Button`. Keeping `primary` as the default — conflicts with the admin menu context where teal is inappropriate.
 
-- **Step:** PR 6 — Discovery
+- **Step:** PR 5.5 — Discovery (implementation deviations documented in D34)
 
 ---
 
