@@ -1,8 +1,13 @@
 import { render, screen } from '@testing-library/react'
+import mockRouter from 'next-router-mock'
 
 import { ROUTES } from '@/globals/constants'
 
 import { Pagination } from '../pagination'
+
+beforeEach(() => {
+  mockRouter.push(ROUTES.posts)
+})
 
 describe('<Pagination />', () => {
   it('should render nothing when totalPages is 1', () => {
@@ -48,5 +53,38 @@ describe('<Pagination />', () => {
   it('should render an ellipsis for large page sets', () => {
     render(<Pagination currentPage={4} totalPages={10} />)
     expect(screen.getAllByText('More pages').length).toBeGreaterThan(0)
+  })
+
+  describe('?unpublished=true', () => {
+    beforeEach(() => {
+      mockRouter.push(ROUTES.unpublishedPosts)
+    })
+
+    it.each([1, 2, 3])(
+      'should include &unpublished=true in page links',
+      (page) => {
+        render(<Pagination currentPage={0} totalPages={3} />)
+        expect(
+          screen.getByRole('link', { name: String(page) }),
+        ).toHaveAttribute(
+          'href',
+          `${ROUTES.posts}?page=${page - 1}&unpublished=true`,
+        )
+      },
+    )
+
+    it('should include &unpublished=true in the Previous link', () => {
+      render(<Pagination currentPage={1} totalPages={3} />)
+      expect(
+        screen.getByRole('link', { name: /go to previous page/i }),
+      ).toHaveAttribute('href', `${ROUTES.posts}?page=0&unpublished=true`)
+    })
+
+    it('should include &unpublished=true in the Next link', () => {
+      render(<Pagination currentPage={1} totalPages={3} />)
+      expect(
+        screen.getByRole('link', { name: /go to next page/i }),
+      ).toHaveAttribute('href', `${ROUTES.posts}?page=2&unpublished=true`)
+    })
   })
 })

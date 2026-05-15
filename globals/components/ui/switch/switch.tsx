@@ -4,6 +4,8 @@ import { type ComponentProps } from 'react'
 import { Root, Thumb } from '@radix-ui/react-switch'
 import type { VariantProps } from 'class-variance-authority'
 
+import { cn } from '@/lib/utils'
+
 import { SWITCH_THUMB_VARIANTS, SWITCH_TRACK_VARIANTS } from './constants'
 
 type Extensions = ComponentProps<typeof Root> &
@@ -21,7 +23,7 @@ export function Switch({
 }: Props) {
   return (
     <Root
-      className={SWITCH_TRACK_VARIANTS({ className, variant })}
+      className={cn(SWITCH_TRACK_VARIANTS({ className, variant }))}
       data-size={size}
       data-slot="switch"
       data-variant={variant}
