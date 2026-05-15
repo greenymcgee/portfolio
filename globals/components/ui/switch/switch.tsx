@@ -1,46 +1,34 @@
 'use client'
 
-import { ComponentProps } from 'react'
+import { type ComponentProps } from 'react'
 import { Root, Thumb } from '@radix-ui/react-switch'
-import clsx from 'clsx'
+import type { VariantProps } from 'class-variance-authority'
 
-import { cn } from '@/lib/utils/index'
+import { SWITCH_THUMB_VARIANTS, SWITCH_TRACK_VARIANTS } from './constants'
 
-type Props = ComponentProps<typeof Root> & {
-  size?: 'sm' | 'default'
+type Extensions = ComponentProps<typeof Root> &
+  VariantProps<typeof SWITCH_TRACK_VARIANTS>
+
+type Props = Extensions & {
+  size?: 'default' | 'sm'
 }
 
-export function Switch({ className, size = 'default', ...props }: Props) {
+export function Switch({
+  className,
+  size = 'default',
+  variant = 'default',
+  ...props
+}: Props) {
   return (
     <Root
-      className={cn(
-        'peer group/switch focus-visible:border-ring focus-visible:ring-ring/50',
-        'aria-invalid:border-destructive aria-invalid:ring-destructive/20',
-        'dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40',
-        'data-checked:bg-primary data-unchecked:bg-input dark:data-unchecked:bg-input/80',
-        'relative inline-flex shrink-0 items-center rounded-full border border-transparent',
-        'shadow-xs transition-all outline-none after:absolute after:-inset-x-3',
-        'after:-inset-y-2 focus-visible:ring-3 aria-invalid:ring-3',
-        'data-disabled:cursor-not-allowed data-disabled:opacity-50',
-        'data-[size=default]:h-[18.4px] data-[size=default]:w-[32px]',
-        'data-[size=sm]:h-[14px] data-[size=sm]:w-[24px]',
-        className,
-      )}
+      className={SWITCH_TRACK_VARIANTS({ className, variant })}
       data-size={size}
       data-slot="switch"
+      data-variant={variant}
       {...props}
     >
       <Thumb
-        className={clsx(
-          'bg-background dark:data-checked:bg-primary-foreground',
-          'dark:data-unchecked:bg-foreground pointer-events-none block',
-          'rounded-full ring-0 transition-transform',
-          'group-data-[size=default]/switch:size-4 group-data-[size=sm]/switch:size-3',
-          'group-data-[size=default]/switch:data-checked:translate-x-[calc(100%-2px)]',
-          'group-data-[size=sm]/switch:data-checked:translate-x-[calc(100%-2px)]',
-          'group-data-[size=default]/switch:data-unchecked:translate-x-0',
-          'group-data-[size=sm]/switch:data-unchecked:translate-x-0',
-        )}
+        className={SWITCH_THUMB_VARIANTS({ variant })}
         data-slot="switch-thumb"
       />
     </Root>

@@ -60,4 +60,20 @@ describe('<Switch />', () => {
     expect(onCheckedChange).toHaveBeenCalledTimes(1)
     expect(onCheckedChange).toHaveBeenCalledWith(true)
   })
+
+  it('should use default variant data attribute', () => {
+    render(<Switch {...PROPS} />)
+    expect(screen.getByRole('switch')).toHaveAttribute(
+      'data-variant',
+      'default',
+    )
+  })
+
+  it('should set data-variant when variant prop is provided', () => {
+    render(<Switch {...PROPS} variant="inverted" />)
+    expect(screen.getByRole('switch')).toHaveAttribute(
+      'data-variant',
+      'inverted',
+    )
+  })
 })
