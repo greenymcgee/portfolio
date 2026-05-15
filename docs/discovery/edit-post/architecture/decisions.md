@@ -553,6 +553,28 @@ provides no additional safety over DTO validation.
 
 ---
 
+## 2026-05-14 - D33: `Switch` three-variant color system — `default`, `inverted`, `primary`
+
+- **Decision:** `Switch` gains a `variant` prop (`'default' | 'inverted' | 'primary'`), consistent with the `Button` component's prop naming. All three variants use a constant-color track (no state-based track color change) except `primary`, which retains the existing teal-on-checked behavior as an opt-in. The thumb color indicates state in `default` and `inverted`.
+
+  | Variant | Track | Thumb (off) | Thumb (on) |
+  |---------|-------|-------------|------------|
+  | `default` | `bg-subtle` | `bg-background` | `bg-input` |
+  | `inverted` | `bg-input` | `bg-subtle` | `bg-background` |
+  | `primary` | `bg-input` (off) / `bg-primary` (on) | `bg-background` (all existing behavior) | ← same |
+
+  `default` and `inverted` are true inverses: track and thumb tokens swap symmetrically. `primary` preserves the previous default in full, including dark-mode overrides, for contexts that require a branded checked state.
+
+  `UnpublishedPostsToggle` uses `variant="inverted"` because it renders inside `AdminMenuDialog`, which applies `bg-foreground` (`#d9d9d9`) — the inverse of the site's dark background.
+
+- **Why:** The old default used `bg-primary` (teal) for the checked track. Teal clashed visually with the light `#d9d9d9` admin menu background. The thumb (`bg-background` = `#1b1b1b`) was nearly invisible against the near-white `bg-input` unchecked track in the admin menu context. A proper inverted variant was needed; separating `primary` into its own variant preserves the branded option without making it the global default.
+
+- **Alternatives considered:** CSS-context overrides via `className` — too fragile, requires callers to know internals. A single `invert` boolean — works for two states but can't represent the three distinct color schemes needed. `theme` as the prop name — rejected in favour of `variant` to stay consistent with `Button`. Keeping `primary` as the default — conflicts with the admin menu context where teal is inappropriate.
+
+- **Step:** PR 6 — Discovery
+
+---
+
 ## 2026-05-10 - D32: `authorizeUnpublishedPosts` — auth gate outside `'use cache'` boundary; supersedes D7 auth placement
 
 - **Decision:** Auth for the unpublished filter is enforced in a dedicated `'use server'` action, `authorizeUnpublishedPosts`, called by `latestPosts.tsx` before `getPosts` is entered. `getPosts` itself contains no auth logic. No auth backstop exists deeper in the stack — callers are responsible for invoking `authorizeUnpublishedPosts` before entering the cache.

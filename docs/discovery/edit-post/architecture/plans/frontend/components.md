@@ -107,14 +107,31 @@ Three actions after PR 12:
 
 ---
 
-## Unpublished Filter (→ D7, D18)
+## `Switch` variant prop (→ D33) — PR 5.5
 
-`PostsPageAdminMenuContent` adds an "Unpublished" toggle that pushes
-`?unpublished=true` via `useRouter().push`.
+`Switch` gains a `variant` prop (`'default' | 'inverted' | 'primary'`):
+
+| Variant | Track | Thumb (off) | Thumb (on) |
+|---------|-------|-------------|------------|
+| `default` | `bg-subtle` (always) | `bg-background` | `bg-input` |
+| `inverted` | `bg-input` (always) | `bg-subtle` | `bg-background` |
+| `primary` | `bg-input` (off) / `bg-primary` (on) | existing behavior | ← same |
+
+`default` and `inverted` are true inverses. `primary` preserves the original
+Shadcn behavior in full for contexts that require a branded checked state.
+
+---
+
+## Unpublished Filter (→ D7, D18, D33) — PR 6 / PR 11
+
+`PostsPageAdminMenuContent` adds an "Unpublished" toggle (`UnpublishedPostsToggle`)
+that pushes `?unpublished=true` via `useRouter().push`. The toggle passes
+`variant="inverted"` to `Switch` because it renders inside `AdminMenuDialog`
+(`bg-foreground` = `#d9d9d9` context). Implement in PR 6.
 
 `FindAndCountPostsDto` adds `unpublished?: string`.
 
 `Pagination` gains `unpublished?: boolean` prop — when `true`, page links are
 built as `${ROUTES.posts}?page=${N}&unpublished=true`.
 
-Implement in PR 12.
+`FindAndCountPostsDto` / `Pagination` changes implement in PR 11.

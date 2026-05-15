@@ -3,10 +3,10 @@
 | Field | Value |
 |-------|-------|
 | **Phase** | Implementation in progress |
-| **Current Focus** | PR 5 — Backend: `getPosts` unpublished filter |
-| **Current PR** | PR 5 |
+| **Current Focus** | PR 5.5 — `Switch` variant prop discovery |
+| **Current PR** | PR 5 (in progress) / PR 5.5 (discovery complete) |
 | **Blocked** | No |
-| **Last updated** | 2026-05-10 |
+| **Last updated** | 2026-05-14 |
 | **Branch** | 158-unpublished-posts-backend |
 
 ## Requirements Review Progress
@@ -32,6 +32,7 @@
 | 3 | Database migration | [EDIT-POST-3](../jira/pr-03.md) | Done |
 | 4 | Backend: `updatePost` | [EDIT-POST-4](../jira/pr-04.md) | Done |
 | 5 | Backend: `getPosts` unpublished filter | [EDIT-POST-5](../jira/pr-05.md) | In progress |
+| 5.5 | `Switch` variant prop — `default`, `inverted`, `primary` | [EDIT-POST-5.5](../jira/pr-05.5.md) | Not started |
 | 6 | `PostsPageAdminMenuContent` unpublished toggle | [EDIT-POST-6](../jira/pr-06.md) | Not started |
 | 7 | Edit page — core structure + autosave | [EDIT-POST-7](../jira/pr-07.md) | Not started |
 | 8 | Edit page — title + RTE styles | [EDIT-POST-8](../jira/pr-08.md) | Not started |
