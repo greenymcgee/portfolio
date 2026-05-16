@@ -1,3 +1,5 @@
+'use client'
+
 import { useMemo } from 'react'
 
 import {
@@ -12,6 +14,8 @@ import {
 import { ROUTES } from '@/globals/constants'
 import { PaginationFacade } from '@/globals/facades'
 
+import { useUnpublishedParam } from '../../hooks'
+
 type Props = {
   currentPage: number
   totalPages: number
@@ -21,6 +25,7 @@ export function Pagination({ currentPage, totalPages }: Props) {
   const facade = useMemo(() => new PaginationFacade(), [])
   const nextDisabled = currentPage === totalPages - 1
   const previousDisabled = currentPage === 0
+  const unpublishedSuffix = useUnpublishedParam() ? '&unpublished=true' : ''
 
   const pages = useMemo(() => {
     facade.update(currentPage, totalPages)
@@ -35,7 +40,7 @@ export function Pagination({ currentPage, totalPages }: Props) {
         <PaginationItem>
           <PaginationPrevious
             disabled={previousDisabled}
-            href={`${ROUTES.posts}?page=${currentPage - 1}`}
+            href={`${ROUTES.posts}?page=${currentPage - 1}${unpublishedSuffix}`}
           />
         </PaginationItem>
         {pages.map((page, index) =>
@@ -46,7 +51,7 @@ export function Pagination({ currentPage, totalPages }: Props) {
           ) : (
             <PaginationItem key={page}>
               <PaginationLink
-                href={`${ROUTES.posts}?page=${page - 1}`}
+                href={`${ROUTES.posts}?page=${page - 1}${unpublishedSuffix}`}
                 isActive={page - 1 === currentPage}
               >
                 {page}
@@ -57,7 +62,7 @@ export function Pagination({ currentPage, totalPages }: Props) {
         <PaginationItem>
           <PaginationNext
             disabled={nextDisabled}
-            href={`${ROUTES.posts}?page=${currentPage + 1}`}
+            href={`${ROUTES.posts}?page=${currentPage + 1}${unpublishedSuffix}`}
           />
         </PaginationItem>
       </PaginationContent>

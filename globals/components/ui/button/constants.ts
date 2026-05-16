@@ -2,6 +2,7 @@ import { cva } from 'class-variance-authority'
 
 export const BUTTON_VARIANTS = cva(
   [
+    'cursor-pointer',
     'group/button',
     'inline-flex',
     'shrink-0',
@@ -122,7 +123,7 @@ export const BUTTON_VARIANTS = cva(
         ],
         'outline-inverse': [
           'border-border',
-          'bg-foreground',
+          'bg-input',
           'text-background',
           'shadow-xs',
           'hover:bg-muted',

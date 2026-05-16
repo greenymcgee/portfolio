@@ -1,3 +1,5 @@
+import { Suspense } from 'react'
+
 import { getPosts } from '@/features/posts/actions'
 
 import { Pagination } from '../pagination'
@@ -22,7 +24,9 @@ export async function LatestPosts({ searchParams }: Props) {
   return (
     <div aria-live="polite" data-testid="latest-posts">
       <PostCards posts={posts} />
-      <Pagination currentPage={currentPage} totalPages={totalPages} />
+      <Suspense>
+        <Pagination currentPage={currentPage} totalPages={totalPages} />
+      </Suspense>
     </div>
   )
 }
