@@ -3,7 +3,7 @@
 | Field | Value |
 |-------|-------|
 | **Phase** | Implementation in progress |
-| **Current Focus** | PR 7 — edit page core structure (brainstorming in progress; see `jira/pr-07-questions.md`) |
+| **Current Focus** | PR 7 — edit page core structure (brainstorming in progress; see `jira/pr-07/`) |
 | **Current PR** | PR 5 (in progress) / PR 5.5 (done) |
 | **Blocked** | No |
 | **Last updated** | 2026-05-15 |
