@@ -3,10 +3,10 @@
 | Field | Value |
 |-------|-------|
 | **Phase** | Implementation in progress |
-| **Current Focus** | PR 6 — `PostsPageAdminMenuContent` unpublished toggle |
+| **Current Focus** | PR 7 — edit page core structure (brainstorming in progress; see `jira/pr-07-questions.md`) |
 | **Current PR** | PR 5 (in progress) / PR 5.5 (done) |
 | **Blocked** | No |
-| **Last updated** | 2026-05-14 |
+| **Last updated** | 2026-05-15 |
 | **Branch** | 158-unpublished-posts-backend |
 
 ## Requirements Review Progress
@@ -51,3 +51,4 @@
 | T19 | ~~Description modal — manual Save button instead of autosave on close~~ | Resolved → D27 |
 | T20 | ~~Move unpublished filter earlier in rollout (after migration, not last)~~ | Resolved → D24 |
 | ~~T21~~ | ~~Revise `useAutoSave` call-site plan~~ | Resolved → D31 |
+| T22 | 404 handling for the edit page — `notFound()` in `EditPostContent` + `not-found.tsx` | Open — deferred post PR-07 |

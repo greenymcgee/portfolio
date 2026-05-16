@@ -231,6 +231,20 @@ Updated: `components.md`, `state-management.md`, `jira/pr-10.md`.
 
 ---
 
+## T22: 404 handling for the edit page
+
+**Status:** Open
+
+`EditPostContent` currently passes `post` to `EditPostClient` with no handling for the
+error case (post not found or `getPost` failure). When the post doesn't exist, `post`
+will be `null` and `EditPostClient` will receive invalid initial state.
+
+Add proper 404 handling to `EditPostContent`: call Next.js `notFound()` when `getPost`
+returns an error, and wire up a `not-found.tsx` at the `app/posts/[id]/edit/` route
+segment.
+
+---
+
 ## T20: Move unpublished filter earlier in the rollout sequence
 
 **Status:** Resolved → D24
