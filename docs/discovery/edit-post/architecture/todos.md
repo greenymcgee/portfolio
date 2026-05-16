@@ -231,6 +231,30 @@ Updated: `components.md`, `state-management.md`, `jira/pr-10.md`.
 
 ---
 
+## T23: Breadcrumbs for `/posts/[id]` and `/posts/[id]/edit`
+
+**Status:** Open
+
+Add [shadcn Breadcrumb](https://ui.shadcn.com/docs/components/radix/breadcrumb) to both the post page and the edit page. Needs its own PR — install the component and wire it up to both pages in the same PR.
+
+---
+
+## T24: Conditional `<SiteNavbar />` display
+
+**Status:** Open
+
+`<SiteNavbar />` should not render on `/login`, `/posts/[id]`, or `/posts/[id]/edit`. `<AdminMenuDialog />` must still appear on the two post pages. Needs a plan/decision before implementation.
+
+---
+
+## T25: Skeleton and error states for the edit page
+
+**Status:** Open
+
+The edit page currently has no loading skeleton and no meaningful error UI when `getPost` fails. Both need to be designed and implemented before the feature ships. Ensure upcoming PRs include these states.
+
+---
+
 ## T22: 404 handling for the edit page
 
 **Status:** Open
