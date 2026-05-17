@@ -5,6 +5,12 @@ import { renderWithProviders } from '@/test/helpers/utils'
 import { EditPostStatus } from '..'
 
 describe('<EditPostStatus />', () => {
+  it('should show the spinner when saving after a previous error', () => {
+    renderWithProviders(<EditPostStatus saving status="ERROR" />)
+    expect(screen.getByRole('status')).toBeVisible()
+    expect(screen.queryByText('Unable to save')).not.toBeInTheDocument()
+  })
+
   it('should render nothing in idle state', () => {
     const { container } = renderWithProviders(
       <EditPostStatus saving={false} status="IDLE" />,

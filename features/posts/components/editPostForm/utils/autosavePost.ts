@@ -1,6 +1,8 @@
 import { startTransition } from 'react'
 import type { RefObject } from 'react'
 
+import { cancelDebounce } from './cancelDebounce'
+
 type Params = {
   formRef: RefObject<HTMLFormElement | null>
   timeoutRef: RefObject<ReturnType<typeof setTimeout> | null>
@@ -8,11 +10,7 @@ type Params = {
 }
 
 export function autosavePost({ formRef, timeoutRef, updateAction }: Params) {
-  if (timeoutRef.current) {
-    clearTimeout(timeoutRef.current)
-    timeoutRef.current = null
-  }
-
+  cancelDebounce(timeoutRef)
   timeoutRef.current = setTimeout(() => {
     if (!formRef.current) return
 

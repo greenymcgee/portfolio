@@ -9,7 +9,12 @@ export async function EditPostContent({ params }: Props) {
   const { error, post } = await getPost(id)
 
   if (error) {
-    return <h1 data-testid="edit-post-content-error">Something went wrong</h1>
+    return (
+      <header data-testid="edit-post-content-error">
+        <h1>Edit post page</h1>
+        <p className="text-destructive">Something went wrong</p>
+      </header>
+    )
   }
 
   return (

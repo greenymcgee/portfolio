@@ -1,14 +1,18 @@
 'use client'
 
 import { useActionState, useCallback, useRef } from 'react'
-import { EditorState } from 'lexical'
+import type { EditorState } from 'lexical'
 
 import { updatePost } from '@/features/posts/actions'
 import { LegacyRichTextEditor } from '@/globals/components'
 import type { Post } from '@/prisma/generated/client'
 
 import { EditPostStatus } from '../editPostStatus'
-import { autosavePost, cancelDebounce, updateContentField } from './utils'
+import {
+  autosavePost,
+  handleEditPostFormSubmit,
+  updateContentField,
+} from './utils'
 
 interface Props {
   post: Post
@@ -26,10 +30,10 @@ export function EditPostForm({ post }: Props) {
   const initialContent =
     typeof state?.content === 'string' ? state.content : undefined
 
-  const handleFieldChange = useCallback(() => {
-    cancelDebounce(timeoutRef)
-    autosavePost({ formRef, timeoutRef, updateAction })
-  }, [updateAction])
+  const handleFieldChange = useCallback(
+    () => autosavePost({ formRef, timeoutRef, updateAction }),
+    [updateAction],
+  )
 
   const handleContentChange = useCallback(
     (editorState: EditorState) => {
@@ -46,6 +50,7 @@ export function EditPostForm({ post }: Props) {
     <form
       className="mx-auto max-w-3xl px-6"
       data-testid="edit-post-form"
+      onSubmit={handleEditPostFormSubmit}
       ref={formRef}
     >
       <div className="mb-3">
