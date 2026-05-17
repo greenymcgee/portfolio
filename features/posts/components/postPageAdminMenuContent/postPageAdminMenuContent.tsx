@@ -2,7 +2,7 @@
 
 import { useActionState } from 'react'
 import { withCallbacks } from '@greenymcgee/typescript-utils'
-import { CirclePlus, Trash2Icon } from 'lucide-react'
+import { CirclePlus, Pencil, Trash2Icon } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 
@@ -25,12 +25,29 @@ export function PostPageAdminMenuContent({ post }: Props) {
   )
 
   return (
-    <nav data-testid="post-page-admin-menu-content">
-      <div className="mb-2">
+    <nav className="space-y-2" data-testid="post-page-admin-menu-content">
+      <div>
         <Button asChild className="justify-start" variant="ghost">
           <Link href={ROUTES.newPost}>
-            <CirclePlus className="inline h-[1em] w-[1em] align-middle" />{' '}
+            <CirclePlus
+              aria-hidden
+              className="inline h-[1em] w-[1em] align-middle"
+            />{' '}
             <span className="align-middle">New Post</span>
+          </Link>
+        </Button>
+      </div>
+      <div>
+        <Button asChild className="justify-start" variant="ghost">
+          <Link
+            aria-label={`Edit ${post.title}`}
+            href={ROUTES.editPost(post.id)}
+          >
+            <Pencil
+              aria-hidden
+              className="inline h-[1em] w-[1em] align-middle"
+            />{' '}
+            <span className="align-middle">Edit</span>
           </Link>
         </Button>
       </div>
