@@ -613,3 +613,23 @@ provides no additional safety over DTO validation.
 - **Supersedes:** D4 (custom `useAutoSave` hook)
 - **Resolves:** T21
 - **Step:** Step 3 — Iterative Refinement (T21)
+
+---
+
+## 2026-05-17 - D35: T25 split into error-handling PR and deferred skeleton PR; missed PR-07 items distributed; T22 absorbed
+
+- **Decision:** T25 is split into two new PRs. PR 14 covers error handling: `notFound()` for missing posts and a `not-found.tsx` at the edit route segment; all other errors keep the existing generic error UI. PR 14 absorbs T22 and requires issue #157 (not-found error type rename) to be resolved first. PR 15 is the loading skeleton, intentionally deferred until after PR 9 so the skeleton matches the final layout. Three items missed in PR 7's implementation are distributed forward: `state.threwUniqueConstraintError` (inline error below title) and `state.dtoError?.fieldErrors?.content` (inline error near editor) move to PR 8; `flushDebounce` (immediate-flush path for Close and Publish) moves to PR 9 where the ActionBar is introduced and first consumes it.
+- **Why:** Designing a skeleton before the action bar and toolbar land would require rework in PR 9. Absorbing T22 into PR 14 avoids a standalone one-item PR. The missed PR-07 items belong in PRs 8 and 9 because they are co-located with work already scoped to those PRs: error display is near the title/editor (PR 8 scope) and `flushDebounce` is first needed by the ActionBar (PR 9 scope).
+- **Alternatives considered:** Standalone "missed PR-07 items" PR — adds a PR with no clear feature scope. Skeleton before page is built — risks rework when layout changes in PR 9. Separate PR for T22 alone — undersized; absorbed into the error handling PR instead.
+- **Resolves:** T22, T25
+- **Step:** Step 3 — Iterative Refinement (T22, T25)
+
+---
+
+## 2026-05-17 - D36: No server-side auth redirect on the edit page — proxy + permission guard + EditPostPolicyEnforcer are sufficient
+
+- **Decision:** The edit page (`app/posts/[id]/edit/page.tsx`) does not implement a server-side `redirect()` on unauthenticated requests. Auth is enforced by three layers already in place: the reverse proxy (blocks all anonymous traffic at the network edge), the `updatePost` server action permission check (any autosave attempt without `posts.update` permission is rejected), and `EditPostPolicyEnforcer` (client-side `useLayoutEffect` that redirects to home if the session lacks `posts.update` permission). A fourth server-side redirect in `page.tsx` adds no meaningful security benefit.
+- **Why:** The proxy ensures unauthenticated users never reach the page. Any autosave fired without permission is rejected by the action guard. `EditPostPolicyEnforcer` covers client-side navigation without a session. The three-layer defence is equivalent to a server-side RSC redirect for this admin-only route.
+- **Alternatives considered:** Server-side `authenticateAPISession()` + `redirect()` in `page.tsx` (original D16 plan) — rejected; redundant given the existing layers, and `page.tsx` is already a sync RSC that doesn't need an async auth call.
+- **Supersedes:** D16 (server-side redirect rationale no longer applies)
+- **Step:** PR 7 — Implementation
