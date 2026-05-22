@@ -12,12 +12,15 @@ _Source: [`../architecture.md`](../architecture.md) § Rollout Plan_
 | 4 | Backend: `updatePost` | `UpdatePostDto`, `PostService.update`, `PostRepository.update`, `updatePost` action, `getPost` caching, `deletePost` cache fix, tests |
 | 5 | Backend: `getPosts` filter | `unpublished` param in DTO/schema; `PostService.findAndCount` auth check; repository `WHERE` clause; tests |
 | 6 | `PostsPageAdminMenuContent` unpublished toggle | Unpublished toggle UI; `Pagination` `unpublished` prop; tests |
-| 7 | Edit page — core | `page.tsx`, `EditPostContent`, `EditPostClient`, autosave, auth guard, tests |
-| 8 | Title + RTE styles | Invisible title input; editor area styles matching `design-reference.png`; `publishedAt` subtitle |
-| 9 | Sticky action bar + RTE controls | `ActionBar`; new `RichTextEditor`; `ToolbarPlugin` in `ActionBar`; `LexicalComposer` in `EditPostClient` |
+| 7 | Edit page — core | `page.tsx`, `EditPostContent`, `EditPostForm`, autosave, policy enforcer, tests |
+| 8 | Title + RTE styles | Invisible title input; inline error states (unique constraint + content DTO errors); editor area styles; `publishedAt` subtitle |
+| 9 | Sticky action bar + RTE controls | `ActionBar`; `flushDebounce`; new `RichTextEditor`; `ToolbarPlugin` in `ActionBar`; `LexicalComposer` in `EditPostForm` |
 | 10 | Description + Close buttons | Description modal; Close flush-and-redirect; no-title confirmation dialog; tests |
 | 11 | Publish/Unpublish button | `publishPost` action; `PublishUnpublishButton`; disabled state; Publish flush sequence; tests |
 | 12 | `createPost` + edit button + remove `/posts/new` | Draft redirect; remove `/posts/new`; `PostsPageAdminMenuContent` → form; `PostPageAdminMenuContent` → Edit link + form; `ROUTES.editPost`; tests |
+| 13 | Fix stale content on `/posts` and `/posts/[id]` after autosave | Cache invalidation for both listing and detail page |
+| 14 | Edit page — error handling | `notFound()` for missing posts; `not-found.tsx`; requires issue #157 |
+| 15 | Edit page — loading skeleton | Skeleton component replacing plain-text `Suspense` fallback; deferred until after PR 9 |
 
 ## Hard Dependencies
 

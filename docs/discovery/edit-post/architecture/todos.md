@@ -249,23 +249,25 @@ Add [shadcn Breadcrumb](https://ui.shadcn.com/docs/components/radix/breadcrumb) 
 
 ## T25: Skeleton and error states for the edit page
 
-**Status:** Open
+**Status:** Resolved → D35
 
-The edit page currently has no loading skeleton and no meaningful error UI when `getPost` fails. Both need to be designed and implemented before the feature ships. Ensure upcoming PRs include these states.
+Split into two new PRs:
+- **PR 14** — error handling: `notFound()` for missing posts + `not-found.tsx`. Generic error UI already exists; PR 14 adds the not-found path. Requires issue #157 first.
+- **PR 15** — loading skeleton: deferred until the full page layout is stable (after PR 9) to avoid rework.
 
 ---
 
 ## T22: 404 handling for the edit page
 
-**Status:** Open
+**Status:** Resolved → D35 (absorbed into PR 14)
 
 `EditPostContent` currently passes `post` to `EditPostClient` with no handling for the
 error case (post not found or `getPost` failure). When the post doesn't exist, `post`
 will be `null` and `EditPostClient` will receive invalid initial state.
 
 Add proper 404 handling to `EditPostContent`: call Next.js `notFound()` when `getPost`
-returns an error, and wire up a `not-found.tsx` at the `app/posts/[id]/edit/` route
-segment.
+returns a not-found error, and wire up a `not-found.tsx` at the
+`app/posts/[id]/edit/` route segment. Requires issue #157 to be resolved first.
 
 ---
 
