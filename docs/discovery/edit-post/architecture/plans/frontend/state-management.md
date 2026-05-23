@@ -46,46 +46,45 @@ at save time without a custom helper.
 
 | Condition | Display |
 |-----------|---------|
-| `state.status === 'IDLE'` | Nothing |
-| `pending` | `SaveStateIndicator` spinner |
+| `state.status === 'IDLE'` | `SaveStateIndicator` → "Edited [date-fns phrase]" from `post.updatedAt` |
+| `pending` | `SaveStateIndicator` spinner + "Saving..." |
 | `!pending && state.status === 'SUCCESS'` | `SaveStateIndicator` → "Saved" |
-| `!pending && state.status === 'ERROR'` | `SaveStateIndicator` error |
-| `state.threwUniqueConstraintError` | `TitleInput` hard-coded error message |
+| `!pending && state.status === 'ERROR'` | `SaveStateIndicator` error (design pending) |
+| `state.threwUniqueConstraintError` | `TitleInput` hard-coded error message **above** the input |
 | `state.dtoError?.fieldErrors?.content` | Inline errors near editor |
 
-## Cancel and Flush
+## Cancel Debounce
 
-`EditPostClient` exposes two callbacks passed as props:
+The parent form component exposes `cancelDebounce` as a prop to children that trigger their own save:
 
 | Handle | Used by | Behavior |
 |--------|---------|---------|
-| `cancelDebounce` | `PublishUnpublishButton`, `DescriptionModal.onSaveSuccess`, `CloseButton` | Clears the timer; autosave does not fire |
-| `flushDebounce` | `CloseButton` | Cancels timer, calls `updateAction` with current form data immediately |
+| `cancelDebounce` | `PublishUnpublishButton`, `DescriptionModal`, `CloseButton` | Clears the timer; autosave does not fire |
 
 ## Form State Ownership
 
-All mutable form state (`title`, `description`, `content`) lives in
-`EditPostClient`. It is passed down to child components as props.
+`EditPostContent` holds the `formRef` and passes it down to `EditPostForm` (the
+actual `<form>` element). `CloseButton` and `DescriptionModal` receive this
+`formRef` and read `formRef.current` to populate their hidden inputs at submit time.
 
-`EditPostClient` is initialized from the `post` prop fetched by `EditPostContent`
-(the async RSC). These values are treated as the initial state only — they are
-never written back after mount.
+`EditPostContent` is initialized from the `post` prop fetched server-side.
+These values are treated as the initial state only — they are never written back
+after mount.
 
 ## Notification Strategy
 
 | Event | UI response |
 |-------|------------|
-| Autosave in flight | `SaveStateIndicator` spinner |
+| Autosave in flight | `SaveStateIndicator` spinner + "Saving..." |
 | Autosave success | `SaveStateIndicator` → "Saved" |
-| Autosave error — unique constraint | `SaveStateIndicator` error + `TitleInput` hard-coded message |
-| Autosave error — content DTO | `SaveStateIndicator` error + inline content errors |
-| Autosave error — generic | `SaveStateIndicator` error |
-| Publish / Unpublish failure | Sonner toast |
-| Close failure (with title) | Sonner toast |
-| Close failure (no title) | Delete confirmation `Dialog` |
-| Description modal Save failure — description DTO | `state.dtoError?.fieldErrors?.description` rendered in `DescriptionModal` |
-| Description modal Save failure — unique constraint | Hard-coded "copy description before closing and fix the title" in `DescriptionModal` |
-| Description modal Save failure — generic | Generic inline error in `DescriptionModal` |
+| Autosave error (any kind) | **Design pending** |
+| Unique constraint violation | `TitleInput` hard-coded error message **above** the input |
+| Publish success | Sonner toast (message design pending) + redirect to post page |
+| Publish / Unpublish failure | Sonner toast — message content design pending |
+| Close success | Redirect to post page |
+| Close failure | **Design pending** |
+| Description modal Save success | Modal closes |
+| Description modal Save failure | **Design pending** |
 
 ## Description Modal State (→ D27, D31)
 

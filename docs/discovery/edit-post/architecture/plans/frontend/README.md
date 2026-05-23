@@ -16,7 +16,6 @@ app/posts/[id]/edit/page.tsx          ← sync RSC; auth guard; <Suspense>
                     │     ├── PublishUnpublishButton
                     │     └── CloseButton
                     ├── TitleInput               ← auto-focused on mount
-                    ├── PublishedAtSubtitle       ← static <time>, set on load
                     └── RichTextEditor
 ```
 
@@ -41,11 +40,22 @@ foundation going forward.
 
 ## Icon & Asset Mapping
 
-| UI Element | Icon | Library | Used In |
-|-----------|------|---------|---------|
-| Edit button | `SquarePen` | lucide-react | `PostPageAdminMenuContent` |
+See [`./icon-map.md`](./icon-map.md) for the full icon reference including toolbar controls, disabled-state rules, and Lucide React import names.
+
+| UI Element | Lucide React import | Used In |
+|-----------|---------------------|---------|
+| Undo | `Undo2` | `ToolbarPlugin` |
+| Redo | `Redo2` | `ToolbarPlugin` |
+| Bold / Italic / Underline / Strikethrough | `Bold`, `Italic`, `Underline`, `Strikethrough` | `ToolbarPlugin` |
+| Align left / center / right | `AlignLeft`, `AlignCenter`, `AlignRight` | `ToolbarPlugin` |
+| Bullet / numbered list | `List`, `ListOrdered` | `ToolbarPlugin` |
+| Block type selector | `ChevronDown` | `ToolbarPlugin` |
+| Saving spinner | `Loader2Icon` (via `<Spinner className="size-3" />`) | `SaveStateIndicator` |
+| Close | `X` | `CloseButton` |
+| Edit | `SquarePen` | `PostPageAdminMenuContent` |
 
 ## Detailed Specs
 
-- **Per-component specs** (save-state indicator, buttons, modals, publishedAt): [`./components.md`](./components.md)
+- **Per-component specs** (save-state indicator, buttons, modals): [`./components.md`](./components.md)
+- **Icon & asset reference** (all icons, disabled states, import names): [`./icon-map.md`](./icon-map.md)
 - **State management** (autosave wiring, inline debounce, `DescriptionModal` action state): [`./state-management.md`](./state-management.md)

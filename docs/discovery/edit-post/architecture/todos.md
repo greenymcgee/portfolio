@@ -231,11 +231,47 @@ Updated: `components.md`, `state-management.md`, `jira/pr-10.md`.
 
 ---
 
-## T23: Breadcrumbs for `/posts/[id]` and `/posts/[id]/edit`
+## T26: Skeleton component install + implementation-time discovery
 
 **Status:** Open
 
-Add [shadcn Breadcrumb](https://ui.shadcn.com/docs/components/radix/breadcrumb) to both the post page and the edit page. Needs its own PR — install the component and wire it up to both pages in the same PR.
+No `Skeleton` component exists in the project yet. Install via `npx shadcn add skeleton` and split into one-component-per-directory under `globals/components/ui/skeleton/` to match existing conventions.
+
+The Figma skeleton (screen 3, node 527:1568) shows `bg-border` rectangles as a starting point only. Actual region shapes, heights, and spacing must be determined at implementation time to match the final page layout (after PR 9). Deferred until after PR 9 per D35.
+
+Impacts: `jira/pr-15.md` acceptance criteria.
+
+---
+
+## T27: Name and document the `EditPostContent` form state wrapper
+
+**Status:** Open
+
+`EditPostContent` holds the `formRef` and passes it to `EditPostForm`. `CloseButton` and `DescriptionModal` receive `formRef` and read `formRef.current` to populate hidden inputs at submit time. The component boundaries, prop contracts, and `cancelDebounce` threading need to be documented before PR 7 work is extended.
+
+Impacts: `frontend/state-management.md`, `frontend/components.md`, `frontend/README.md` component tree, relevant Jira tickets.
+
+---
+
+## T28: Revisit architecture and Jira tickets once pending designs are provided
+
+**Status:** Open — blocked on design
+
+Once the items in [`../inputs/design-pending.md`](../inputs/design-pending.md) have been designed and added to the Figma file:
+
+1. Update `design-map.md` with the new screen URLs.
+2. Update `frontend/components.md` and `frontend/state-management.md` to replace all "Design pending" markers with the confirmed specs.
+3. Update the relevant Jira tickets (PRs 8–11) with finalized acceptance criteria.
+
+Impacts: `inputs/design-map.md`, `frontend/components.md`, `frontend/state-management.md`, `jira/pr-08.md`, `jira/pr-09.md`, `jira/pr-10.md`, `jira/pr-11.md`.
+
+---
+
+## T23: Breadcrumbs for `/posts/[id]` and `/posts/[id]/edit`
+
+**Status:** Cancelled → D38
+
+Breadcrumbs will not be added to the post page or the edit page for this project.
 
 ---
 

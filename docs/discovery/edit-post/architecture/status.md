@@ -6,7 +6,7 @@
 | **Current Focus** | Resolving T22–T25 before shipping PRs 8–12 |
 | **Current PR** | PR 7 (done, pending review) |
 | **Blocked** | No |
-| **Last updated** | 2026-05-16 |
+| **Last updated** | 2026-05-22 |
 | **Branch** | 170-edit-post-page |
 
 ## Requirements Review Progress
@@ -56,6 +56,9 @@
 | T20 | ~~Move unpublished filter earlier in rollout (after migration, not last)~~ | Resolved → D24 |
 | ~~T21~~ | ~~Revise `useAutoSave` call-site plan~~ | Resolved → D31 |
 | T22 | ~~404 handling for the edit page~~ | Resolved → D35 (absorbed into PR 14) |
-| T23 | Breadcrumbs for `/posts/[id]` and `/posts/[id]/edit` — own PR | Open |
+| T23 | Breadcrumbs for `/posts/[id]` and `/posts/[id]/edit` | Cancelled → D38 |
 | T24 | Conditional `<SiteNavbar />` — hidden on login + post pages; `<AdminMenuDialog />` still shown | Open — needs decision |
+| T28 | Revisit architecture + Jira tickets once pending designs land | Open — blocked on design (see `inputs/design-pending.md`) |
 | T25 | ~~Skeleton and error states for edit page~~ | Resolved → D35 (split → PR 14 error handling, PR 15 skeleton deferred) |
+| T26 | Skeleton component install (`npx shadcn add skeleton`) + implementation-time discovery | Open |
+| T27 | Document `EditPostContent` form state wrapper — component boundaries, prop contracts, `cancelDebounce` threading | Open |

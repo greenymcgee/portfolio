@@ -633,3 +633,32 @@ provides no additional safety over DTO validation.
 - **Alternatives considered:** Server-side `authenticateAPISession()` + `redirect()` in `page.tsx` (original D16 plan) — rejected; redundant given the existing layers, and `page.tsx` is already a sync RSC that doesn't need an async auth call.
 - **Supersedes:** D16 (server-side redirect rationale no longer applies)
 - **Step:** PR 7 — Implementation
+
+---
+
+## 2026-05-22 - D37: Design map (Figma) review — SaveStateIndicator, CloseButton form, error states design pending
+
+- **Decision:** The following architecture changes are made based on Figma design review (see `inputs/design-map.md`):
+  1. `SaveStateIndicator` IDLE state shows `formatDistanceToNow(post.updatedAt, { addSuffix: true })` (e.g. "Edited 3 minutes ago") rather than nothing. After any successful save the indicator switches to "Saved".
+  2. `PublishedAtSubtitle` is removed from the page body. The published date information is now surfaced via the `SaveStateIndicator` idle phrase in the `ActionBar`.
+  3. The description modal Save button is labeled **"Save changes"** (per Figma), not "Save".
+  4. Toolbar RTE controls (Bold, Italic, Underline, Strikethrough, alignment, Block Select) dim when the editor content area is not focused. Description, Publish/Unpublish, and Close buttons are unaffected by focus state.
+  5. The `PublishUnpublishButton` disabled state uses the standard `disabled` HTML attribute, which maps to `disabled:opacity-50` already in the Button CVA variants — no extra styling required.
+  6. The inline title unique-constraint error renders **above** the title input (not below as stated in D12). D12's "below" language is superseded.
+  7. `CloseButton` uses `useActionState(withCallbacks(updatePost, { onSuccess }), initialState)`. Its form includes hidden inputs populated from `formRef.current` (id, title, description, content) plus a `redirectPath` hidden input set to `ROUTES.post(post.id)`. `updatePost` gains a `redirectPath` DTO field; on success the server action redirects to that path. There is no separate flush mechanism.
+  8. `DescriptionModal` uses the same hidden-inputs-from-`formRef.current` pattern (without `redirectPath`).
+  9. Error display for autosave failures, description modal save failures, publish/unpublish failures, and close failures is **design pending**. Publish success uses Sonner toast (message content design pending) then redirects. Close success redirects to the post page with no toast.
+- **Why:** Direct Figma review of screens 1–14 (design-map.md) revealed that the architecture docs predated the finalized designs. D14's "nothing" IDLE state contradicts screen 1 which shows a timestamp phrase. D15's PublishedAtSubtitle contradicts the same screen. D12's error position was wrong. D13's flush concept was replaced by the simpler hidden-inputs form pattern, which makes Close and DescriptionModal consistent with how autosave already works.
+- **Resolves:** Design discrepancies found in D12, D14, D15
+- **Opens:** T26 (skeleton install + discovery), T27 (EditPostContent wrapper documentation), T28 (revisit once pending designs land)
+- **Step:** Step 3 — Iterative Refinement (Figma design review)
+
+---
+
+## 2026-05-22 - D38: Breadcrumbs dropped for `/posts/[id]` and `/posts/[id]/edit`
+
+- **Decision:** Breadcrumbs will not be added to the post page or the edit page. T23 is cancelled.
+- **Why:** Decided during design review session on 2026-05-22. The pages do not require breadcrumb navigation for this project.
+- **Alternatives considered:** Shadcn Breadcrumb installed and wired to both pages in a single PR (original T23 plan) — dropped.
+- **Cancels:** T23
+- **Step:** Step 3 — Iterative Refinement
