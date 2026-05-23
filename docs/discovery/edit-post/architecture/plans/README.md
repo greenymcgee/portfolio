@@ -31,10 +31,10 @@
 | Field | Value |
 | --- | --- |
 | Slug | `edit-post` |
-| Step | 4 — Structure Architecture |
+| Step | 3 — Iterative Refinement |
 | Created | 2026-05-03 |
-| Last Updated | 2026-05-03 |
-| Inputs | [`../inputs/requirements.md`](../inputs/requirements.md), [`../inputs/constraints.md`](../inputs/constraints.md), [`../inputs/design-reference.png`](../inputs/design-reference.png) |
+| Last Updated | 2026-05-22 |
+| Inputs | [`../inputs/requirements.md`](../inputs/requirements.md), [`../inputs/constraints.md`](../inputs/constraints.md), [`../inputs/design-reference.png`](../inputs/design-reference.png), [`../inputs/design-map.md`](../inputs/design-map.md) |
 | Pattern source | `features/posts/{post.repository,post.service,dto/create-post.dto,schemas/create-post.schema,actions/createPost,components/createPostForm}.{ts,tsx}` |
 | Monolithic source | [`../architecture.md`](../architecture.md) (kept as reference) |
 
@@ -174,6 +174,7 @@ From [`../inputs/constraints.md`](../inputs/constraints.md):
 - Requirements: [`../inputs/requirements.md`](../inputs/requirements.md)
 - Constraints: [`../inputs/constraints.md`](../inputs/constraints.md)
 - Design reference: [`../inputs/design-reference.png`](../inputs/design-reference.png)
+- Design map (Figma screens): [`../inputs/design-map.md`](../inputs/design-map.md)
 - Save-state reference (Confluence): [`../inputs/saved-state.png`](../inputs/saved-state.png)
 - Decisions log: [`../decisions.md`](../decisions.md)
 - Initial plan: [`../initial-plan.md`](../initial-plan.md)
