@@ -6,7 +6,7 @@ _Source: [`../architecture.md`](../architecture.md) § Risks / Open Questions_
 
 | Risk | Severity | Status | Mitigation |
 |------|----------|--------|-----------|
-| R1: `ToolbarPlugin` in the action bar requires `LexicalComposer` to wrap both areas — highest frontend complexity | Medium | Resolved → D5, D21 | `EditPostClient` owns the `LexicalComposer`. New `RichTextEditor` has no internal composer. Existing consumers use `LegacyRichTextEditor` unchanged. |
+| R1: `ToolbarPlugin` in the action bar requires `LexicalComposer` to wrap both areas — highest frontend complexity | Medium | Resolved → D5, D21 | `EditPostForm` owns the `LexicalComposer`. New `RichTextEditor` has no internal composer. Existing consumers use `LegacyRichTextEditor` unchanged. |
 | R2: ~~Partial unique index via raw SQL migration — Prisma may overwrite on future `migrate dev` runs~~ | — | Resolved → D23 | Full `@unique` on `Post.title` expressed in `schema.prisma`; migration is fully Prisma-managed. No hand-authored SQL, no overwrite risk. |
 | R3: `createPost` relied on `@default("{}")` at the DB level | Low | Resolved → D2 | `CreatePostDto` generates the initial Lexical state when no `content` is provided. Migration drops the default in PR 1. |
 | R4: `getPosts` cache + unpublished filter create two cache entries | Low | Resolved → D7, D11 | Both entries are tagged `'posts'`; `revalidateTag('posts')` invalidates both. |

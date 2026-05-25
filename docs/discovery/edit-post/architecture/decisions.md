@@ -339,7 +339,7 @@ time — loses the ability to distinguish same-day drafts.
 **Decision:** The edit post page route (`app/posts/[id]/edit/page.tsx`) is an
 async RSC that calls `authenticateAPISession()` and checks
 `hasPermission(token.user, 'posts', 'update')` before rendering. If either
-check fails it calls `redirect(ROUTES.home)` server-side. `EditPostClient`
+check fails it calls `redirect(ROUTES.home)` server-side. `EditPostForm`
 additionally implements `useLayoutEffect` mirroring the existing
 `CreatePostForm` pattern as a belt-and-suspenders guard.
 
@@ -455,7 +455,7 @@ provides no additional safety over DTO validation.
 
 ## D21: New `RichTextEditor` for the edit page; existing component renamed `LegacyRichTextEditor`
 
-- **Decision:** The existing `RichTextEditor` is renamed `LegacyRichTextEditor` in a dedicated PR before the edit page work begins. A new `RichTextEditor` is built specifically for the edit page: no internal `LexicalComposer`, no embedded `ToolbarPlugin`. `EditPostClient` owns the `LexicalComposer` and wraps both `ActionBar` (which renders `ToolbarPlugin`) and the new `RichTextEditor`. `ToolbarPlugin` is re-exported from `globals/components/richTextEditor/index.ts` alongside `RichTextEditor`. The new component becomes the foundation going forward.
+- **Decision:** The existing `RichTextEditor` is renamed `LegacyRichTextEditor` in a dedicated PR before the edit page work begins. A new `RichTextEditor` is built specifically for the edit page: no internal `LexicalComposer`, no embedded `ToolbarPlugin`. `EditPostForm` owns the `LexicalComposer` and wraps both `ActionBar` (which renders `ToolbarPlugin`) and the new `RichTextEditor`. `ToolbarPlugin` is re-exported from `globals/components/richTextEditor/index.ts` alongside `RichTextEditor`. The new component becomes the foundation going forward.
 - **Why:** Adding an `omitToolbar` branch to the existing component introduces conditional logic that serves only the edit page use case. A purpose-built component is simpler, has no backwards-compatibility surface, and makes the edit page's `LexicalComposer` ownership explicit. The rename keeps existing consumers working without any changes.
 - **Alternatives considered:** `omitToolbar` prop on the existing `RichTextEditor` — requires the component to conditionally skip its own `LexicalComposer`, which is confusing and creates an implicit contract that the caller must provide one. Portal-based toolbar rendering — unnecessary indirection when a shared composer achieves the same result cleanly.
 - **Step:** Step 3 — refinement (T14)
@@ -517,9 +517,9 @@ provides no additional safety over DTO validation.
 
 ## D27: Description modal — manual Save + Cancel (Option A)
 
-- **Decision:** `DescriptionModal` holds temporary local state (`localDescription`) initialised from the current description prop when the modal opens. The **Save** button calls `updatePost` directly with `{ id, title, description: localDescription, content }`, on success updates `EditPostClient.description` and calls `cancelPendingDebounce`, then closes the modal. Inline error is shown in the modal on failure. The **Cancel** button discards temp state and closes without saving. Autosave does not fire on modal close.
-- **Why:** Cancel-button semantics require that closing without Save truly discards changes. Triggering autosave on close — even 1 second later — conflicts with this: any description state change propagates to `useAutoSave` regardless of how the modal closed. The manual Save + cancel-debounce pattern gives the modal deterministic save/discard semantics.
-- **Alternatives considered:** Option B — update `EditPostClient.description` then call `flushPendingDebounce`. Rejected because the modal cannot display an inline error if the flush fails; the failure surface is the `SaveStateIndicator`, which is outside the modal and easy to miss.
+- **Decision:** `DescriptionModal` holds temporary local state (`localDescription`) initialised from the description hidden input (`formRef.current`) when the modal opens. The **Save** button calls `updatePost` directly with `{ id, title, description: localDescription, content }`, on success closes the modal. Inline error is shown in the modal on failure. The **Cancel** button discards temp state and closes without saving. Autosave does not fire on modal close.
+- **Why:** Cancel-button semantics require that closing without Save truly discards changes. Triggering autosave on close — even 1 second later — conflicts with this. The manual Save pattern gives the modal deterministic save/discard semantics.
+- **Alternatives considered:** Option B — flush the debounce with the new description value. Rejected because the modal cannot display an inline error if the flush fails; the failure surface is `AutoSaveStatus`, which is outside the modal and easy to miss.
 - **Resolves:** T19
 - **Step:** Step 3 — Iterative Refinement (T19)
 
@@ -607,9 +607,9 @@ provides no additional safety over DTO validation.
 
 ## 2026-05-08 - D31: Autosave wiring — `useActionState` + inline debounce; `DescriptionModal` owns separate instance
 
-- **Decision:** Replace the underspecified `useAutoSave` custom hook with `useActionState(updatePost, initialState)` in `EditPostClient`. Debounce is inlined via `useRef` + `setTimeout` — no custom hook. FormData is constructed from a `formRef` on the form element. `DescriptionModal` owns its own `useActionState(withCallbacks(updatePost, { onSuccess }), initialState)` instance; `withCallbacks` is used only for the auto-close side effect. All autosave display (spinner, "Saved", error, field errors) is derived directly from `state` and `pending` — no callbacks, no mirrored state. `state.threwUniqueConstraintError` and `state.dtoError.fieldErrors` are read independently by the components that own them.
+- **Decision:** Replace the underspecified `useAutoSave` custom hook with `useActionState(updatePost, initialState)` in `EditPostForm`. Debounce is inlined via `useRef` + `setTimeout` — no custom hook. FormData is constructed from a `formRef` on the form element. `DescriptionModal` owns its own `useActionState(withCallbacks(updatePost, { onSuccess }), initialState)` instance; `withCallbacks` is used only for the auto-close side effect. All autosave display (spinner, "Saved", error, field errors) is derived directly from `state` and `pending` — no callbacks, no mirrored state. `state.threwUniqueConstraintError` and `state.dtoError.fieldErrors` are read independently by the components that own them.
 - **Why:** `startTransition` discards the action return value — the state machine could never observe success or failure. `useActionState` threads state automatically and exposes `pending`. The `useAutoSave` abstraction added no reusable value; debounce is 5 lines inlined. `DescriptionModal` owning a separate instance avoids ref-based "which save was mine" detection. `withCallbacks` in the modal provides a clean `onSuccess` hook for auto-close without coupling the modal's error display to callbacks.
-- **Alternatives considered:** Shared `updateAction` dispatch from `EditPostClient` passed to `DescriptionModal` (Option B) — rejected; modal would need a ref flag to distinguish its save from a concurrent autosave. `withCallbacks.onError` for field error state — rejected; `state` already carries `dtoError` and `threwUniqueConstraintError`, mirroring them into separate state variables is redundant.
+- **Alternatives considered:** Shared `updateAction` dispatch from `EditPostForm` passed to `DescriptionModal` (Option B) — rejected; modal would need a ref flag to distinguish its save from a concurrent autosave. `withCallbacks.onError` for field error state — rejected; `state` already carries `dtoError` and `threwUniqueConstraintError`, mirroring them into separate state variables is redundant.
 - **Supersedes:** D4 (custom `useAutoSave` hook)
 - **Resolves:** T21
 - **Step:** Step 3 — Iterative Refinement (T21)
@@ -661,4 +661,28 @@ provides no additional safety over DTO validation.
 - **Why:** Decided during design review session on 2026-05-22. The pages do not require breadcrumb navigation for this project.
 - **Alternatives considered:** Shadcn Breadcrumb installed and wired to both pages in a single PR (original T23 plan) — dropped.
 - **Cancels:** T23
+- **Step:** Step 3 — Iterative Refinement
+
+---
+
+## 2026-05-24 - D39: Confirmed design specs from Figma screens 13–25
+
+- **Decision:** The following specs are confirmed from Figma screens 13–25. All "design pending" markers from T28 are resolved.
+  1. The action bar save-state component is named **`AutoSaveStatus`** (replaces `SaveStateIndicator` everywhere). Saving state: spinner + "Saving...". Error state: "Updates not saved" in destructive red.
+  2. Autosave failure: Sonner toast — "Post could not be saved".
+  3. Close button shows **"Closing..."** + spinner while in flight.
+  4. Close failure: dialog — **"There are unsaved changes / Are you sure you want to leave?"** — with Cancel (stay on page) and Close (destructive; a `<Link href={ROUTES.post(post.id)}>` that navigates away without saving). Replaces D13's no-title delete confirmation and the Sonner-on-failure approach from prior PR-10 spec.
+  5. Publish button shows **"Publishing..."** + spinner (teal) while in flight.
+  6. Publish failure: Sonner toast — "Post could not be published".
+  7. Unpublish failure: Sonner toast — "Post could not be unpublished".
+  8. Publish success: Sonner toast — "Success!" — appears on the post page after redirect. Unpublish success: Sonner toast — "Success!" — label toggles in-place; no redirect.
+  9. Description modal saving: "Save changes" button shows an inline spinner while in flight.
+  10. Description modal generic save failure: "Something went wrong" in red below the "Description" label.
+  11. Description modal Zod errors: bullet list in red below the "Description" label.
+  12. Description modal with empty description: Save changes button is **disabled**.
+  13. `DescriptionButton` is **disabled** when `AutoSaveStatus` is in error state. Because the modal cannot be opened during an autosave error, the unique-constraint failure case is unreachable in the description modal — only Zod and generic failures apply.
+- **Why:** Figma screens 13–25 were added to the design map, covering all previously pending error, loading, and success states. Design review session on 2026-05-24 confirmed each spec against the live designs.
+- **Alternatives considered:** None — these are direct design confirmations, not architectural choices.
+- **Supersedes:** D13 (no-title delete confirmation flow)
+- **Resolves:** T28
 - **Step:** Step 3 — Iterative Refinement

@@ -65,7 +65,7 @@ points:
 | 2 | Backend: updatePost | `update-post.schema.ts`, `UpdatePostDto`, `PostRepository.update`, `PostService.update`, `updatePost` server action, tests |
 | 3 | Backend: getPosts filter | `unpublished` param in schema + DTO; `PostService.findAndCount` auth check; `PostRepository.findAndCount` conditional where clause; `getPosts` action updated; tests |
 | 4 | createPost flow + edit button | `createPost` creates a minimal draft and redirects to `/posts/[id]/edit`; remove `/posts/new` + `CreatePostForm` + `CreatePostFormBody`; `PostsPageAdminMenuContent` button→form; `PostPageAdminMenuContent` gains Edit button; `ROUTES` gains `editPost`; tests |
-| 5 | Edit post page — core | `app/posts/[id]/edit/page.tsx` (sync RSC + Suspense); `EditPostContent` (async RSC fetches post); `EditPostClient` (client component: title input auto-focused, RTE, `useAutoSave` hook); `useLayoutEffect` redirect guard; tests |
+| 5 | Edit post page — core | `app/posts/[id]/edit/page.tsx` (sync RSC + Suspense); `EditPostContent` (async RSC fetches post); `EditPostForm` (client component: title input auto-focused, RTE, `useAutoSave` hook); `useLayoutEffect` redirect guard; tests |
 | 6 | Title + RTE styles | Invisible title input and editor area styled to match `design-reference.png`; published-at subtitle |
 | 7 | Sticky action bar + RTE controls | Action bar (sticky) added; `ToolbarPlugin` moved into it; `RichTextEditor` updated to optionally render without toolbar |
 | 8 | Modal component | `globals/components/ui/dialog/` (Shadcn Dialog); tests |

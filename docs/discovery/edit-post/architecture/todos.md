@@ -114,7 +114,7 @@ Draft shows current date/time; published shows actual publish date/time.
 **Status:** Resolved → D16
 
 Server-side redirect in the async RSC page + `useLayoutEffect` in
-`EditPostClient` as belt-and-suspenders. Implement in PR 5.
+`EditPostForm` as belt-and-suspenders. Implement in PR 5.
 
 ---
 
@@ -157,7 +157,7 @@ No `omitToolbar` prop. The existing `RichTextEditor` is renamed
 `LegacyRichTextEditor` in PR 5. A new `RichTextEditor` purpose-built for the
 edit page (no internal `LexicalComposer`, no embedded toolbar) is introduced
 alongside it. `ToolbarPlugin` is re-exported from `richTextEditor/index.ts`.
-`EditPostClient` owns the `LexicalComposer`.
+`EditPostForm` owns the `LexicalComposer`.
 
 ---
 
@@ -217,8 +217,7 @@ tickets will need to be updated once the new sequence is agreed.
 
 ~~The current design triggers autosave 1 second after the modal closes.~~ Modal
 now uses a manual Save + Cancel pattern (Option A). Save calls `updatePost`
-directly, on success updates `EditPostClient.description` + calls
-`cancelPendingDebounce` + closes. Cancel discards temp state with no save.
+directly, on success closes the modal. Cancel discards temp state with no save.
 Updated: `components.md`, `state-management.md`, `jira/pr-10.md`.
 
 ---
@@ -227,7 +226,7 @@ Updated: `components.md`, `state-management.md`, `jira/pr-10.md`.
 
 **Status:** Resolved → D31
 
-`useAutoSave` custom hook removed. `EditPostClient` uses `useActionState(updatePost, initialState)` with inline debounce via `useRef` + `setTimeout`. All autosave display derived from `state` and `pending` directly. `DescriptionModal` owns its own `useActionState(withCallbacks(updatePost, { onSuccess }), initialState)` instance for auto-close. Updated: `state-management.md`, `pr-07.md`, `components.md`, `pr-10.md`, `pr-04.md`.
+`useAutoSave` custom hook removed. `EditPostForm` uses `useActionState(updatePost, initialState)` with inline debounce via `useRef` + `setTimeout`. All autosave display derived from `state` and `pending` directly. `DescriptionModal` owns its own `useActionState(withCallbacks(updatePost, { onSuccess }), initialState)` instance for auto-close. Updated: `state-management.md`, `pr-07.md`, `components.md`, `pr-10.md`, `pr-04.md`.
 
 ---
 
@@ -253,17 +252,48 @@ Impacts: `frontend/state-management.md`, `frontend/components.md`, `frontend/REA
 
 ---
 
+## T29: Link design-map screens to the PRs that implement them
+
+**Status:** Open
+
+Each Jira ticket should reference the specific `inputs/design-map.md` screen numbers that govern its implementation, so implementors can open the exact Figma frames without hunting through the full design map.
+
+Mapping to work through:
+
+| PR | Relevant screens |
+|----|-----------------|
+| PR-06 | 2 (published/unpublished toggle) |
+| PR-08 | 1, 6, 7, 8 |
+| PR-09 | 9, 10, 13, 14, 15 |
+| PR-10 | 5, 16, 17, 21, 22, 23, 24 |
+| PR-11 | 2, 18, 19, 20, 25 |
+| PR-12 | 1 |
+| PR-14 | 11, 12 |
+| PR-15 | 3 |
+| PR-16 | 11 |
+
+Impacts: all Jira ticket files listed above.
+
+---
+
+## T30: Ticket refinement and potential breakdown review
+
+**Status:** Open
+
+With all designs now confirmed (D39), each ticket needs a review pass to:
+1. Verify no implementation details are missing or still vague.
+2. Assess whether any ticket is large enough to warrant splitting.
+3. Ensure acceptance criteria are concrete and testable — no placeholders remain.
+
+Tickets to review: PR-08, PR-09, PR-10, PR-11, PR-12, PR-14, PR-15, PR-16.
+
+---
+
 ## T28: Revisit architecture and Jira tickets once pending designs are provided
 
-**Status:** Open — blocked on design
+**Status:** Resolved → D39
 
-Once the items in [`../inputs/design-pending.md`](../inputs/design-pending.md) have been designed and added to the Figma file:
-
-1. Update `design-map.md` with the new screen URLs.
-2. Update `frontend/components.md` and `frontend/state-management.md` to replace all "Design pending" markers with the confirmed specs.
-3. Update the relevant Jira tickets (PRs 8–11) with finalized acceptance criteria.
-
-Impacts: `inputs/design-map.md`, `frontend/components.md`, `frontend/state-management.md`, `jira/pr-08.md`, `jira/pr-09.md`, `jira/pr-10.md`, `jira/pr-11.md`.
+All pending design items (screens 13–25) were added to the Figma file and reviewed on 2026-05-24. `components.md`, `state-management.md`, and Jira tickets PR-08 through PR-11 have been updated with confirmed specs. `design-pending.md` cleared.
 
 ---
 
@@ -297,9 +327,9 @@ Split into two new PRs:
 
 **Status:** Resolved → D35 (absorbed into PR 14)
 
-`EditPostContent` currently passes `post` to `EditPostClient` with no handling for the
+`EditPostContent` currently passes `post` to `EditPostForm` with no handling for the
 error case (post not found or `getPost` failure). When the post doesn't exist, `post`
-will be `null` and `EditPostClient` will receive invalid initial state.
+will be `null` and `EditPostForm` will receive invalid initial state.
 
 Add proper 404 handling to `EditPostContent`: call Next.js `notFound()` when `getPost`
 returns a not-found error, and wire up a `not-found.tsx` at the

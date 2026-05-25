@@ -69,11 +69,11 @@ createPost (server action)
   ▼
 app/posts/[id]/edit/page.tsx   ← sync RSC; auth guard; <Suspense>
   └── EditPostContent           ← async RSC; getPost (cached)
-        └── LexicalComposer     ← single composer; owned by EditPostClient
-              └── EditPostClient ('use client')
+        └── LexicalComposer     ← single composer; owned by EditPostForm
+              └── EditPostForm ('use client')
                     ├── ActionBar (sticky)
                     │     ├── ToolbarPlugin   ← inside LexicalComposer
-                    │     ├── SaveStateIndicator
+                    │     ├── AutoSaveStatus
                     │     ├── DescriptionButton → DescriptionModal
                     │     ├── PublishUnpublishButton
                     │     └── CloseButton
@@ -103,8 +103,8 @@ Numbered for cross-reference — each links to [`../decisions.md`](../decisions.
 1. **Full `@unique` on `Post.title` in `schema.prisma`.** Migration is fully Prisma-managed — no hand-authored SQL. Timestamped placeholder ensures no draft is ever created with an empty title. (D23)
 2. **Remove `@default("{}")` from `Post.content`; `CreatePostDto` generates the initial Lexical state.** Eliminates the latent footgun where the `{}` default would break `RichTextEditor`. (D2)
 3. **Two separate server actions: `updatePost` (autosave) and `publishPost` (publish/unpublish).** Single responsibility per action; maps cleanly to existing `posts.update` and `posts.publish` permissions. (D3)
-4. **Inline debounce via `useRef` + `setTimeout` in `EditPostClient`.** `useActionState` threads `UpdatePostState`; `withCallbacks` auto-closes `DescriptionModal` on success. (D31)
-5. **Single `LexicalComposer` owned by `EditPostClient`, wrapping both `ActionBar` and `RichTextEditor`.** The only viable approach for rendering `ToolbarPlugin` outside the editor DOM subtree. (D5, D21)
+4. **Inline debounce via `useRef` + `setTimeout` in `EditPostForm`.** `useActionState` threads `UpdatePostState`; `withCallbacks` auto-closes `DescriptionModal` on success. (D31)
+5. **Single `LexicalComposer` owned by `EditPostForm`, wrapping both `ActionBar` and `RichTextEditor`.** The only viable approach for rendering `ToolbarPlugin` outside the editor DOM subtree. (D5, D21)
 6. **`publishPost` is atomic — carries all content fields and sets `publishedAt` in one DB write.** Eliminates the sequential flush-then-publish round-trip. (D20)
 7. **`createPost` creates a minimal draft and redirects to the edit page.** `/posts/new` page and `CreatePostForm` deleted in PR 4. (D8)
 8. **Publish redirects to post detail page; Unpublish is an in-place toggle.** Publish is "done with this"; Unpublish is "pause, then keep editing". (D9)
@@ -127,9 +127,9 @@ Numbered for cross-reference — each links to [`../decisions.md`](../decisions.
 
 | Area | Key decision summary | Doc |
 | --- | --- | --- |
-| Component hierarchy + `LexicalComposer` strategy | Single composer in `EditPostClient`; new `RichTextEditor` has no internal composer; `ToolbarPlugin` re-exported | [`./frontend/README.md`](./frontend/README.md) |
-| Per-component specs (save-state, buttons, modals, publishedAt, filter) | Four-state indicator; atomic Publish; Close flush-and-redirect; Shadcn Dialog | [`./frontend/components.md`](./frontend/components.md) |
-| Autosave state machine + `DescriptionModal` wiring | `useActionState` + inline debounce; `cancelDebounce`/`flushDebounce` props; display derived from `state` + `pending` | [`./frontend/state-management.md`](./frontend/state-management.md) |
+| Component hierarchy + `LexicalComposer` strategy | Single composer in `EditPostForm`; new `RichTextEditor` has no internal composer; `ToolbarPlugin` re-exported | [`./frontend/README.md`](./frontend/README.md) |
+| Per-component specs (save-state, buttons, modals, publishedAt, filter) | Four-state indicator; atomic Publish; Close own-form + redirect; Shadcn Dialog | [`./frontend/components.md`](./frontend/components.md) |
+| Autosave state machine + `DescriptionModal` wiring | `useActionState` + inline debounce; `cancelDebounce` prop; display derived from `state` + `pending` | [`./frontend/state-management.md`](./frontend/state-management.md) |
 
 ### Cross-cutting
 

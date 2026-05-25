@@ -30,7 +30,7 @@ _Source: [`../architecture.md`](../architecture.md) § User-Facing Behavior_
 2. Admin clicks "Edit" — navigates to `/posts/[id]/edit`.
 3. Admin types in the auto-focused title input.
 4. Autosave fires 1 second after the last keystroke.
-5. Admin clicks "Close" — pending debounce is cancelled, `updatePost` flushes.
+5. Admin clicks "Close" — `cancelDebounce` fires, `CloseButton` form submits.
 6. Admin is redirected to the post detail page.
 
 ### Flow 3: Editing a Post Description (Admin)
@@ -38,9 +38,8 @@ _Source: [`../architecture.md`](../architecture.md) § User-Facing Behavior_
 1. Admin navigates to `/posts/[id]/edit` via the Edit button.
 2. Admin clicks "Description" in the action bar — the Description modal opens.
 3. Admin types in the textarea.
-4. Admin closes the modal — description state is held in `EditPostClient`.
-5. Autosave fires 1 second after the modal closes (description changed).
-6. Admin clicks "Close" — `updatePost` flushes, redirect to post detail page.
+4. Admin clicks "Save changes" — the modal submits its own form to `updatePost`.
+5. On success, the modal closes.
 
 ### Flow 4: Editing Post Content (Admin)
 
@@ -49,7 +48,6 @@ _Source: [`../architecture.md`](../architecture.md) § User-Facing Behavior_
 3. Admin uses the heading dropdown in the action bar to select h2, types a heading.
 4. Admin presses enter, types a paragraph.
 5. Autosave fires 1 second after the last change.
-6. Admin clicks "Close" — `updatePost` flushes, redirect to post detail page.
 
 ### Flow 5: Publishing a Post (Admin)
 

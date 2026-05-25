@@ -73,9 +73,9 @@ than to a form. The existing `/posts/new` page and `CreatePostForm` are deleted.
 **Frontend components:**
 - `app/posts/[id]/edit/page.tsx` — sync RSC entry point with `<Suspense>`
 - `EditPostContent` — async RSC that fetches the post before rendering the client
-- `EditPostClient` — client component; owns all editor state and autosave logic
+- `EditPostForm` — client component; owns all editor state and autosave logic
 - `ActionBar` — sticky top bar; contains toolbar, save indicator, and action buttons
-- `ToolbarPlugin` — rendered inside `ActionBar` within the shared `LexicalComposer` owned by `EditPostClient`
+- `ToolbarPlugin` — rendered inside `ActionBar` within the shared `LexicalComposer` owned by `EditPostForm`
 - `LegacyRichTextEditor` — the existing `RichTextEditor` renamed in its own PR before the edit page work begins
 - New `RichTextEditor` — purpose-built for the edit page; no embedded toolbar, no internal `LexicalComposer`; exported alongside `ToolbarPlugin` from `globals/components/richTextEditor`
 - `useAutoSave` — custom debounce hook
@@ -103,7 +103,7 @@ than to a form. The existing `/posts/new` page and `CreatePostForm` are deleted.
 4. Admin arrives on the edit page with the title input auto-focused.
 5. Admin fills in title, description (via Description modal), and content.
 6. Autosave fires 1 second after each change.
-7. Admin clicks "Publish" — `updatePost` flushes first, then `publishPost` fires.
+7. Admin clicks "Publish" — `cancelDebounce` fires, then `publishPost` fires atomically.
 8. Admin is redirected to the post detail page (`/posts/[id]`).
 
 #### Flow 2: Editing a Post Title (Admin)
@@ -112,7 +112,7 @@ than to a form. The existing `/posts/new` page and `CreatePostForm` are deleted.
 2. Admin clicks "Edit" — navigates to `/posts/[id]/edit`.
 3. Admin types in the auto-focused title input.
 4. Autosave fires 1 second after the last keystroke.
-5. Admin clicks "Close" — pending debounce is cancelled, `updatePost` flushes.
+5. Admin clicks "Close" — `cancelDebounce` fires, `CloseButton` form submits.
 6. Admin is redirected to the post detail page.
 
 #### Flow 3: Editing a Post Description (Admin)
@@ -120,9 +120,9 @@ than to a form. The existing `/posts/new` page and `CreatePostForm` are deleted.
 1. Admin navigates to `/posts/[id]/edit` via the Edit button.
 2. Admin clicks "Description" in the action bar — the Description modal opens.
 3. Admin types in the textarea.
-4. Admin closes the modal — description state is held in `EditPostClient`.
-5. Autosave fires 1 second after the modal closes (description changed).
-6. Admin clicks "Close" — `updatePost` flushes, redirect to post detail page.
+4. Admin closes the modal.
+5. Autosave fires 1 second after the last field change.
+6. Admin clicks "Close" — `cancelDebounce` fires, `CloseButton` form submits, redirect to post detail page.
 
 #### Flow 4: Editing Post Content (Admin)
 
@@ -131,7 +131,7 @@ than to a form. The existing `/posts/new` page and `CreatePostForm` are deleted.
 3. Admin uses the heading dropdown in the action bar to select h2, types a heading.
 4. Admin presses enter, types a paragraph.
 5. Autosave fires 1 second after the last change.
-6. Admin clicks "Close" — `updatePost` flushes, redirect to post detail page.
+6. Admin clicks "Close" — `cancelDebounce` fires, `CloseButton` form submits, redirect to post detail page.
 
 #### Flow 5: Publishing a Post (Admin)
 
@@ -246,7 +246,7 @@ export const CACHE_TAGS = {
 - `app/posts/[id]/edit/page.tsx` is an async RSC. It calls
   `authenticateAPISession()` and `hasPermission(token.user, 'posts', 'update')`
   before rendering. Failure → `redirect(ROUTES.home)`.
-- `EditPostClient` additionally implements `useLayoutEffect` mirroring the
+- `EditPostForm` additionally implements `useLayoutEffect` mirroring the
   existing `CreatePostForm` pattern as a belt-and-suspenders client guard.
 
 **Server action auth:**
@@ -303,10 +303,10 @@ cacheTag(CACHE_TAGS.post)
 app/posts/[id]/edit/page.tsx          ← sync RSC; auth guard; <Suspense>
   └── EditPostContent                 ← async RSC; fetches post via getPost
         └── LexicalComposer           ← single composer wraps entire page
-              └── EditPostClient      ← 'use client'; owns all editor state
+              └── EditPostForm      ← 'use client'; owns all editor state
                     ├── ActionBar (sticky)
                     │     ├── ToolbarPlugin      ← inside LexicalComposer context
-                    │     ├── SaveStateIndicator
+                    │     ├── AutoSaveStatus
                     │     ├── DescriptionButton  → DescriptionModal (Dialog)
                     │     ├── PublishUnpublishButton
                     │     └── CloseButton
@@ -318,7 +318,7 @@ app/posts/[id]/edit/page.tsx          ← sync RSC; auth guard; <Suspense>
 #### `LexicalComposer` strategy (→ D5, D21)
 
 `ToolbarPlugin` uses `useLexicalComposerContext()` and must be a descendant of
-the same `LexicalComposer` as the editor content. `EditPostClient` owns and
+the same `LexicalComposer` as the editor content. `EditPostForm` owns and
 renders the `LexicalComposer`, wrapping both `ActionBar` (which contains
 `ToolbarPlugin`) and the new `RichTextEditor`.
 
@@ -342,7 +342,7 @@ useAutoSave({
   delay: 1000,
   onSave: (fields) => startTransition(() => updatePost(fields)),
 })
-// Returns: { cancelPendingDebounce, flushPendingDebounce }
+// Returns: { cancelDebounce }
 ```
 
 `startTransition` keeps autosave non-blocking so the UI remains responsive.
@@ -383,7 +383,7 @@ input (field-specific guidance) alongside the indicator error (→ D12 amended b
 
 Shadcn `Dialog` component installed via `npx shadcn add dialog`. Split into
 one-component-per-directory under `globals/components/ui/` to match existing
-conventions. Description state is held in `EditPostClient` and included in every
+conventions. Description state is held in `EditPostForm` and included in every
 `updatePost` / `publishPost` call.
 
 #### `publishedAt` subtitle (→ D15)
@@ -436,11 +436,10 @@ prop — when `true`, page links are built as
 - `PostService.findAndCount` — unpublished filter: with and without permission
 
 **Unit/component tests (`*.test.ts`, `*.test.tsx`) — jsdom:**
-- `useAutoSave` — debounce fires after delay; cancel prevents fire; flush calls `onSave` immediately
-- `EditPostClient` — renders with `PROPS`; autosave state transitions; Publish button disabled states
-- `SaveStateIndicator` — all four states render correctly
+- `EditPostForm` — renders with `PROPS`; autosave state transitions; Publish button disabled states
+- `AutoSaveStatus` — all four states render correctly
 - `PublishUnpublishButton` — disabled when fields empty; label toggles on unpublish
-- `CloseButton` — calls flush on click; shows confirmation dialog on no-title failure
+- `CloseButton` — cancels debounce on submit; shows unsaved-changes dialog on failure
 - `DescriptionModal` — opens and closes; description updates trigger autosave
 - `PostPageAdminMenuContent` — Edit link renders; New Post renders as form
 
@@ -462,12 +461,12 @@ prop — when `true`, page links are built as
 | 3 | Backend: `getPosts` filter | `unpublished` param in DTO/schema; `PostService.findAndCount` auth check; repository WHERE clause; tests |
 | 4 | `createPost` + edit button | Draft redirect; remove `/posts/new`; `PostsPageAdminMenuContent` → form; `PostPageAdminMenuContent` → Edit link + form; `ROUTES.editPost`; tests |
 | 5 | `LegacyRichTextEditor` rename | Rename existing `RichTextEditor` → `LegacyRichTextEditor`; update all consumers; no behaviour changes |
-| 6 | Edit page — core | `page.tsx`, `EditPostContent`, `EditPostClient`, `useAutoSave`, auth guard, tests |
+| 6 | Edit page — core | `page.tsx`, `EditPostContent`, `EditPostForm`, `useAutoSave`, auth guard, tests |
 | 7 | Title + RTE styles | Invisible title input; editor area styles matching `design-reference.png`; `publishedAt` subtitle |
-| 8 | Sticky action bar + RTE controls | `ActionBar`; new `RichTextEditor`; `ToolbarPlugin` in `ActionBar`; `LexicalComposer` in `EditPostClient` |
+| 8 | Sticky action bar + RTE controls | `ActionBar`; new `RichTextEditor`; `ToolbarPlugin` in `ActionBar`; `LexicalComposer` in `EditPostForm` |
 | 9 | Modal component | `globals/components/ui/dialog/`; Shadcn Dialog install; tests |
-| 10 | Description + Close buttons | Description modal; Close flush-and-redirect; no-title confirmation dialog; tests |
-| 11 | Publish/Unpublish button | `publishPost` action; `PublishUnpublishButton`; disabled state; Publish flush sequence; tests |
+| 10 | Description + Close buttons | Description modal; CloseButton own-form + redirect; unsaved-changes dialog; tests |
+| 11 | Publish/Unpublish button | `publishPost` action; `PublishUnpublishButton`; disabled state; atomic publish; tests |
 | 12 | Unpublished filter | `PostsPageAdminMenuContent` toggle; `Pagination` `unpublished` prop; tests |
 
 **Hard dependencies:**
@@ -485,7 +484,7 @@ prop — when `true`, page links are built as
 
 | Risk | Severity | Mitigation |
 |------|----------|-----------|
-| R1: `ToolbarPlugin` in the action bar requires `LexicalComposer` to wrap both areas — highest frontend complexity | Medium | Decided (→ D5, D21): `EditPostClient` owns the `LexicalComposer`. New `RichTextEditor` has no internal composer. Existing consumers use `LegacyRichTextEditor` unchanged. |
+| R1: `ToolbarPlugin` in the action bar requires `LexicalComposer` to wrap both areas — highest frontend complexity | Medium | Decided (→ D5, D21): `EditPostForm` owns the `LexicalComposer`. New `RichTextEditor` has no internal composer. Existing consumers use `LegacyRichTextEditor` unchanged. |
 | R2: ~~Partial unique index via raw SQL migration~~ | — | Resolved → D23. Full `@unique` on `Post.title` in `schema.prisma`; migration is fully Prisma-managed. |
 | R3: `createPost` relied on `@default("{}")` at the DB level | Low | Decided (→ D2): `CreatePostDto` generates the initial Lexical state when no `content` is provided. Migration drops the default in PR 1. |
 | R4: `getPosts` cache + unpublished filter create two cache entries | Low | Decided (→ D7, D11): both entries are tagged `'posts'`; `revalidateTag('posts')` invalidates both. |

@@ -18,7 +18,7 @@ _Derived from Figma design context. Figma uses kebab-case names (`lucide/bold`);
 | Bullet list | `lucide/list` | `List` | `ToolbarPlugin` |
 | Numbered list | `lucide/list-ordered` | `ListOrdered` | `ToolbarPlugin` |
 | Block type selector | `lucide/chevron-down` | `ChevronDown` | `ToolbarPlugin` (dropdown trigger) |
-| Saving spinner | `lucide/loader-circle` | `Loader2Icon` (via `<Spinner className="size-3" />`) | `SaveStateIndicator` |
+| Saving spinner | `lucide/loader-circle` | `Loader2Icon` (via `<Spinner className="size-3" />`) | `AutoSaveStatus` |
 | Close | `lucide/x` | `X` | `CloseButton` |
 | Edit | `lucide/square-pen` | `SquarePen` | `PostPageAdminMenuContent` |
 

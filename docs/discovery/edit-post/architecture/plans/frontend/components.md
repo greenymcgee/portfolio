@@ -10,12 +10,12 @@ See [`./README.md`](./README.md) for the component hierarchy and `LexicalCompose
 
 - Auto-focused on mount.
 - Styled to be invisible (no border, no background) — visually integrated with the page content.
-- Feeds into `EditPostClient` state; triggers the autosave debounce.
+- Feeds into `EditPostForm` state; triggers the autosave debounce.
 - Inline error rendered **above** this input on unique-constraint violations (→ D12 amended by D14, D37).
 
 ---
 
-## `SaveStateIndicator` (→ D14, D37)
+## `AutoSaveStatus` (→ D14, D37, D39)
 
 Lives in `ActionBar`. Derives display entirely from `state` and `pending`:
 
@@ -24,52 +24,51 @@ Lives in `ActionBar`. Derives display entirely from `state` and `pending`:
 | `state.status === 'IDLE'` (no save has fired this session) | "Edited [date-fns dynamic phrase]" — `formatDistanceToNow(post.updatedAt, { addSuffix: true })` e.g. "Edited 3 minutes ago" |
 | `pending` | `<Spinner className="size-3" />` + "Saving..." |
 | `!pending && state.status === 'SUCCESS'` | "Saved" — persists until next save cycle |
-| `!pending && state.status === 'ERROR'` | **Design pending** — error display not yet designed |
+| `!pending && state.status === 'ERROR'` | "Updates not saved" — destructive red |
+
+Autosave errors also fire a Sonner toast ("Post could not be saved") in addition to the indicator text.
 
 Use `formatDistanceToNow` from `date-fns` (already installed) for the idle phrase. The spinner is `<Spinner className="size-3" />` (12px), using the existing `Spinner` component at `globals/components/ui/spinner/spinner.tsx`.
-
-> **Design pending:** The following cases have not been designed:
-> - Autosave error (any kind)
-> - Description modal Save failure
-> - Publish success — planned Sonner toast; message content not yet designed
-> - Publish failure — planned Sonner toast; message content not yet designed
-> - Unpublish failure — planned Sonner toast; message content not yet designed
-> - Close button save failure
 
 Unique-constraint failures render an inline error **above** the title input for field-specific guidance.
 
 ---
 
-## `PublishUnpublishButton` (→ D3, D9, D19)
+## `PublishUnpublishButton` (→ D3, D9, D19, D39)
 
 - Disabled when any of title, description, or content is empty.
-- **On Publish:** cancel debounce → call `publishPost` with current form state → on success redirect to `ROUTES.post(id)`.
-- **On Unpublish:** call `publishPost({ id, publishing: false, ...currentFormState })` → on success toggle label in-place. No redirect.
-- On failure (either direction): Sonner toast; button label does not toggle.
+- **On Publish:** cancel debounce → call `publishPost` with current form state → while in flight, button shows **"Publishing..."** with a spinner → on success redirect to `ROUTES.post(id)`.
+- **On Unpublish:** call `publishPost` → on success Sonner toast — "Success!" + toggle label in-place. No redirect.
+- **On publish failure:** Sonner toast — "Post could not be published"; button label does not toggle.
+- **On unpublish failure:** Sonner toast — "Post could not be unpublished"; button label does not toggle.
 
 ---
 
-## `CloseButton` (→ D10, D13, D37)
+## `CloseButton` (→ D10, D37, D39)
 
 `CloseButton` is its own `<form action={updatePost}>` that mirrors the current
 `editPostForm` values plus a `redirectPath` hidden input set to `ROUTES.post(post.id)`.
 
 On submit:
 1. Cancel pending autosave debounce (prevents a concurrent `updatePost` call).
-2. Submit the form.
-3. **On success:** Redirect to `ROUTES.post(post.id)`.
-4. **On failure:** Design pending.
+2. Submit the form. While in flight, the button label changes to **"Closing..."** with a spinner.
+3. **On success:** Server action redirects to `ROUTES.post(post.id)` via `redirectPath`.
+4. **On failure:** A dialog appears — **"There are unsaved changes / Are you sure you want to leave?"** — with Cancel (stays on page) and Close (destructive; a `<Link href={ROUTES.post(post.id)}>` that navigates away without saving) buttons.
 
 ---
 
-## `DescriptionButton` + `DescriptionModal` (→ D6)
+## `DescriptionButton` + `DescriptionModal` (→ D6, D39)
 
 - `DescriptionButton` in `ActionBar` opens the Shadcn `Dialog`.
+- `DescriptionButton` is **disabled** when `AutoSaveStatus` is in error state — the modal cannot be opened while autosave has failed.
 - `DescriptionModal` wraps a `<textarea>` for the post description.
-- `DescriptionModal` holds **temporary local state** (`localDescription`) initialised from `EditPostClient.description` when the modal opens.
+- `DescriptionModal` holds **temporary local state** (`localDescription`) initialised from the description hidden input (`formRef.current`) when the modal opens.
 - Owns its own `useActionState(withCallbacks(updatePost, { onSuccess }), ...)` instance. `withCallbacks` handles auto-close only — errors are derived from `state` directly.
 - **Save changes** (button label per Figma): the modal form includes hidden inputs populated from `formRef.current` (id, title, content) plus the `<textarea>` for description. Submits to `updatePost`. On success, `withCallbacks.onSuccess` fires and closes the modal.
-- **Save (failure):** Design pending.
+- **Save changes** is **disabled** when description is empty.
+- **Save — in flight:** "Save changes" button shows an inline spinner.
+- **Save (failure — Zod):** `state.dtoError?.fieldErrors?.description` → bullet list in red below the "Description" label.
+- **Save (failure — generic):** "Something went wrong" in red below the "Description" label.
 - **Cancel:** discards temp state and closes without saving. Autosave does not fire.
 
 Shadcn `Dialog` is installed via `npx shadcn add dialog` and split into
