@@ -11,7 +11,7 @@ app/posts/[id]/edit/page.tsx          ← sync RSC; auth guard; <Suspense>
               └── EditPostClient      ← 'use client'; owns all editor state
                     ├── ActionBar (sticky)
                     │     ├── ToolbarPlugin      ← inside LexicalComposer context
-                    │     ├── SaveStateIndicator
+                    │     ├── AutoSaveStatus
                     │     ├── DescriptionButton  → DescriptionModal (Dialog)
                     │     ├── PublishUnpublishButton
                     │     └── CloseButton
@@ -50,7 +50,7 @@ See [`./icon-map.md`](./icon-map.md) for the full icon reference including toolb
 | Align left / center / right | `AlignLeft`, `AlignCenter`, `AlignRight` | `ToolbarPlugin` |
 | Bullet / numbered list | `List`, `ListOrdered` | `ToolbarPlugin` |
 | Block type selector | `ChevronDown` | `ToolbarPlugin` |
-| Saving spinner | `Loader2Icon` (via `<Spinner className="size-3" />`) | `SaveStateIndicator` |
+| Saving spinner | `Loader2Icon` (via `<Spinner className="size-3" />`) | `AutoSaveStatus` |
 | Close | `X` | `CloseButton` |
 | Edit | `SquarePen` | `PostPageAdminMenuContent` |
 

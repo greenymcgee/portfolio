@@ -662,3 +662,27 @@ provides no additional safety over DTO validation.
 - **Alternatives considered:** Shadcn Breadcrumb installed and wired to both pages in a single PR (original T23 plan) — dropped.
 - **Cancels:** T23
 - **Step:** Step 3 — Iterative Refinement
+
+---
+
+## 2026-05-24 - D39: Confirmed design specs from Figma screens 13–25
+
+- **Decision:** The following specs are confirmed from Figma screens 13–25. All "design pending" markers from T28 are resolved.
+  1. The action bar save-state component is named **`AutoSaveStatus`** (replaces `SaveStateIndicator` everywhere). Saving state: spinner + "Saving...". Error state: "Updates not saved" in destructive red.
+  2. Autosave failure: Sonner toast — "Post could not be saved".
+  3. Close button shows **"Closing..."** + spinner while in flight.
+  4. Close failure: dialog — **"There are unsaved changes / Are you sure you want to leave?"** — with Cancel (stay on page) and Close (destructive; navigate away without saving). Replaces D13's no-title delete confirmation and the Sonner-on-failure approach from prior PR-10 spec.
+  5. Publish button shows **"Publishing..."** + spinner (teal) while in flight.
+  6. Publish failure: Sonner toast — "Post could not be published".
+  7. Unpublish failure: Sonner toast — "Post could not be unpublished".
+  8. Publish success: Sonner toast — "Success!" — appears on the post page after redirect.
+  9. Description modal saving: "Save changes" button shows an inline spinner while in flight.
+  10. Description modal generic save failure: "Something went wrong" in red below the "Description" label.
+  11. Description modal Zod errors: bullet list in red below the "Description" label.
+  12. Description modal with empty description: Save changes button is **disabled**.
+  13. `DescriptionButton` is **disabled** when `AutoSaveStatus` is in error state. Because the modal cannot be opened during an autosave error, the unique-constraint failure case is unreachable in the description modal — only Zod and generic failures apply.
+- **Why:** Figma screens 13–25 were added to the design map, covering all previously pending error, loading, and success states. Design review session on 2026-05-24 confirmed each spec against the live designs.
+- **Alternatives considered:** None — these are direct design confirmations, not architectural choices.
+- **Supersedes:** D13 (no-title delete confirmation flow)
+- **Resolves:** T28
+- **Step:** Step 3 — Iterative Refinement

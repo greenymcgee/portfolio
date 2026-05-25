@@ -42,14 +42,14 @@ at save time without a custom helper.
 
 ## Autosave State Machine
 
-`SaveStateIndicator` and field-error displays derive from `state` and `pending` directly:
+`AutoSaveStatus` and field-error displays derive from `state` and `pending` directly:
 
 | Condition | Display |
 |-----------|---------|
-| `state.status === 'IDLE'` | `SaveStateIndicator` → "Edited [date-fns phrase]" from `post.updatedAt` |
-| `pending` | `SaveStateIndicator` spinner + "Saving..." |
-| `!pending && state.status === 'SUCCESS'` | `SaveStateIndicator` → "Saved" |
-| `!pending && state.status === 'ERROR'` | `SaveStateIndicator` error (design pending) |
+| `state.status === 'IDLE'` | `AutoSaveStatus` → "Edited [date-fns phrase]" from `post.updatedAt` |
+| `pending` | `AutoSaveStatus` spinner + "Saving..." |
+| `!pending && state.status === 'SUCCESS'` | `AutoSaveStatus` → "Saved" |
+| `!pending && state.status === 'ERROR'` | `AutoSaveStatus` → "Updates not saved" (destructive red) |
 | `state.threwUniqueConstraintError` | `TitleInput` hard-coded error message **above** the input |
 | `state.dtoError?.fieldErrors?.content` | Inline errors near editor |
 
@@ -75,16 +75,18 @@ after mount.
 
 | Event | UI response |
 |-------|------------|
-| Autosave in flight | `SaveStateIndicator` spinner + "Saving..." |
-| Autosave success | `SaveStateIndicator` → "Saved" |
-| Autosave error (any kind) | **Design pending** |
+| Autosave in flight | `AutoSaveStatus` spinner + "Saving..." |
+| Autosave success | `AutoSaveStatus` → "Saved" |
+| Autosave error (any kind) | `AutoSaveStatus` → "Updates not saved" (destructive red) + Sonner toast: "Post could not be saved" |
 | Unique constraint violation | `TitleInput` hard-coded error message **above** the input |
-| Publish success | Sonner toast (message design pending) + redirect to post page |
-| Publish / Unpublish failure | Sonner toast — message content design pending |
+| Publish success | Sonner toast: "Success!" + redirect to post page |
+| Publish failure | Sonner toast: "Post could not be published" |
+| Unpublish failure | Sonner toast: "Post could not be unpublished" |
 | Close success | Redirect to post page |
-| Close failure | **Design pending** |
+| Close failure | "There are unsaved changes" dialog — Cancel (stay) or Close (navigate away without saving) |
 | Description modal Save success | Modal closes |
-| Description modal Save failure | **Design pending** |
+| Description modal Save failure (Zod) | Bullet list in red below "Description" label |
+| Description modal Save failure (generic) | "Something went wrong" in red below "Description" label |
 
 ## Description Modal State (→ D27, D31)
 
@@ -111,9 +113,8 @@ Error display is derived from `state` directly — `state.threwUniqueConstraintE
 | Action | Effect |
 |--------|--------|
 | Open modal | `localDescription` initialised from current `EditPostClient.description` |
-| Save — in flight | `saving === true` → Save button disabled |
+| Save — in flight | `saving === true` → "Save changes" button shows inline spinner |
 | Save (success) | `withCallbacks.onSuccess` fires → `onSaveSuccess(localDescription)` → modal closes |
-| Save (failure — unique constraint) | `state.threwUniqueConstraintError` → hard-coded "copy description before closing and fix the title" |
-| Save (failure — description DTO) | `state.dtoError?.fieldErrors?.description` rendered inline |
-| Save (failure — generic) | Generic inline error |
+| Save (failure — Zod) | `state.dtoError?.fieldErrors?.description` → bullet list in red below "Description" label |
+| Save (failure — generic) | "Something went wrong" in red below "Description" label |
 | Cancel | `localDescription` discarded; modal closes; no autosave triggered |

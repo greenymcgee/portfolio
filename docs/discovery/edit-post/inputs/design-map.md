@@ -9,7 +9,7 @@
 ## Design Context
 
 This map catalogs the Figma screens for the edit-post page (`/posts/[id]/edit`).
-Screens 1–14 cover the full admin editing flow including loading, error, and save states.
+These screens cover the full admin editing flow including loading, error, and save states.
 
 ---
 
@@ -97,3 +97,69 @@ https://www.figma.com/design/c6I8C3p7YgtqYJATZQTbiH/Portfolio?node-id=553-935&t=
 - **Persona**: Admin
 - **Key interactions**: User sees the saved state
 - **States**: Saved state
+
+## 15. auto-save failure
+https://www.figma.com/design/c6I8C3p7YgtqYJATZQTbiH/Portfolio?node-id=566-722&t=XvWnzfCKOb8Et0AN-4
+- **Persona**: Admin
+- **Key interactions**: User sees the auto-save failure
+- **States**: Auto-save failure
+
+## 16. close failure
+https://www.figma.com/design/c6I8C3p7YgtqYJATZQTbiH/Portfolio?node-id=566-1326&t=XvWnzfCKOb8Et0AN-4
+- **Persona**: Admin
+- **Key interactions**: User sees the close failure
+- **States**: Close failure
+
+## 17. closing
+https://www.figma.com/design/c6I8C3p7YgtqYJATZQTbiH/Portfolio?node-id=566-1441&t=XvWnzfCKOb8Et0AN-4
+- **Persona**: Admin
+- **Key interactions**: User sees the closing state
+- **States**: Closing state
+
+## 18. publishing
+https://www.figma.com/design/c6I8C3p7YgtqYJATZQTbiH/Portfolio?node-id=566-1526&t=XvWnzfCKOb8Et0AN-4
+- **Persona**: Admin
+- **Key interactions**: User sees the publishing state
+- **States**: Publishing state
+
+## 19. publish failure
+https://www.figma.com/design/c6I8C3p7YgtqYJATZQTbiH/Portfolio?node-id=568-1054&t=XvWnzfCKOb8Et0AN-4
+- **Persona**: Admin
+- **Key interactions**: User sees the publish failure
+- **States**: Publish failure
+
+## 20. unpublish failure
+https://www.figma.com/design/c6I8C3p7YgtqYJATZQTbiH/Portfolio?node-id=568-1141&t=XvWnzfCKOb8Et0AN-4
+- **Persona**: Admin
+- **Key interactions**: User sees the unpublish failure
+- **States**: Unpublish failure
+
+## 21. description saving
+https://www.figma.com/design/c6I8C3p7YgtqYJATZQTbiH/Portfolio?node-id=566-870&t=XvWnzfCKOb8Et0AN-4
+- **Persona**: Admin
+- **Key interactions**: User sees the description saving
+- **States**: Description saving
+
+## 22. description save failure
+https://www.figma.com/design/c6I8C3p7YgtqYJATZQTbiH/Portfolio?node-id=566-987&t=XvWnzfCKOb8Et0AN-4
+- **Persona**: Admin
+- **Key interactions**: User sees the description save failure
+- **States**: Description save failure
+
+## 23. empty description
+https://www.figma.com/design/c6I8C3p7YgtqYJATZQTbiH/Portfolio?node-id=566-1110&t=XvWnzfCKOb8Et0AN-4
+- **Persona**: Admin
+- **Key interactions**: User sees the disabled submit button
+- **States**: Disabled submit button
+
+## 24. description zod errors
+https://www.figma.com/design/c6I8C3p7YgtqYJATZQTbiH/Portfolio?node-id=566-1218&t=XvWnzfCKOb8Et0AN-4
+- **Persona**: Admin
+- **Key interactions**: User sees the description zod errors
+- **States**: Description zod errors
+
+## 25. publish post success
+https://www.figma.com/design/c6I8C3p7YgtqYJATZQTbiH/Portfolio?node-id=568-1003&t=XvWnzfCKOb8Et0AN-4
+- **Persona**: Admin
+- **Key interactions**: User sees the sonner toast after redirecting to the post page
+- **States**: Sonner toast after redirecting to the post page
