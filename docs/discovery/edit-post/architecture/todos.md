@@ -276,6 +276,24 @@ Impacts: all Jira ticket files listed above.
 
 ---
 
+## T32: Description modal save does not update the main form state
+
+**Status:** Open
+
+When `DescriptionModal` saves successfully, it calls `updatePost` via its own `useActionState` instance (D31). The DB is updated, but the main form's `formRef` still holds the old description value. If autosave fires after the modal closes, `EditPostForm` reads `formRef.current` and sends the stale description, silently overwriting what was just saved.
+
+Needs a decision on how the modal's saved description is propagated back to the main form. Impacts `components.md`, `state-management.md`, and `jira/pr-10.md`.
+
+---
+
+## T31: Split PR-11 into separate frontend and backend tickets
+
+**Status:** Open
+
+PR-11 mixes `PublishUnpublishButton` (frontend) and `togglePostPublishedStatus` / service / repository (backend). Split into two tickets — one for each layer. Create a new ticket for whichever half moves out of PR-11; numbering TBD.
+
+---
+
 ## T30: Ticket refinement and potential breakdown review
 
 **Status:** Open

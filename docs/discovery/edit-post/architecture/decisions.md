@@ -686,3 +686,14 @@ provides no additional safety over DTO validation.
 - **Supersedes:** D13 (no-title delete confirmation flow)
 - **Resolves:** T28
 - **Step:** Step 3 — Iterative Refinement
+
+---
+
+## 2026-05-25 - D40: `togglePostPublishedStatus` — action design, DTO reuse, toggle contract
+
+- **Decision:** The publish/unpublish server action is named `togglePostPublishedStatus` (not `publishPost`). It reuses `UpdatePostDto` — no separate `PublishPostDto` or `publish-post.schema.ts`. `UpdatePostDto` will gain two optional fields as part of the global plan: `publishedAt` (the post's current DB value, sent as a hidden input from the form to avoid a DB lookup) and `redirectUrl` (the post detail page URL, sent only on the publish path). The toggle direction is determined by `dto.params.publishedAt`: truthy → unpublish (set `null`); falsy → publish (set `new Date()`). The repository performs one atomic `prisma.post.update` writing all content fields and `publishedAt` together. On publish success the action calls `redirect(dto.params.redirectUrl)`; on unpublish success it returns `{ ...params, status: 'SUCCESS' }`. Error handling mirrors `updatePost` exactly — same branch structure including `unique-constraint` returning `threwUniqueConstraintError: true`. Lexical content safety validation is inherited from `UpdatePostDto` at no extra cost.
+- **Why:** Using `UpdatePostDto` keeps the backend consistent — one DTO, one schema, one validation path. Sending `publishedAt` as a hidden input (the edit page already has the post) avoids an extra DB read. Sending `redirectUrl` in the form rather than constructing it in the action keeps routing concerns in the component. Mirroring `updatePost` error branches avoids inventing new patterns.
+- **Alternatives considered:** Separate `PublishPostDto` with a `publishing: boolean` flag — unnecessary new file when `UpdatePostDto` covers the same shape. Reading `publishedAt` from the DB in the service — an avoidable round-trip when the form already has the value. Using `redirectUrl` presence as the toggle signal — fragile coupling between routing and business logic.
+- **Supersedes:** D19 (flush-first was superseded by D20; now D20's `publishPost` naming and separate DTO are also superseded)
+- **Resolves:** PR-11 backend discovery (see `jira/pr-11.md`)
+- **Step:** Step 3 — Iterative Refinement
