@@ -36,8 +36,8 @@ The `getPosts` read path gains an admin-only `?unpublished=true` filter. The
 |----------|-----------|------------------------|
 | **Full `@unique` on `Post.title` in `schema.prisma`** (D23) | `createPost` uses a timestamped placeholder so no draft is ever created with `title = ''`. `UpdatePostDto` requires a non-empty title, so blank-title autosaves fail DTO validation before reaching the DB. A full constraint is simpler and fully Prisma-managed. | Partial index (`WHERE title != ''`) — exclusion no longer needed; unnecessary complexity. Application-layer-only enforcement — data integrity risk if DTO path is bypassed. |
 | **Two server actions: `updatePost` (autosave) and `publishPost` (atomic)** (D3, D20) | Single responsibility per action. `publishPost` carries all content fields and sets `publishedAt` in one DB write — no sequential flush needed. `updatePost` never touches `publishedAt`. | Single `updatePost` with `publishedAt` field — ambiguous; can't distinguish autosave from publish intent without an extra flag. |
-| **Single `LexicalComposer` owned by `EditPostClient`** (D5, D21) | `ToolbarPlugin` uses `useLexicalComposerContext()` and must be a descendant of the same composer as the editor. Wrapping both the action bar and the editor in one composer is the only clean approach. | Portal-based toolbar rendering — unnecessary indirection. Keeping toolbar inside `RichTextEditor` — breaks when editor is not a descendant. |
-| **New `RichTextEditor` purpose-built for the edit page; existing renamed `LegacyRichTextEditor`** (D21) | New component has no internal `LexicalComposer` and no embedded `ToolbarPlugin`. `EditPostClient` owns the composer explicitly. No conditional logic in the existing component. | `omitToolbar` prop on the existing component — implicit contract that the caller must provide a composer; confusing interface. |
+| **Single `LexicalComposer` owned by `EditPostForm`** (D5, D21) | `ToolbarPlugin` uses `useLexicalComposerContext()` and must be a descendant of the same composer as the editor. Wrapping both the action bar and the editor in one composer is the only clean approach. | Portal-based toolbar rendering — unnecessary indirection. Keeping toolbar inside `RichTextEditor` — breaks when editor is not a descendant. |
+| **New `RichTextEditor` purpose-built for the edit page; existing renamed `LegacyRichTextEditor`** (D21) | New component has no internal `LexicalComposer` and no embedded `ToolbarPlugin`. `EditPostForm` owns the composer explicitly. No conditional logic in the existing component. | `omitToolbar` prop on the existing component — implicit contract that the caller must provide a composer; confusing interface. |
 | **`publishPost` atomic — carries all content fields** (D20) | Single DB round-trip sets `publishedAt` and content fields together. Eliminates the flush-then-publish sequential dependency from the earlier design. | Flush `updatePost` first, then `publishPost` — two sequential round-trips; brittle "flush succeeded" gate. |
 | **Permission check for `unpublished` flag in `PostService.findAndCount`, not in `getPosts`** (D7) | `getPosts` is wrapped in `'use cache'` — auth logic must not cross the cache boundary; the cached function runs with no session context. | Permission check in the cached function — auth depends on request context which is not part of the cache key. |
 | **Save-state indicator handles all autosave feedback; Sonner only for publish/unpublish/close** (D14) | Routing all autosave feedback through one surface avoids a redundant toast + indicator for the same event. | Sonner for generic autosave errors — superseded; the inline indicator is the single source of truth for autosave state. |
@@ -60,7 +60,7 @@ identified and how each was mitigated, for reviewer awareness.
 
 | Risk | Severity | Mitigation |
 |------|----------|-----------|
-| `ToolbarPlugin` in the action bar requires `LexicalComposer` to wrap both areas | Medium | `EditPostClient` owns the `LexicalComposer`. New `RichTextEditor` has no internal composer. (D5, D21) |
+| `ToolbarPlugin` in the action bar requires `LexicalComposer` to wrap both areas | Medium | `EditPostForm` owns the `LexicalComposer`. New `RichTextEditor` has no internal composer. (D5, D21) |
 | ~~Partial unique index not expressible in Prisma schema DSL~~ | — | Resolved → D23. Full `@unique` on `Post.title` in `schema.prisma`; migration is fully Prisma-managed. |
 | `createPost` relied on `@default("{}")` at the DB level | Low | `CreatePostDto` generates the initial Lexical state. Migration drops the default in PR 1. (D2) |
 | `getPosts` cache + unpublished filter could bypass auth | Low | Permission check in `PostService.findAndCount`, outside the `'use cache'` boundary. (D7) |
@@ -70,10 +70,10 @@ identified and how each was mitigated, for reviewer awareness.
 
 ## Areas Needing Scrutiny
 
-- **`LexicalComposer` ownership in `EditPostClient`.** The single-composer
+- **`LexicalComposer` ownership in `EditPostForm`.** The single-composer
   strategy (D5, D21) is the highest-complexity frontend change. Reviewers should
   verify that `ToolbarPlugin` is a true descendant of the `LexicalComposer` owned
-  by `EditPostClient`, and that the new `RichTextEditor` correctly omits its own
+  by `EditPostForm`, and that the new `RichTextEditor` correctly omits its own
   internal composer without breaking existing toolbar behaviour.
 
 - **Autosave state machine and flush sequence.** The Close and Publish handlers

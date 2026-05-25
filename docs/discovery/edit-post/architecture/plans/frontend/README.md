@@ -8,7 +8,7 @@ _Source: [`../architecture.md`](../architecture.md) § Frontend_
 app/posts/[id]/edit/page.tsx          ← sync RSC; auth guard; <Suspense>
   └── EditPostContent                 ← async RSC; fetches post via getPost
         └── LexicalComposer           ← single composer wraps entire page
-              └── EditPostClient      ← 'use client'; owns all editor state
+              └── EditPostForm      ← 'use client'; owns all editor state
                     ├── ActionBar (sticky)
                     │     ├── ToolbarPlugin      ← inside LexicalComposer context
                     │     ├── AutoSaveStatus
@@ -22,7 +22,7 @@ app/posts/[id]/edit/page.tsx          ← sync RSC; auth guard; <Suspense>
 ## `LexicalComposer` Strategy (→ D5, D21)
 
 `ToolbarPlugin` uses `useLexicalComposerContext()` and must be a descendant of
-the same `LexicalComposer` as the editor content. `EditPostClient` owns and
+the same `LexicalComposer` as the editor content. `EditPostForm` owns and
 renders the `LexicalComposer`, wrapping both `ActionBar` (which contains
 `ToolbarPlugin`) and the new `RichTextEditor`.
 

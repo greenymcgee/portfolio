@@ -14,9 +14,9 @@ _Source: [`../architecture.md`](../architecture.md) § Rollout Plan_
 | 6 | `PostsPageAdminMenuContent` unpublished toggle | Unpublished toggle UI; `Pagination` `unpublished` prop; tests |
 | 7 | Edit page — core | `page.tsx`, `EditPostContent`, `EditPostForm`, autosave, policy enforcer, tests |
 | 8 | Title + RTE styles | Invisible title input; inline error states (unique constraint + content DTO errors); editor area styles; `publishedAt` subtitle |
-| 9 | Sticky action bar + RTE controls | `ActionBar`; `flushDebounce`; new `RichTextEditor`; `ToolbarPlugin` in `ActionBar`; `LexicalComposer` in `EditPostForm` |
-| 10 | Description + Close buttons | Description modal; Close flush-and-redirect; no-title confirmation dialog; tests |
-| 11 | Publish/Unpublish button | `publishPost` action; `PublishUnpublishButton`; disabled state; Publish flush sequence; tests |
+| 9 | Sticky action bar + RTE controls | `ActionBar`; new `RichTextEditor`; `ToolbarPlugin` in `ActionBar`; `LexicalComposer` in `EditPostForm` |
+| 10 | Description + Close buttons | Description modal; CloseButton own-form + redirect; unsaved-changes dialog; tests |
+| 11 | Publish/Unpublish button | `publishPost` action; `PublishUnpublishButton`; disabled state; atomic publish; tests |
 | 12 | `createPost` + edit button + remove `/posts/new` | Draft redirect; remove `/posts/new`; `PostsPageAdminMenuContent` → form; `PostPageAdminMenuContent` → Edit link + form; `ROUTES.editPost`; tests |
 | 13 | Fix stale content on `/posts` and `/posts/[id]` after autosave | Cache invalidation for both listing and detail page |
 | 14 | Edit page — error handling | `notFound()` for missing posts; `not-found.tsx`; requires issue #157 |

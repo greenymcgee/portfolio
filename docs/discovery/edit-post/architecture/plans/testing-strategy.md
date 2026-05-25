@@ -29,10 +29,10 @@ jsdom environment.
 
 | Subject | Cases |
 |---------|-------|
-| `EditPostClient` autosave | Debounce fires after 1s; `cancelDebounce` prevents fire; `flushDebounce` calls `updateAction` immediately; state transitions (idle → saving → saved → error) |
-| `SaveStateIndicator` | All four states render correctly (`idle`, `saving`, `saved`, `error`) |
+| `EditPostForm` autosave | Debounce fires after 1s; `cancelDebounce` prevents fire; state transitions (idle → saving → saved → error) |
+| `AutoSaveStatus` | All four states render correctly (`idle`, `saving`, `saved`, `error`) |
 | `PublishUnpublishButton` | Disabled when any field empty; label toggles to "Publish" on unpublish success |
-| `CloseButton` | Calls `flushDebounce` on click; shows confirmation dialog on no-title failure |
+| `CloseButton` | Cancels debounce on submit; shows unsaved-changes dialog on failure |
 | `DescriptionModal` | Opens on button click; closes; description changes trigger autosave |
 | `PostPageAdminMenuContent` | Edit link renders with correct `href`; "New Post" renders as `<form>` not `<a>` |
 

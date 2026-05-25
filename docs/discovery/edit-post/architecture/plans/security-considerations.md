@@ -8,7 +8,7 @@ _Source: [`../architecture.md`](../architecture.md) § Security Considerations_
 `authenticateAPISession()` and `hasPermission(token.user, 'posts', 'update')`
 before rendering. Failure → `redirect(ROUTES.home)`.
 
-`EditPostClient` additionally implements a `useLayoutEffect` guard mirroring
+`EditPostForm` additionally implements a `useLayoutEffect` guard mirroring
 the existing `CreatePostForm` pattern as belt-and-suspenders protection against
 client-side session expiry after initial load.
 

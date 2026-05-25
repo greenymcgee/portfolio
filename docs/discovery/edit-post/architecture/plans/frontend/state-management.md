@@ -4,7 +4,7 @@ _Source: [`../architecture.md`](../architecture.md) § Frontend_
 
 ## Autosave — `useActionState` + inline debounce (→ D31)
 
-`EditPostClient` owns the `updatePost` action state:
+`EditPostForm` owns the `updatePost` action state:
 
 ```ts
 const [state, updateAction, pending] = useActionState(
@@ -27,18 +27,13 @@ const cancelDebounce = () => {
   timeoutRef.current = null
 }
 
-const flushDebounce = () => {
-  cancelDebounce()
-  if (formRef.current) updateAction(new FormData(formRef.current))
-}
 ```
 
 On each field change: `cancelDebounce()`, then schedule a 1-second timeout. When it fires,
 call `updateAction(new FormData(formRef.current))`. The form ref captures all field values
 at save time without a custom helper.
 
-`cancelDebounce` and `flushDebounce` are passed as props to `CloseButton` and
-`PublishUnpublishButton`.
+`cancelDebounce` is passed as a prop to `CloseButton` and `PublishUnpublishButton`.
 
 ## Autosave State Machine
 
@@ -81,9 +76,10 @@ after mount.
 | Unique constraint violation | `TitleInput` hard-coded error message **above** the input |
 | Publish success | Sonner toast: "Success!" + redirect to post page |
 | Publish failure | Sonner toast: "Post could not be published" |
+| Unpublish success | Sonner toast: "Success!" + label toggles in-place; no redirect |
 | Unpublish failure | Sonner toast: "Post could not be unpublished" |
 | Close success | Redirect to post page |
-| Close failure | "There are unsaved changes" dialog — Cancel (stay) or Close (navigate away without saving) |
+| Close failure | "There are unsaved changes" dialog — Cancel (stay) or Close (`<Link href={ROUTES.post(post.id)}>` — navigates away without saving) |
 | Description modal Save success | Modal closes |
 | Description modal Save failure (Zod) | Bullet list in red below "Description" label |
 | Description modal Save failure (generic) | "Something went wrong" in red below "Description" label |
@@ -98,23 +94,22 @@ const formRef = useRef<HTMLFormElement>(null)
 
 const [state, modalUpdateAction, saving] = useActionState(
   withCallbacks(updatePost, {
-    onSuccess: () => onSaveSuccess(localDescription),
+    onSuccess: closeModal,
   }),
   { status: 'IDLE' } as UpdatePostState,
 )
 ```
 
-`onSaveSuccess` is a prop from `EditPostClient` that updates `EditPostClient.description`,
-calls `cancelDebounce`, and closes the modal. Save submits via `new FormData(formRef.current)`.
+Save submits via `new FormData(formRef.current)`. On success, `withCallbacks.onSuccess` closes the modal.
 
 Error display is derived from `state` directly — `state.threwUniqueConstraintError` and
 `state.dtoError?.fieldErrors?.description` are checked independently:
 
 | Action | Effect |
 |--------|--------|
-| Open modal | `localDescription` initialised from current `EditPostClient.description` |
+| Open modal | `localDescription` initialised from the description hidden input (`formRef.current`) |
 | Save — in flight | `saving === true` → "Save changes" button shows inline spinner |
-| Save (success) | `withCallbacks.onSuccess` fires → `onSaveSuccess(localDescription)` → modal closes |
+| Save (success) | `withCallbacks.onSuccess` fires → modal closes |
 | Save (failure — Zod) | `state.dtoError?.fieldErrors?.description` → bullet list in red below "Description" label |
 | Save (failure — generic) | "Something went wrong" in red below "Description" label |
 | Cancel | `localDescription` discarded; modal closes; no autosave triggered |

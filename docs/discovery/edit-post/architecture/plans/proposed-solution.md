@@ -42,16 +42,16 @@ than to a form. The existing `/posts/new` page and `CreatePostForm` are deleted.
 |-----------|------|----------|---------|
 | `app/posts/[id]/edit/page.tsx` | sync RSC | `app/` | Auth guard + `<Suspense>` wrapper |
 | `EditPostContent` | async RSC | `features/posts/components/` | Fetches post via `getPost`; hands data to client |
-| `EditPostClient` | Client component | `features/posts/components/` | Owns all editor state, autosave logic, `LexicalComposer` |
+| `EditPostForm` | Client component | `features/posts/components/` | Owns all editor state, autosave logic, `LexicalComposer` |
 | `ActionBar` | Client component | `features/posts/components/` | Sticky top bar; contains toolbar + buttons |
-| `SaveStateIndicator` | Client component | `features/posts/components/` | Four-state autosave status display |
+| `AutoSaveStatus` | Client component | `features/posts/components/` | Four-state autosave status display |
 | `TitleInput` | Client component | `features/posts/components/` | Auto-focused invisible title input |
 | `PublishedAtSubtitle` | Component | `features/posts/components/` | Static `<time>` element |
 | `PublishUnpublishButton` | Client component | `features/posts/components/` | Publish/unpublish toggle with disabled state |
 | `DescriptionButton` | Client component | `features/posts/components/` | Opens description modal |
 | `DescriptionModal` | Client component | `features/posts/components/` | Shadcn Dialog wrapping textarea |
-| `CloseButton` | Client component | `features/posts/components/` | Flush + redirect; no-title confirmation |
-| Inline debounce | `EditPostClient` | `features/posts/components/editPostClient/` | `useRef`+`setTimeout`; `cancelDebounce`/`flushDebounce` callbacks |
+| `CloseButton` | Client component | `features/posts/components/` | Own form + redirect; unsaved-changes dialog on failure |
+| Inline debounce | `EditPostForm` | `features/posts/components/editPostForm/` | `useRef`+`setTimeout`; `cancelDebounce` callback |
 | New `RichTextEditor` | Component | `globals/components/richTextEditor/` | No internal composer, no embedded toolbar |
 | `globals/components/ui/dialog/` | Component | `globals/components/ui/` | Shadcn Dialog split into one-per-directory |
 

@@ -114,7 +114,7 @@ Draft shows current date/time; published shows actual publish date/time.
 **Status:** Resolved → D16
 
 Server-side redirect in the async RSC page + `useLayoutEffect` in
-`EditPostClient` as belt-and-suspenders. Implement in PR 5.
+`EditPostForm` as belt-and-suspenders. Implement in PR 5.
 
 ---
 
@@ -157,7 +157,7 @@ No `omitToolbar` prop. The existing `RichTextEditor` is renamed
 `LegacyRichTextEditor` in PR 5. A new `RichTextEditor` purpose-built for the
 edit page (no internal `LexicalComposer`, no embedded toolbar) is introduced
 alongside it. `ToolbarPlugin` is re-exported from `richTextEditor/index.ts`.
-`EditPostClient` owns the `LexicalComposer`.
+`EditPostForm` owns the `LexicalComposer`.
 
 ---
 
@@ -217,8 +217,7 @@ tickets will need to be updated once the new sequence is agreed.
 
 ~~The current design triggers autosave 1 second after the modal closes.~~ Modal
 now uses a manual Save + Cancel pattern (Option A). Save calls `updatePost`
-directly, on success updates `EditPostClient.description` + calls
-`cancelPendingDebounce` + closes. Cancel discards temp state with no save.
+directly, on success closes the modal. Cancel discards temp state with no save.
 Updated: `components.md`, `state-management.md`, `jira/pr-10.md`.
 
 ---
@@ -227,7 +226,7 @@ Updated: `components.md`, `state-management.md`, `jira/pr-10.md`.
 
 **Status:** Resolved → D31
 
-`useAutoSave` custom hook removed. `EditPostClient` uses `useActionState(updatePost, initialState)` with inline debounce via `useRef` + `setTimeout`. All autosave display derived from `state` and `pending` directly. `DescriptionModal` owns its own `useActionState(withCallbacks(updatePost, { onSuccess }), initialState)` instance for auto-close. Updated: `state-management.md`, `pr-07.md`, `components.md`, `pr-10.md`, `pr-04.md`.
+`useAutoSave` custom hook removed. `EditPostForm` uses `useActionState(updatePost, initialState)` with inline debounce via `useRef` + `setTimeout`. All autosave display derived from `state` and `pending` directly. `DescriptionModal` owns its own `useActionState(withCallbacks(updatePost, { onSuccess }), initialState)` instance for auto-close. Updated: `state-management.md`, `pr-07.md`, `components.md`, `pr-10.md`, `pr-04.md`.
 
 ---
 
@@ -328,9 +327,9 @@ Split into two new PRs:
 
 **Status:** Resolved → D35 (absorbed into PR 14)
 
-`EditPostContent` currently passes `post` to `EditPostClient` with no handling for the
+`EditPostContent` currently passes `post` to `EditPostForm` with no handling for the
 error case (post not found or `getPost` failure). When the post doesn't exist, `post`
-will be `null` and `EditPostClient` will receive invalid initial state.
+will be `null` and `EditPostForm` will receive invalid initial state.
 
 Add proper 404 handling to `EditPostContent`: call Next.js `notFound()` when `getPost`
 returns a not-found error, and wire up a `not-found.tsx` at the
