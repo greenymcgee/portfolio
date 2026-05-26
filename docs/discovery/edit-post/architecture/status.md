@@ -3,10 +3,10 @@
 | Field | Value |
 |-------|-------|
 | **Phase** | Implementation in progress |
-| **Current Focus** | T30 — ticket refinement pass (PRs 8–16); T31 resolved |
+| **Current Focus** | T30 — split EDIT-POST-10 (Description Button) into separate Description and Close Button PRs; PRs 8–9 refined, PR-18 added |
 | **Current PR** | PR 7 (done, pending review) |
 | **Blocked** | No |
-| **Last updated** | 2026-05-25 |
+| **Last updated** | 2026-05-26 |
 | **Branch** | 170-edit-post-page |
 
 ## Requirements Review Progress
@@ -37,6 +37,7 @@
 | 7 | Edit page — core structure + autosave | [EDIT-POST-7](../jira/pr-07.md) | Done |
 | 8 | Edit page — title + RTE styles | [EDIT-POST-8](../jira/pr-08.md) | Ready |
 | 9 | Edit page — sticky action bar + RTE controls | [EDIT-POST-9](../jira/pr-09.md) | Ready |
+| 18 | Edit page — AutoSaveStatus indicator | [EDIT-POST-18](../jira/pr-18.md) | Ready |
 | 10 | Description button + Close button | [EDIT-POST-10](../jira/pr-10.md) | Ready |
 | 11 | Backend: `togglePostPublishedStatus` action, service, repository + `UpdatePostDto` extensions | [EDIT-POST-11](../jira/pr-11.md) | Ready |
 | 12 | `createPost` draft flow + remove `/posts/new` + Edit button | [EDIT-POST-12](../jira/pr-12.md) | Design pending |

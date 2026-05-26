@@ -717,3 +717,12 @@ provides no additional safety over DTO validation.
 - **Alternatives considered:** Disable when any field is empty (D39 point 5 plan) — superseded by this decision.
 - **Supersedes:** D39 point 5 (disabled state + styling)
 - **Step:** Step 3 — Iterative Refinement
+
+---
+
+## 2026-05-25 - D43: `TitleInput` auto-focus removed
+
+- **Decision:** `TitleInput` does not auto-focus on mount.
+- **Why:** Owner decision — auto-focus is no longer desired behavior.
+- **Alternatives considered:** Auto-focus on mount (original plan) — removed at owner request.
+- **Step:** Step 3 — Iterative Refinement (T30)
