@@ -697,3 +697,23 @@ provides no additional safety over DTO validation.
 - **Supersedes:** D19 (flush-first was superseded by D20; now D20's `publishPost` naming and separate DTO are also superseded)
 - **Resolves:** PR-11 backend discovery (see `jira/pr-11.md`)
 - **Step:** Step 3 — Iterative Refinement
+
+---
+
+## 2026-05-25 - D41: PR-11 split into backend (EDIT-POST-11) and frontend (EDIT-POST-17)
+
+- **Decision:** EDIT-POST-11 retains the backend scope only: `UpdatePostDto` extensions (`publishedAt`, `redirectUrl`), `togglePostPublishedStatus` action, `PostService.togglePublishedStatus`, and `PostRepository.togglePublishedStatus`. A new ticket, EDIT-POST-17, covers the frontend: `PublishUnpublishButton` component and its integration into `ActionBar`. EDIT-POST-17 depends on EDIT-POST-11 and EDIT-POST-9.
+- **Why:** Backend and frontend are independent work units with no shared state or sequential code dependency within the same PR. Splitting them keeps each PR reviewable in isolation and allows the backend to merge independently of frontend progress.
+- **Alternatives considered:** Keep as one PR — original plan; rejected because mixing backend service/repository/DTO changes with frontend component work inflates the diff and couples review of different concerns.
+- **Resolves:** T31
+- **Step:** Step 3 — Iterative Refinement
+
+---
+
+## 2026-05-25 - D42: `PublishUnpublishButton` is never disabled — supersedes D39 point 5
+
+- **Decision:** `PublishUnpublishButton` has no disabled state. The button is always enabled regardless of title, description, or content values.
+- **Why:** Design change confirmed after D39. The disabled-state behavior described in D39 (point 5) was a design artifact that has since been removed.
+- **Alternatives considered:** Disable when any field is empty (D39 point 5 plan) — superseded by this decision.
+- **Supersedes:** D39 point 5 (disabled state + styling)
+- **Step:** Step 3 — Iterative Refinement

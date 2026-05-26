@@ -288,9 +288,9 @@ Needs a decision on how the modal's saved description is propagated back to the 
 
 ## T31: Split PR-11 into separate frontend and backend tickets
 
-**Status:** Open
+**Status:** Resolved → D41
 
-PR-11 mixes `PublishUnpublishButton` (frontend) and `togglePostPublishedStatus` / service / repository (backend). Split into two tickets — one for each layer. Create a new ticket for whichever half moves out of PR-11; numbering TBD.
+EDIT-POST-11 retains the backend scope. EDIT-POST-17 (new) covers `PublishUnpublishButton` and `ActionBar` integration. See `decisions.md` → D41.
 
 ---
 

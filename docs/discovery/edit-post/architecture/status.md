@@ -3,7 +3,7 @@
 | Field | Value |
 |-------|-------|
 | **Phase** | Implementation in progress |
-| **Current Focus** | PRs 8–11 ready to implement; PR 11 needs splitting (T31) |
+| **Current Focus** | T30 — ticket refinement pass (PRs 8–16); T31 resolved |
 | **Current PR** | PR 7 (done, pending review) |
 | **Blocked** | No |
 | **Last updated** | 2026-05-25 |
@@ -38,12 +38,13 @@
 | 8 | Edit page — title + RTE styles | [EDIT-POST-8](../jira/pr-08.md) | Ready |
 | 9 | Edit page — sticky action bar + RTE controls | [EDIT-POST-9](../jira/pr-09.md) | Ready |
 | 10 | Description button + Close button | [EDIT-POST-10](../jira/pr-10.md) | Ready |
-| 11 | Publish/Unpublish button | [EDIT-POST-11](../jira/pr-11.md) | Ready — needs splitting (T31) |
+| 11 | Backend: `togglePostPublishedStatus` action, service, repository + `UpdatePostDto` extensions | [EDIT-POST-11](../jira/pr-11.md) | Ready |
 | 12 | `createPost` draft flow + remove `/posts/new` + Edit button | [EDIT-POST-12](../jira/pr-12.md) | Design pending |
 | 13 | Fix `/posts/[id]` stale content after autosave | [EDIT-POST-13](../jira/pr-13.md) | Not started |
 | 14 | Edit page — error handling + `not-found.tsx` | [EDIT-POST-14](../jira/pr-14.md) | Design pending |
 | 15 | Edit page — loading skeleton | [EDIT-POST-15](../jira/pr-15.md) | Design pending |
 | 16 | Edit page — generic error UI | [EDIT-POST-16](../jira/pr-16.md) | Design pending |
+| 17 | `PublishUnpublishButton` component | [EDIT-POST-17](../jira/pr-17.md) | Ready |
 
 ## Open Todos
 
@@ -64,5 +65,5 @@
 | T27 | Document `EditPostContent` form state wrapper — component boundaries, prop contracts, `cancelDebounce` threading | Open |
 | T29 | Link design-map screens to the PRs that implement them | Open |
 | T32 | Description modal save does not update main form state | Open |
-| T31 | Split PR-11 into frontend and backend tickets | Open |
+| T31 | ~~Split PR-11 into frontend and backend tickets~~ | Resolved → D41 |
 | T30 | Ticket refinement and potential breakdown review | Open |
