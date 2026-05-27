@@ -726,3 +726,31 @@ provides no additional safety over DTO validation.
 - **Why:** Owner decision — auto-focus is no longer desired behavior.
 - **Alternatives considered:** Auto-focus on mount (original plan) — removed at owner request.
 - **Step:** Step 3 — Iterative Refinement (T30)
+
+---
+
+## 2026-05-27 - D44: `redirectPath` standardized — `redirectUrl` in D40 and PR-11 corrected
+
+- **Decision:** The optional redirect field added to `UpdatePostDto` and `updatePostSchema` is named `redirectPath` throughout — in the DTO, schema, server action, and all Jira tickets. D40 and the original PR-11 draft used `redirectUrl`; that name is superseded.
+- **Why:** D37 (CloseButton design) already established `redirectPath` as the canonical name. Standardizing on one name avoids a DTO with two redirect-like fields and removes an inconsistency between the two Jira tickets that touch `UpdatePostDto`.
+- **Alternatives considered:** `redirectUrl` (D40's name) — rejected in favour of the already-established `redirectPath` from D37.
+- **Supersedes:** D40 (the `redirectUrl` field name only — the rest of D40's contract is unchanged)
+- **Step:** Step 3 — Iterative Refinement (T30)
+
+---
+
+## 2026-05-27 - D45: T32 resolved — `DescriptionModal` `onSuccess` syncs `formRef` description input
+
+- **Decision:** After `DescriptionModal` saves successfully, `withCallbacks.onSuccess` updates the main form's description hidden input before closing the modal:
+  ```ts
+  onSuccess: () => {
+    const input = formRef.current?.elements.namedItem('description') as HTMLInputElement | null
+    if (input) input.value = localDescription
+    closeModal()
+  }
+  ```
+  This ensures the next autosave debounce reads the freshly-saved description from `formRef.current` rather than the stale pre-modal value.
+- **Why:** `EditPostForm`'s autosave debounce constructs its `FormData` from `formRef.current`. Without this sync, a successful modal save updates the DB but leaves `formRef` stale — the next autosave silently overwrites the saved description. The imperative DOM update is consistent with the existing pattern: `CloseButton` and `DescriptionModal` already read field values from `formRef.current` via the same `elements.namedItem` API. No new state, no re-renders.
+- **Alternatives considered:** Lifting `description` to controlled React state in `EditPostForm` — adds a state variable for one field while leaving title and content uncontrolled, creating an inconsistency without a clear payoff. A separate `descriptionRef` passed from `EditPostForm` — more indirection with no benefit over querying `formRef.current.elements` directly.
+- **Resolves:** T32
+- **Step:** Step 3 — Iterative Refinement (T32)

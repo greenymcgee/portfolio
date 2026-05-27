@@ -278,11 +278,9 @@ Impacts: all Jira ticket files listed above.
 
 ## T32: Description modal save does not update the main form state
 
-**Status:** Open
+**Status:** Resolved → D45
 
-When `DescriptionModal` saves successfully, it calls `updatePost` via its own `useActionState` instance (D31). The DB is updated, but the main form's `formRef` still holds the old description value. If autosave fires after the modal closes, `EditPostForm` reads `formRef.current` and sends the stale description, silently overwriting what was just saved.
-
-Needs a decision on how the modal's saved description is propagated back to the main form. Impacts `components.md`, `state-management.md`, and `jira/pr-10.md`.
+`withCallbacks.onSuccess` imperatively updates the description hidden input via `formRef.current.elements.namedItem('description')` before closing the modal. Documented in `jira/pr-10.md` technical notes and acceptance criteria.
 
 ---
 
@@ -296,14 +294,16 @@ EDIT-POST-11 retains the backend scope. EDIT-POST-17 (new) covers `PublishUnpubl
 
 ## T30: Ticket refinement and potential breakdown review
 
-**Status:** Open
+**Status:** Open (in progress)
 
 With all designs now confirmed (D39), each ticket needs a review pass to:
 1. Verify no implementation details are missing or still vague.
 2. Assess whether any ticket is large enough to warrant splitting.
 3. Ensure acceptance criteria are concrete and testable — no placeholders remain.
 
-Tickets to review: PR-08, PR-09, PR-10, PR-11, PR-12, PR-14, PR-15, PR-16.
+Done: PR-08, PR-09 (refined), PR-10 (split → EDIT-POST-10 Description only + EDIT-POST-19 Close Button), PR-11 (`redirectUrl` → `redirectPath` fixed → D44), PR-18 (added).
+
+Remaining: PR-12, PR-14, PR-15, PR-16.
 
 ---
 

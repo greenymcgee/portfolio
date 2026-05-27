@@ -3,10 +3,10 @@
 | Field | Value |
 |-------|-------|
 | **Phase** | Implementation in progress |
-| **Current Focus** | T30 — split EDIT-POST-10 (Description Button) into separate Description and Close Button PRs; PRs 8–9 refined, PR-18 added |
+| **Current Focus** | T30 — PR-10 split done, PR-11 redirectPath fixed; PRs 12, 14, 15, 16 still need review |
 | **Current PR** | PR 7 (done, pending review) |
 | **Blocked** | No |
-| **Last updated** | 2026-05-26 |
+| **Last updated** | 2026-05-27 |
 | **Branch** | 170-edit-post-page |
 
 ## Requirements Review Progress
@@ -38,7 +38,7 @@
 | 8 | Edit page — title + RTE styles | [EDIT-POST-8](../jira/pr-08.md) | Ready |
 | 9 | Edit page — sticky action bar + RTE controls | [EDIT-POST-9](../jira/pr-09.md) | Ready |
 | 18 | Edit page — AutoSaveStatus indicator | [EDIT-POST-18](../jira/pr-18.md) | Ready |
-| 10 | Description button + Close button | [EDIT-POST-10](../jira/pr-10.md) | Ready |
+| 10 | Edit page — Description Button and Description Modal | [EDIT-POST-10](../jira/pr-10.md) | Ready |
 | 11 | Backend: `togglePostPublishedStatus` action, service, repository + `UpdatePostDto` extensions | [EDIT-POST-11](../jira/pr-11.md) | Ready |
 | 12 | `createPost` draft flow + remove `/posts/new` + Edit button | [EDIT-POST-12](../jira/pr-12.md) | Design pending |
 | 13 | Fix `/posts/[id]` stale content after autosave | [EDIT-POST-13](../jira/pr-13.md) | Not started |
@@ -46,6 +46,7 @@
 | 15 | Edit page — loading skeleton | [EDIT-POST-15](../jira/pr-15.md) | Design pending |
 | 16 | Edit page — generic error UI | [EDIT-POST-16](../jira/pr-16.md) | Design pending |
 | 17 | `PublishUnpublishButton` component | [EDIT-POST-17](../jira/pr-17.md) | Ready |
+| 19 | Edit page — Close Button | [EDIT-POST-19](../jira/pr-19.md) | Ready |
 
 ## Open Todos
 
@@ -65,6 +66,6 @@
 | T26 | Skeleton component install (`npx shadcn add skeleton`) + implementation-time discovery | Open |
 | T27 | Document `EditPostContent` form state wrapper — component boundaries, prop contracts, `cancelDebounce` threading | Open |
 | T29 | Link design-map screens to the PRs that implement them | Open |
-| T32 | Description modal save does not update main form state | Open |
+| ~~T32~~ | ~~Description modal save does not update main form state~~ | Resolved → D45 |
 | T31 | ~~Split PR-11 into frontend and backend tickets~~ | Resolved → D41 |
-| T30 | Ticket refinement and potential breakdown review | Open |
+| T30 | Ticket refinement — PRs 12, 14, 15, 16 still need review | Open |
