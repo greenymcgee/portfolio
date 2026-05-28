@@ -765,3 +765,22 @@ provides no additional safety over DTO validation.
 - **Supersedes:** D8 in part (the `/posts/new` deletion and Edit link scoping no longer applies to PR-12), D24 in part (the "PR 12: `createPost` draft redirect + `/posts/new` deletion" description is superseded)
 - **Resolves:** T30
 - **Step:** Step 3 — Iterative Refinement (T30)
+
+---
+
+## 2026-05-27 - D47: `SiteNavbar` rendered opt-in at the call site; `ClientSiteNavbar` and `usePathname` removed
+
+- **Decision:** `SiteNavbar` is removed from the root `app/layout.tsx`. Pages and layouts that need the navbar render it directly and pass `pathname` as a server-side prop — no client hook. `ClientSiteNavbar` is deleted. The `usePathname` dependency is gone.
+- **Why:** The previous model was opt-out: every new route that should not show the navbar required the exclusion list in `ClientSiteNavbar` to be updated. That list gets buried and forgotten as the route tree grows. Opt-in rendering is the correct default — each layout/page that wants the navbar declares it explicitly, and pages that don't simply don't render it. No conditionals, no hidden maintenance surface.
+- **Alternatives considered:** Extending `ClientSiteNavbar` with per-path conditionals — rejected; this is exactly the buried-list problem. Route group layouts that override the root header — viable but adds file restructuring for the same result.
+- **Resolves:** T24
+- **Step:** Step 3 — Iterative Refinement (T24)
+
+---
+
+## 2026-05-27 - D48: PR ordering is not maintained — new PRs append to the end of the list
+
+- **Decision:** PRs are added to the end of the PR checklist as they are discovered. The list order does not reflect implementation sequence. Sequence information (dependencies, blocks) lives in the individual Jira ticket files.
+- **Why:** Maintaining strict positional order in the checklist requires renumbering or reordering entries every time scope changes, which is error-prone busywork. Dependency information already exists in each ticket's `dependencies` and `blocks` frontmatter — that is the authoritative source for sequencing. The checklist is a status tracker, not a sequenced plan.
+- **Alternatives considered:** Strict positional ordering (prior approach) — rejected; creates ongoing maintenance burden and causes confusion when tickets are split or added mid-project.
+- **Step:** Step 3 — Iterative Refinement

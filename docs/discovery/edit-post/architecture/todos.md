@@ -323,9 +323,9 @@ Breadcrumbs will not be added to the post page or the edit page for this project
 
 ## T24: Conditional `<SiteNavbar />` display
 
-**Status:** Open
+**Status:** Resolved → D47, D48
 
-`<SiteNavbar />` should not render on `/login`, `/posts/[id]`, or `/posts/[id]/edit`. `<AdminMenuDialog />` must still appear on the two post pages. Needs a plan/decision before implementation.
+`SiteNavbar` is rendered opt-in at each call site. `ClientSiteNavbar` and `usePathname` are removed. Pages that need the navbar render it directly with a server-side pathname. PR-20 covers the refactor.
 
 ---
 

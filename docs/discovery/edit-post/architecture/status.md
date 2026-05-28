@@ -3,10 +3,10 @@
 | Field | Value |
 |-------|-------|
 | **Phase** | Implementation in progress |
-| **Current Focus** | T30 complete — all PRs refined; T24 (SiteNavbar) and T29 (design map links) next |
+| **Current Focus** | T24 resolved (D47, D48, PR-20 added); T29 (design map links) next |
 | **Current PR** | PR 7 (done, pending review) |
 | **Blocked** | No |
-| **Last updated** | 2026-05-27 (T30 resolved) |
+| **Last updated** | 2026-05-27 (T24 resolved → D47, D48; PR-20 added) |
 | **Branch** | 170-edit-post-page |
 
 ## Requirements Review Progress
@@ -47,6 +47,7 @@
 | 16 | Edit page — generic error UI | [EDIT-POST-16](../jira/pr-16.md) | Ready |
 | 17 | `PublishUnpublishButton` component | [EDIT-POST-17](../jira/pr-17.md) | Ready |
 | 19 | Edit page — Close Button | [EDIT-POST-19](../jira/pr-19.md) | Ready |
+| 20 | Edit Post Page — Refactor ClientSiteNavbar | [EDIT-POST-20](../jira/pr-20.md) | Ready |
 
 ## Open Todos
 
@@ -60,7 +61,7 @@
 | ~~T21~~ | ~~Revise `useAutoSave` call-site plan~~ | Resolved → D31 |
 | T22 | ~~404 handling for the edit page~~ | Resolved → D35 (absorbed into PR 14) |
 | T23 | Breadcrumbs for `/posts/[id]` and `/posts/[id]/edit` | Cancelled → D38 |
-| T24 | Conditional `<SiteNavbar />` — hidden on login + post pages; `<AdminMenuDialog />` still shown | Open — needs decision |
+| T24 | Conditional `<SiteNavbar />` — hidden on login + post pages; `<AdminMenuDialog />` still shown | Resolved → D47, D48 |
 | T28 | ~~Revisit architecture + Jira tickets once pending designs land~~ | Resolved → D39 |
 | T25 | ~~Skeleton and error states for edit page~~ | Resolved → D35 (split → PR 14 error handling, PR 15 skeleton deferred) |
 | T26 | Skeleton component install (`npx shadcn add skeleton`) + implementation-time discovery | Open |
