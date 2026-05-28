@@ -3,10 +3,10 @@
 | Field | Value |
 |-------|-------|
 | **Phase** | Implementation in progress |
-| **Current Focus** | PRs 8–10 ready to implement; PR 11 frontend ready, backend needs discovery |
+| **Current Focus** | T29 resolved (D49); T26 and T27 remain open |
 | **Current PR** | PR 7 (done, pending review) |
 | **Blocked** | No |
-| **Last updated** | 2026-05-24 |
+| **Last updated** | 2026-05-27 (T29 resolved → D49; design references added to all tickets) |
 | **Branch** | 170-edit-post-page |
 
 ## Requirements Review Progress
@@ -37,13 +37,17 @@
 | 7 | Edit page — core structure + autosave | [EDIT-POST-7](../jira/pr-07.md) | Done |
 | 8 | Edit page — title + RTE styles | [EDIT-POST-8](../jira/pr-08.md) | Ready |
 | 9 | Edit page — sticky action bar + RTE controls | [EDIT-POST-9](../jira/pr-09.md) | Ready |
-| 10 | Description button + Close button | [EDIT-POST-10](../jira/pr-10.md) | Ready |
-| 11 | Publish/Unpublish button | [EDIT-POST-11](../jira/pr-11.md) | Ready (frontend); backend pending discovery |
-| 12 | `createPost` draft flow + remove `/posts/new` + Edit button | [EDIT-POST-12](../jira/pr-12.md) | Design pending |
+| 18 | Edit page — AutoSaveStatus indicator | [EDIT-POST-18](../jira/pr-18.md) | Ready |
+| 10 | Edit page — Description Button and Description Modal | [EDIT-POST-10](../jira/pr-10.md) | Ready |
+| 11 | Backend: `togglePostPublishedStatus` action, service, repository + `UpdatePostDto` extensions | [EDIT-POST-11](../jira/pr-11.md) | Ready |
+| 12 | Edit Post Page — Redirect from New Post Clicked | [EDIT-POST-12](../jira/pr-12.md) | Ready |
 | 13 | Fix `/posts/[id]` stale content after autosave | [EDIT-POST-13](../jira/pr-13.md) | Not started |
-| 14 | Edit page — error handling + `not-found.tsx` | [EDIT-POST-14](../jira/pr-14.md) | Design pending |
-| 15 | Edit page — loading skeleton | [EDIT-POST-15](../jira/pr-15.md) | Design pending |
-| 16 | Edit page — generic error UI | [EDIT-POST-16](../jira/pr-16.md) | Design pending |
+| 14 | Edit page — error handling + `not-found.tsx` | [EDIT-POST-14](../jira/pr-14.md) | Ready (blocked: issue #157) |
+| 15 | Edit page — loading skeleton | [EDIT-POST-15](../jira/pr-15.md) | Ready (deferred until after PR 9) |
+| 16 | Edit page — generic error UI | [EDIT-POST-16](../jira/pr-16.md) | Ready |
+| 17 | `PublishUnpublishButton` component | [EDIT-POST-17](../jira/pr-17.md) | Ready |
+| 19 | Edit page — Close Button | [EDIT-POST-19](../jira/pr-19.md) | Ready |
+| 20 | Edit Post Page — Refactor ClientSiteNavbar | [EDIT-POST-20](../jira/pr-20.md) | Ready |
 
 ## Open Todos
 
@@ -57,10 +61,12 @@
 | ~~T21~~ | ~~Revise `useAutoSave` call-site plan~~ | Resolved → D31 |
 | T22 | ~~404 handling for the edit page~~ | Resolved → D35 (absorbed into PR 14) |
 | T23 | Breadcrumbs for `/posts/[id]` and `/posts/[id]/edit` | Cancelled → D38 |
-| T24 | Conditional `<SiteNavbar />` — hidden on login + post pages; `<AdminMenuDialog />` still shown | Open — needs decision |
+| T24 | Conditional `<SiteNavbar />` — hidden on login + post pages; `<AdminMenuDialog />` still shown | Resolved → D47, D48 |
 | T28 | ~~Revisit architecture + Jira tickets once pending designs land~~ | Resolved → D39 |
 | T25 | ~~Skeleton and error states for edit page~~ | Resolved → D35 (split → PR 14 error handling, PR 15 skeleton deferred) |
 | T26 | Skeleton component install (`npx shadcn add skeleton`) + implementation-time discovery | Open |
 | T27 | Document `EditPostContent` form state wrapper — component boundaries, prop contracts, `cancelDebounce` threading | Open |
-| T29 | Link design-map screens to the PRs that implement them | Open |
-| T30 | Ticket refinement and potential breakdown review | Open |
+| T29 | ~~Link design-map screens to the PRs that implement them~~ | Resolved → D49 |
+| ~~T32~~ | ~~Description modal save does not update main form state~~ | Resolved → D45 |
+| T31 | ~~Split PR-11 into frontend and backend tickets~~ | Resolved → D41 |
+| ~~T30~~ | ~~Ticket refinement — PRs 12, 14, 15, 16 still need review~~ | Resolved → D46 |

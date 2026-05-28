@@ -254,38 +254,38 @@ Impacts: `frontend/state-management.md`, `frontend/components.md`, `frontend/REA
 
 ## T29: Link design-map screens to the PRs that implement them
 
-**Status:** Open
+**Status:** Resolved → D49
 
-Each Jira ticket should reference the specific `inputs/design-map.md` screen numbers that govern its implementation, so implementors can open the exact Figma frames without hunting through the full design map.
+Design References sections added to each Jira ticket. The mapping table was removed — the tickets are the authoritative source.
 
-Mapping to work through:
+---
 
-| PR | Relevant screens |
-|----|-----------------|
-| PR-06 | 2 (published/unpublished toggle) |
-| PR-08 | 1, 6, 7, 8 |
-| PR-09 | 9, 10, 13, 14, 15 |
-| PR-10 | 5, 16, 17, 21, 22, 23, 24 |
-| PR-11 | 2, 18, 19, 20, 25 |
-| PR-12 | 1 |
-| PR-14 | 11, 12 |
-| PR-15 | 3 |
-| PR-16 | 11 |
+## T32: Description modal save does not update the main form state
 
-Impacts: all Jira ticket files listed above.
+**Status:** Resolved → D45
+
+`withCallbacks.onSuccess` imperatively updates the description hidden input via `formRef.current.elements.namedItem('description')` before closing the modal. Documented in `jira/pr-10.md` technical notes and acceptance criteria.
+
+---
+
+## T31: Split PR-11 into separate frontend and backend tickets
+
+**Status:** Resolved → D41
+
+EDIT-POST-11 retains the backend scope. EDIT-POST-17 (new) covers `PublishUnpublishButton` and `ActionBar` integration. See `decisions.md` → D41.
 
 ---
 
 ## T30: Ticket refinement and potential breakdown review
 
-**Status:** Open
+**Status:** Resolved → D46
 
 With all designs now confirmed (D39), each ticket needs a review pass to:
 1. Verify no implementation details are missing or still vague.
 2. Assess whether any ticket is large enough to warrant splitting.
 3. Ensure acceptance criteria are concrete and testable — no placeholders remain.
 
-Tickets to review: PR-08, PR-09, PR-10, PR-11, PR-12, PR-14, PR-15, PR-16.
+Done: PR-08, PR-09 (refined), PR-10 (split → EDIT-POST-10 Description only + EDIT-POST-19 Close Button), PR-11 (`redirectUrl` → `redirectPath` fixed → D44), PR-18 (added), PR-12, PR-14, PR-15, PR-16 (all refined 2026-05-27 → D46 for PR-12 scope change).
 
 ---
 
@@ -307,9 +307,9 @@ Breadcrumbs will not be added to the post page or the edit page for this project
 
 ## T24: Conditional `<SiteNavbar />` display
 
-**Status:** Open
+**Status:** Resolved → D47, D48
 
-`<SiteNavbar />` should not render on `/login`, `/posts/[id]`, or `/posts/[id]/edit`. `<AdminMenuDialog />` must still appear on the two post pages. Needs a plan/decision before implementation.
+`SiteNavbar` is rendered opt-in at each call site. `ClientSiteNavbar` and `usePathname` are removed. Pages that need the navbar render it directly with a server-side pathname. PR-20 covers the refactor.
 
 ---
 

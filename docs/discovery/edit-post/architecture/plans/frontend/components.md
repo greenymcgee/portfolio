@@ -8,10 +8,9 @@ See [`./README.md`](./README.md) for the component hierarchy and `LexicalCompose
 
 ## `TitleInput`
 
-- Auto-focused on mount.
 - Styled to be invisible (no border, no background) — visually integrated with the page content.
 - Feeds into `EditPostForm` state; triggers the autosave debounce.
-- Inline error rendered **above** this input on unique-constraint violations (→ D12 amended by D14, D37).
+- Inline error rendered **above** this input on unique-constraint violations (→ D12 amended by D14, D37, D43).
 
 ---
 
@@ -34,10 +33,10 @@ Unique-constraint failures render an inline error **above** the title input for 
 
 ---
 
-## `PublishUnpublishButton` (→ D3, D9, D19, D39)
+## `PublishUnpublishButton` (→ D3, D9, D19, D39, D42)
 
-- Disabled when any of title, description, or content is empty.
-- **On Publish:** cancel debounce → call `publishPost` with current form state → while in flight, button shows **"Publishing..."** with a spinner → on success redirect to `ROUTES.post(id)`.
+- Never disabled (→ D42).
+- **On Publish:** cancel debounce → call `togglePostPublishedStatus` with current form state → while in flight, button shows **"Publishing..."** with a spinner → on success redirect to `ROUTES.post(id)`.
 - **On Unpublish:** call `publishPost` → on success Sonner toast — "Success!" + toggle label in-place. No redirect.
 - **On publish failure:** Sonner toast — "Post could not be published"; button label does not toggle.
 - **On unpublish failure:** Sonner toast — "Post could not be unpublished"; button label does not toggle.

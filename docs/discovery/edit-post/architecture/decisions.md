@@ -686,3 +686,111 @@ provides no additional safety over DTO validation.
 - **Supersedes:** D13 (no-title delete confirmation flow)
 - **Resolves:** T28
 - **Step:** Step 3 — Iterative Refinement
+
+---
+
+## 2026-05-25 - D40: `togglePostPublishedStatus` — action design, DTO reuse, toggle contract
+
+- **Decision:** The publish/unpublish server action is named `togglePostPublishedStatus` (not `publishPost`). It reuses `UpdatePostDto` — no separate `PublishPostDto` or `publish-post.schema.ts`. `UpdatePostDto` will gain two optional fields as part of the global plan: `publishedAt` (the post's current DB value, sent as a hidden input from the form to avoid a DB lookup) and `redirectUrl` (the post detail page URL, sent only on the publish path). The toggle direction is determined by `dto.params.publishedAt`: truthy → unpublish (set `null`); falsy → publish (set `new Date()`). The repository performs one atomic `prisma.post.update` writing all content fields and `publishedAt` together. On publish success the action calls `redirect(dto.params.redirectUrl)`; on unpublish success it returns `{ ...params, status: 'SUCCESS' }`. Error handling mirrors `updatePost` exactly — same branch structure including `unique-constraint` returning `threwUniqueConstraintError: true`. Lexical content safety validation is inherited from `UpdatePostDto` at no extra cost.
+- **Why:** Using `UpdatePostDto` keeps the backend consistent — one DTO, one schema, one validation path. Sending `publishedAt` as a hidden input (the edit page already has the post) avoids an extra DB read. Sending `redirectUrl` in the form rather than constructing it in the action keeps routing concerns in the component. Mirroring `updatePost` error branches avoids inventing new patterns.
+- **Alternatives considered:** Separate `PublishPostDto` with a `publishing: boolean` flag — unnecessary new file when `UpdatePostDto` covers the same shape. Reading `publishedAt` from the DB in the service — an avoidable round-trip when the form already has the value. Using `redirectUrl` presence as the toggle signal — fragile coupling between routing and business logic.
+- **Supersedes:** D19 (flush-first was superseded by D20; now D20's `publishPost` naming and separate DTO are also superseded)
+- **Resolves:** PR-11 backend discovery (see `jira/pr-11.md`)
+- **Step:** Step 3 — Iterative Refinement
+
+---
+
+## 2026-05-25 - D41: PR-11 split into backend (EDIT-POST-11) and frontend (EDIT-POST-17)
+
+- **Decision:** EDIT-POST-11 retains the backend scope only: `UpdatePostDto` extensions (`publishedAt`, `redirectUrl`), `togglePostPublishedStatus` action, `PostService.togglePublishedStatus`, and `PostRepository.togglePublishedStatus`. A new ticket, EDIT-POST-17, covers the frontend: `PublishUnpublishButton` component and its integration into `ActionBar`. EDIT-POST-17 depends on EDIT-POST-11 and EDIT-POST-9.
+- **Why:** Backend and frontend are independent work units with no shared state or sequential code dependency within the same PR. Splitting them keeps each PR reviewable in isolation and allows the backend to merge independently of frontend progress.
+- **Alternatives considered:** Keep as one PR — original plan; rejected because mixing backend service/repository/DTO changes with frontend component work inflates the diff and couples review of different concerns.
+- **Resolves:** T31
+- **Step:** Step 3 — Iterative Refinement
+
+---
+
+## 2026-05-25 - D42: `PublishUnpublishButton` is never disabled — supersedes D39 point 5
+
+- **Decision:** `PublishUnpublishButton` has no disabled state. The button is always enabled regardless of title, description, or content values.
+- **Why:** Design change confirmed after D39. The disabled-state behavior described in D39 (point 5) was a design artifact that has since been removed.
+- **Alternatives considered:** Disable when any field is empty (D39 point 5 plan) — superseded by this decision.
+- **Supersedes:** D39 point 5 (disabled state + styling)
+- **Step:** Step 3 — Iterative Refinement
+
+---
+
+## 2026-05-25 - D43: `TitleInput` auto-focus removed
+
+- **Decision:** `TitleInput` does not auto-focus on mount.
+- **Why:** Owner decision — auto-focus is no longer desired behavior.
+- **Alternatives considered:** Auto-focus on mount (original plan) — removed at owner request.
+- **Step:** Step 3 — Iterative Refinement (T30)
+
+---
+
+## 2026-05-27 - D44: `redirectPath` standardized — `redirectUrl` in D40 and PR-11 corrected
+
+- **Decision:** The optional redirect field added to `UpdatePostDto` and `updatePostSchema` is named `redirectPath` throughout — in the DTO, schema, server action, and all Jira tickets. D40 and the original PR-11 draft used `redirectUrl`; that name is superseded.
+- **Why:** D37 (CloseButton design) already established `redirectPath` as the canonical name. Standardizing on one name avoids a DTO with two redirect-like fields and removes an inconsistency between the two Jira tickets that touch `UpdatePostDto`.
+- **Alternatives considered:** `redirectUrl` (D40's name) — rejected in favour of the already-established `redirectPath` from D37.
+- **Supersedes:** D40 (the `redirectUrl` field name only — the rest of D40's contract is unchanged)
+- **Step:** Step 3 — Iterative Refinement (T30)
+
+---
+
+## 2026-05-27 - D45: T32 resolved — `DescriptionModal` `onSuccess` syncs `formRef` description input
+
+- **Decision:** After `DescriptionModal` saves successfully, `withCallbacks.onSuccess` updates the main form's description hidden input before closing the modal:
+  ```ts
+  onSuccess: () => {
+    const input = formRef.current?.elements.namedItem('description') as HTMLInputElement | null
+    if (input) input.value = localDescription
+    closeModal()
+  }
+  ```
+  This ensures the next autosave debounce reads the freshly-saved description from `formRef.current` rather than the stale pre-modal value.
+- **Why:** `EditPostForm`'s autosave debounce constructs its `FormData` from `formRef.current`. Without this sync, a successful modal save updates the DB but leaves `formRef` stale — the next autosave silently overwrites the saved description. The imperative DOM update is consistent with the existing pattern: `CloseButton` and `DescriptionModal` already read field values from `formRef.current` via the same `elements.namedItem` API. No new state, no re-renders.
+- **Alternatives considered:** Lifting `description` to controlled React state in `EditPostForm` — adds a state variable for one field while leaving title and content uncontrolled, creating an inconsistency without a clear payoff. A separate `descriptionRef` passed from `EditPostForm` — more indirection with no benefit over querying `formRef.current.elements` directly.
+- **Resolves:** T32
+- **Step:** Step 3 — Iterative Refinement (T32)
+
+---
+
+## 2026-05-27 - D46: PR-12 scope narrowed — `createPost` redirect and "New Post" form conversion only
+
+- **Decision:** PR-12 covers two changes only: (1) `createPost` redirects to `ROUTES.editPost(post.id)` instead of the post detail page; (2) the "New Post" button in `PostPageAdminMenuContent` is converted from `<Link href={ROUTES.newPost}>` to `<form action={createPost}>`. The Edit link in `PostPageAdminMenuContent` was already implemented in an earlier PR and is not part of PR-12's scope.
+- **Why:** Owner decision during T30 ticket refinement. The Edit link no longer needed to ship as part of this PR since it was already live.
+- **Alternatives considered:** Original three-change bundle (D8, D17, D24 plan — `createPost` redirect + `/posts/new` deletion + Edit link) — narrowed because the Edit link was already in place.
+- **Supersedes:** D8 in part (the `/posts/new` deletion and Edit link scoping no longer applies to PR-12), D24 in part (the "PR 12: `createPost` draft redirect + `/posts/new` deletion" description is superseded)
+- **Resolves:** T30
+- **Step:** Step 3 — Iterative Refinement (T30)
+
+---
+
+## 2026-05-27 - D47: `SiteNavbar` rendered opt-in at the call site; `ClientSiteNavbar` and `usePathname` removed
+
+- **Decision:** `SiteNavbar` is removed from the root `app/layout.tsx`. Pages and layouts that need the navbar render it directly and pass `pathname` as a server-side prop — no client hook. `ClientSiteNavbar` is deleted. The `usePathname` dependency is gone.
+- **Why:** The previous model was opt-out: every new route that should not show the navbar required the exclusion list in `ClientSiteNavbar` to be updated. That list gets buried and forgotten as the route tree grows. Opt-in rendering is the correct default — each layout/page that wants the navbar declares it explicitly, and pages that don't simply don't render it. No conditionals, no hidden maintenance surface.
+- **Alternatives considered:** Extending `ClientSiteNavbar` with per-path conditionals — rejected; this is exactly the buried-list problem. Route group layouts that override the root header — viable but adds file restructuring for the same result.
+- **Resolves:** T24
+- **Step:** Step 3 — Iterative Refinement (T24)
+
+---
+
+## 2026-05-27 - D48: PR ordering is not maintained — new PRs append to the end of the list
+
+- **Decision:** PRs are added to the end of the PR checklist as they are discovered. The list order does not reflect implementation sequence. Sequence information (dependencies, blocks) lives in the individual Jira ticket files.
+- **Why:** Maintaining strict positional order in the checklist requires renumbering or reordering entries every time scope changes, which is error-prone busywork. Dependency information already exists in each ticket's `dependencies` and `blocks` frontmatter — that is the authoritative source for sequencing. The checklist is a status tracker, not a sequenced plan.
+- **Alternatives considered:** Strict positional ordering (prior approach) — rejected; creates ongoing maintenance burden and causes confusion when tickets are split or added mid-project.
+- **Step:** Step 3 — Iterative Refinement
+
+---
+
+## 2026-05-27 - D49: Design-map screen references live in each Jira ticket, not in a central mapping table
+
+- **Decision:** Each Jira ticket that has corresponding Figma designs contains a `## Design References` table linking to the specific design-map screens relevant to that ticket. No central mapping table is maintained.
+- **Why:** A central table in `todos.md` is a duplicate maintenance surface — every time a ticket is added, split, or renamed, the table must also be updated. Putting the references directly in each ticket eliminates that surface: the ticket is the single source of truth for its own design context, and implementors find the links exactly where they need them.
+- **Alternatives considered:** Central mapping table in `todos.md` (prior approach, T29) — rejected; maintenance cost with no gain over per-ticket references.
+- **Resolves:** T29
+- **Step:** Step 3 — Iterative Refinement (T29)
