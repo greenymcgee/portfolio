@@ -784,3 +784,13 @@ provides no additional safety over DTO validation.
 - **Why:** Maintaining strict positional order in the checklist requires renumbering or reordering entries every time scope changes, which is error-prone busywork. Dependency information already exists in each ticket's `dependencies` and `blocks` frontmatter — that is the authoritative source for sequencing. The checklist is a status tracker, not a sequenced plan.
 - **Alternatives considered:** Strict positional ordering (prior approach) — rejected; creates ongoing maintenance burden and causes confusion when tickets are split or added mid-project.
 - **Step:** Step 3 — Iterative Refinement
+
+---
+
+## 2026-05-27 - D49: Design-map screen references live in each Jira ticket, not in a central mapping table
+
+- **Decision:** Each Jira ticket that has corresponding Figma designs contains a `## Design References` table linking to the specific design-map screens relevant to that ticket. No central mapping table is maintained.
+- **Why:** A central table in `todos.md` is a duplicate maintenance surface — every time a ticket is added, split, or renamed, the table must also be updated. Putting the references directly in each ticket eliminates that surface: the ticket is the single source of truth for its own design context, and implementors find the links exactly where they need them.
+- **Alternatives considered:** Central mapping table in `todos.md` (prior approach, T29) — rejected; maintenance cost with no gain over per-ticket references.
+- **Resolves:** T29
+- **Step:** Step 3 — Iterative Refinement (T29)

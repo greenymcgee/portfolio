@@ -3,10 +3,10 @@
 | Field | Value |
 |-------|-------|
 | **Phase** | Implementation in progress |
-| **Current Focus** | T24 resolved (D47, D48, PR-20 added); T29 (design map links) next |
+| **Current Focus** | T29 resolved (D49); T26 and T27 remain open |
 | **Current PR** | PR 7 (done, pending review) |
 | **Blocked** | No |
-| **Last updated** | 2026-05-27 (T24 resolved → D47, D48; PR-20 added) |
+| **Last updated** | 2026-05-27 (T29 resolved → D49; design references added to all tickets) |
 | **Branch** | 170-edit-post-page |
 
 ## Requirements Review Progress
@@ -66,7 +66,7 @@
 | T25 | ~~Skeleton and error states for edit page~~ | Resolved → D35 (split → PR 14 error handling, PR 15 skeleton deferred) |
 | T26 | Skeleton component install (`npx shadcn add skeleton`) + implementation-time discovery | Open |
 | T27 | Document `EditPostContent` form state wrapper — component boundaries, prop contracts, `cancelDebounce` threading | Open |
-| T29 | Link design-map screens to the PRs that implement them | Open |
+| T29 | ~~Link design-map screens to the PRs that implement them~~ | Resolved → D49 |
 | ~~T32~~ | ~~Description modal save does not update main form state~~ | Resolved → D45 |
 | T31 | ~~Split PR-11 into frontend and backend tickets~~ | Resolved → D41 |
 | ~~T30~~ | ~~Ticket refinement — PRs 12, 14, 15, 16 still need review~~ | Resolved → D46 |

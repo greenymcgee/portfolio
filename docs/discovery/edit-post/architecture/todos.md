@@ -254,25 +254,9 @@ Impacts: `frontend/state-management.md`, `frontend/components.md`, `frontend/REA
 
 ## T29: Link design-map screens to the PRs that implement them
 
-**Status:** Open
+**Status:** Resolved → D49
 
-Each Jira ticket should reference the specific `inputs/design-map.md` screen numbers that govern its implementation, so implementors can open the exact Figma frames without hunting through the full design map.
-
-Mapping to work through:
-
-| PR | Relevant screens |
-|----|-----------------|
-| PR-06 | 2 (published/unpublished toggle) |
-| PR-08 | 1, 6, 7, 8 |
-| PR-09 | 9, 10, 13, 14, 15 |
-| PR-10 | 5, 16, 17, 21, 22, 23, 24 |
-| PR-11 | 2, 18, 19, 20, 25 |
-| PR-12 | 1 |
-| PR-14 | 11, 12 |
-| PR-15 | 3 |
-| PR-16 | 11 |
-
-Impacts: all Jira ticket files listed above.
+Design References sections added to each Jira ticket. The mapping table was removed — the tickets are the authoritative source.
 
 ---
 
