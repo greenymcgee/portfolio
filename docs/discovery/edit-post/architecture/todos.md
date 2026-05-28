@@ -294,16 +294,14 @@ EDIT-POST-11 retains the backend scope. EDIT-POST-17 (new) covers `PublishUnpubl
 
 ## T30: Ticket refinement and potential breakdown review
 
-**Status:** Open (in progress)
+**Status:** Resolved → D46
 
 With all designs now confirmed (D39), each ticket needs a review pass to:
 1. Verify no implementation details are missing or still vague.
 2. Assess whether any ticket is large enough to warrant splitting.
 3. Ensure acceptance criteria are concrete and testable — no placeholders remain.
 
-Done: PR-08, PR-09 (refined), PR-10 (split → EDIT-POST-10 Description only + EDIT-POST-19 Close Button), PR-11 (`redirectUrl` → `redirectPath` fixed → D44), PR-18 (added).
-
-Remaining: PR-12, PR-14, PR-15, PR-16.
+Done: PR-08, PR-09 (refined), PR-10 (split → EDIT-POST-10 Description only + EDIT-POST-19 Close Button), PR-11 (`redirectUrl` → `redirectPath` fixed → D44), PR-18 (added), PR-12, PR-14, PR-15, PR-16 (all refined 2026-05-27 → D46 for PR-12 scope change).
 
 ---
 

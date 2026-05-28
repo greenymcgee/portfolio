@@ -754,3 +754,14 @@ provides no additional safety over DTO validation.
 - **Alternatives considered:** Lifting `description` to controlled React state in `EditPostForm` — adds a state variable for one field while leaving title and content uncontrolled, creating an inconsistency without a clear payoff. A separate `descriptionRef` passed from `EditPostForm` — more indirection with no benefit over querying `formRef.current.elements` directly.
 - **Resolves:** T32
 - **Step:** Step 3 — Iterative Refinement (T32)
+
+---
+
+## 2026-05-27 - D46: PR-12 scope narrowed — `createPost` redirect and "New Post" form conversion only
+
+- **Decision:** PR-12 covers two changes only: (1) `createPost` redirects to `ROUTES.editPost(post.id)` instead of the post detail page; (2) the "New Post" button in `PostPageAdminMenuContent` is converted from `<Link href={ROUTES.newPost}>` to `<form action={createPost}>`. The Edit link in `PostPageAdminMenuContent` was already implemented in an earlier PR and is not part of PR-12's scope.
+- **Why:** Owner decision during T30 ticket refinement. The Edit link no longer needed to ship as part of this PR since it was already live.
+- **Alternatives considered:** Original three-change bundle (D8, D17, D24 plan — `createPost` redirect + `/posts/new` deletion + Edit link) — narrowed because the Edit link was already in place.
+- **Supersedes:** D8 in part (the `/posts/new` deletion and Edit link scoping no longer applies to PR-12), D24 in part (the "PR 12: `createPost` draft redirect + `/posts/new` deletion" description is superseded)
+- **Resolves:** T30
+- **Step:** Step 3 — Iterative Refinement (T30)

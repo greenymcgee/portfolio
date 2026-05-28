@@ -3,10 +3,10 @@
 | Field | Value |
 |-------|-------|
 | **Phase** | Implementation in progress |
-| **Current Focus** | T30 — PR-10 split done, PR-11 redirectPath fixed; PRs 12, 14, 15, 16 still need review |
+| **Current Focus** | T30 complete — all PRs refined; T24 (SiteNavbar) and T29 (design map links) next |
 | **Current PR** | PR 7 (done, pending review) |
 | **Blocked** | No |
-| **Last updated** | 2026-05-27 |
+| **Last updated** | 2026-05-27 (T30 resolved) |
 | **Branch** | 170-edit-post-page |
 
 ## Requirements Review Progress
@@ -40,11 +40,11 @@
 | 18 | Edit page — AutoSaveStatus indicator | [EDIT-POST-18](../jira/pr-18.md) | Ready |
 | 10 | Edit page — Description Button and Description Modal | [EDIT-POST-10](../jira/pr-10.md) | Ready |
 | 11 | Backend: `togglePostPublishedStatus` action, service, repository + `UpdatePostDto` extensions | [EDIT-POST-11](../jira/pr-11.md) | Ready |
-| 12 | `createPost` draft flow + remove `/posts/new` + Edit button | [EDIT-POST-12](../jira/pr-12.md) | Design pending |
+| 12 | Edit Post Page — Redirect from New Post Clicked | [EDIT-POST-12](../jira/pr-12.md) | Ready |
 | 13 | Fix `/posts/[id]` stale content after autosave | [EDIT-POST-13](../jira/pr-13.md) | Not started |
-| 14 | Edit page — error handling + `not-found.tsx` | [EDIT-POST-14](../jira/pr-14.md) | Design pending |
-| 15 | Edit page — loading skeleton | [EDIT-POST-15](../jira/pr-15.md) | Design pending |
-| 16 | Edit page — generic error UI | [EDIT-POST-16](../jira/pr-16.md) | Design pending |
+| 14 | Edit page — error handling + `not-found.tsx` | [EDIT-POST-14](../jira/pr-14.md) | Ready (blocked: issue #157) |
+| 15 | Edit page — loading skeleton | [EDIT-POST-15](../jira/pr-15.md) | Ready (deferred until after PR 9) |
+| 16 | Edit page — generic error UI | [EDIT-POST-16](../jira/pr-16.md) | Ready |
 | 17 | `PublishUnpublishButton` component | [EDIT-POST-17](../jira/pr-17.md) | Ready |
 | 19 | Edit page — Close Button | [EDIT-POST-19](../jira/pr-19.md) | Ready |
 
@@ -68,4 +68,4 @@
 | T29 | Link design-map screens to the PRs that implement them | Open |
 | ~~T32~~ | ~~Description modal save does not update main form state~~ | Resolved → D45 |
 | T31 | ~~Split PR-11 into frontend and backend tickets~~ | Resolved → D41 |
-| T30 | Ticket refinement — PRs 12, 14, 15, 16 still need review | Open |
+| ~~T30~~ | ~~Ticket refinement — PRs 12, 14, 15, 16 still need review~~ | Resolved → D46 |
