@@ -794,3 +794,13 @@ provides no additional safety over DTO validation.
 - **Alternatives considered:** Central mapping table in `todos.md` (prior approach, T29) — rejected; maintenance cost with no gain over per-ticket references.
 - **Resolves:** T29
 - **Step:** Step 3 — Iterative Refinement (T29)
+
+---
+
+## 2026-05-27 - D50: `errorType` return shape — raw error objects replaced in all actions (PR #180)
+
+- **Decision:** All read actions (`getPost`, `getPostsCache`) and write actions (`createPost`, `updatePost`, `deletePost`) now return `errorType: ActionError | 'unhandled' | null` instead of leaking raw error objects to callers. `PostService.respondWithNotFoundError` emits `type: 'not-found'` (previously `'entity'`). `PostService.respondWithPrismaError` additionally checks `error.status === NOT_FOUND` and emits `'not-found'` for that path, keeping `'entity'` for all other Prisma errors. A global ambient type `ActionError` (`types/action-error.d.ts`) enumerates all valid error type strings. Read actions return `{ errorType, status }` alongside their data payload; write actions expose `errorType` on their `ActionState`.
+- **Why:** The old shape (`{ error, post }`) leaked internal service error objects to UI components, requiring callers to inspect `error.type` directly. The new shape surfaces only what the UI needs — the error category and HTTP status — without exposing service internals. Separating `'not-found'` from `'entity'` gives `EditPostContent` a clean signal to call `notFound()` (PR-14) vs. render the generic error UI for all other errors.
+- **Alternatives considered:** Keeping `{ error, post }` and having PR-14 inspect `error.type` — workable but exposes service types to the component layer and is inconsistent with the `ActionState` pattern on write actions. An `isNotFound: boolean` flag — less general; every new error kind would need a new boolean field.
+- **Resolves:** Issue #157 (prerequisite for EDIT-POST-14)
+- **Step:** PR #180 — Implementation

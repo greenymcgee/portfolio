@@ -6,9 +6,9 @@ type Props = { params: Promise<{ id: number }> }
 
 export async function EditPostContent({ params }: Props) {
   const { id } = await params
-  const { error, post } = await getPost(id)
+  const { errorType, post } = await getPost(id)
 
-  if (error) {
+  if (errorType) {
     return (
       <header data-testid="edit-post-content-error">
         <h1>Edit post page</h1>

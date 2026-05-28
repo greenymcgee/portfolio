@@ -7,6 +7,7 @@ import {
   CONFLICT,
   CREATED,
   FORBIDDEN,
+  NOT_FOUND,
   SUCCESS,
   UNAUTHORIZED,
   UNPROCESSABLE_CONTENT,
@@ -172,8 +173,7 @@ export class PostService {
     return errAsync({
       details: error,
       status: error.status,
-      // TODO: change this to not-found
-      type: 'entity' as const,
+      type: 'not-found' as const,
     } as const)
   }
 
@@ -185,7 +185,10 @@ export class PostService {
     return errAsync({
       details: error.details,
       status: error.status,
-      type: 'entity' as const,
+      type:
+        error.status === NOT_FOUND
+          ? ('not-found' as const)
+          : ('entity' as const),
     } as const)
   }
 

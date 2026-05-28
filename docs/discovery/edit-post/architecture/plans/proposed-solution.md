@@ -29,7 +29,7 @@ than to a form. The existing `/posts/new` page and `CreatePostForm` are deleted.
 | Component | Change |
 |-----------|--------|
 | `PostService.findAndCount` | Accepts `unpublished` flag; permission-checks before passing to repository |
-| `getPost` | Wrapped in `'use cache'` with `CACHE_TAGS.post` |
+| `getPost` | Wrapped in `'use cache'` with `CACHE_TAGS.post`; returns `{ errorType, post, status }` — no raw error object exposed to callers |
 | `createPost` | Creates minimal draft; redirects to `/posts/[id]/edit` instead of form |
 | `deletePost` | Adds `revalidateTag(CACHE_TAGS.post)` |
 | `FindAndCountPostsDto` | Adds `unpublished?: string` field |

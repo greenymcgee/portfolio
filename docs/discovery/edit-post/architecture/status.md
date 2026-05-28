@@ -6,7 +6,7 @@
 | **Current Focus** | T29 resolved (D49); T26 and T27 remain open |
 | **Current PR** | PR 7 (done, pending review) |
 | **Blocked** | No |
-| **Last updated** | 2026-05-27 (T29 resolved → D49; design references added to all tickets) |
+| **Last updated** | 2026-05-27 (PR #180 merged → D50; PR-14 unblocked) |
 | **Branch** | 170-edit-post-page |
 
 ## Requirements Review Progress
@@ -42,7 +42,7 @@
 | 11 | Backend: `togglePostPublishedStatus` action, service, repository + `UpdatePostDto` extensions | [EDIT-POST-11](../jira/pr-11.md) | Ready |
 | 12 | Edit Post Page — Redirect from New Post Clicked | [EDIT-POST-12](../jira/pr-12.md) | Ready |
 | 13 | Fix `/posts/[id]` stale content after autosave | [EDIT-POST-13](../jira/pr-13.md) | Not started |
-| 14 | Edit page — error handling + `not-found.tsx` | [EDIT-POST-14](../jira/pr-14.md) | Ready (blocked: issue #157) |
+| 14 | Edit page — error handling + `not-found.tsx` | [EDIT-POST-14](../jira/pr-14.md) | Ready |
 | 15 | Edit page — loading skeleton | [EDIT-POST-15](../jira/pr-15.md) | Ready (deferred until after PR 9) |
 | 16 | Edit page — generic error UI | [EDIT-POST-16](../jira/pr-16.md) | Ready |
 | 17 | `PublishUnpublishButton` component | [EDIT-POST-17](../jira/pr-17.md) | Ready |

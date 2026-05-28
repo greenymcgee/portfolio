@@ -23,7 +23,7 @@ export function EditPostForm({ post }: Props) {
   const contentRef = useRef<HTMLInputElement>(null)
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [state, updateAction, saving] = useActionState(updatePost, {
-    content: typeof post.content === 'string' ? post.content : '',
+    content: typeof post.content === 'string' ? post.content : null,
     status: 'IDLE',
     title: post.title,
   })

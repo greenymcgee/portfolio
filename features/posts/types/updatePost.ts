@@ -12,6 +12,7 @@ export interface UpdatePostState extends ActionState {
     id: number
     title: string
   }>
+  errorType?: ActionError
   response?: { message: string; post: Post }
   threwUniqueConstraintError?: boolean
   title?: FormDataEntryValue | null

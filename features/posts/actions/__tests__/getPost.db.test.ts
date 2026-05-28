@@ -1,8 +1,13 @@
 import { errAsync } from 'neverthrow'
-import { ZodError } from 'zod'
 
 import { PostService } from '@/features/posts/post.service'
-import { BAD_REQUEST } from '@/globals/constants'
+import {
+  BAD_REQUEST,
+  INTERNAL_SERVER_ERROR,
+  NOT_FOUND,
+  SUCCESS,
+  UNPROCESSABLE_CONTENT,
+} from '@/globals/constants'
 import { prisma } from '@/lib/prisma'
 import { setupTestDatabase } from '@/test/helpers/utils'
 
@@ -24,8 +29,9 @@ describe('getPost', () => {
   it('should return an error for an invalid id', async () => {
     const result = await getPost(NaN)
     expect(result).toEqual({
-      error: expect.objectContaining({ details: expect.any(ZodError) }),
+      errorType: 'dto',
       post: null,
+      status: UNPROCESSABLE_CONTENT,
     })
   })
 
@@ -35,7 +41,24 @@ describe('getPost', () => {
       errAsync(error) as unknown as FindOneReturn,
     )
     const result = await getPost(1)
-    expect(result).toEqual({ error, post: null })
+    expect(result).toEqual({
+      errorType: error.type,
+      post: null,
+      status: error.status,
+    })
+  })
+
+  it('should return an error for a not-found error', async () => {
+    const error = { details: {}, status: NOT_FOUND, type: 'not-found' }
+    findOneSpy.mockResolvedValueOnce(
+      errAsync(error) as unknown as FindOneReturn,
+    )
+    const result = await getPost(1)
+    expect(result).toEqual({
+      errorType: error.type,
+      post: null,
+      status: error.status,
+    })
   })
 
   it('should return an error for any unexpected errors', async () => {
@@ -44,7 +67,11 @@ describe('getPost', () => {
       errAsync(error) as unknown as FindOneReturn,
     )
     const result = await getPost(1)
-    expect(result).toEqual({ error, post: null })
+    expect(result).toEqual({
+      errorType: 'unhandled',
+      post: null,
+      status: INTERNAL_SERVER_ERROR,
+    })
   })
 
   describe('integration', () => {
@@ -57,7 +84,7 @@ describe('getPost', () => {
       })
       const result = await getPost(post?.id as number)
       expect(result).toEqual({
-        error: null,
+        errorType: null,
         post: {
           author: { firstName: author?.firstName, lastName: author?.lastName },
           authorId: post?.authorId,
@@ -69,6 +96,7 @@ describe('getPost', () => {
           title: post?.title,
           updatedAt: post?.updatedAt,
         },
+        status: SUCCESS,
       })
     })
   })
