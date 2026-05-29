@@ -3,6 +3,7 @@ import { EditorState } from 'lexical'
 
 import { PostRepository } from '@/features/posts/post.repository'
 import { LegacyRichTextEditor } from '@/globals/components'
+import { authoredPostFactory } from '@/test/factories'
 import {
   AUTHORED_POST,
   LEXICAL_EDITOR_JSON,
@@ -54,6 +55,14 @@ describe('<EditPostForm />', () => {
       expect(screen.getByTestId(id)).toBeInTheDocument()
     },
   )
+
+  it('should gracefully handle a post without content', () => {
+    mockServerSession('ADMIN')
+    renderWithProviders(<EditPostForm post={authoredPostFactory.build()} />, {
+      includesSession: true,
+    })
+    expect(screen.getByTestId('content-input')).toHaveValue('')
+  })
 
   it('should fire autosave after a 1-second debounce', async () => {
     vi.useFakeTimers()

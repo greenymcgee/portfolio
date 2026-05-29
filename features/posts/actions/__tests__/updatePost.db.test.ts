@@ -9,6 +9,7 @@ import {
   BAD_REQUEST,
   CACHE_TAGS,
   INTERNAL_SERVER_ERROR,
+  NOT_FOUND,
   ROUTES,
 } from '@/globals/constants'
 import { prisma } from '@/lib/prisma'
@@ -72,6 +73,7 @@ describe('updatePost', () => {
           fieldErrors: expect.any(Object),
           formErrors: expect.any(Array),
         },
+        errorType: 'dto',
         status: 'ERROR',
       })
     })
@@ -88,6 +90,7 @@ describe('updatePost', () => {
       const result = await updatePost(STATE, FORM_DATA)
       expect(result).toEqual({
         ...Object.fromEntries(FORM_DATA),
+        errorType: 'lexical',
         status: 'ERROR',
       })
     })
@@ -105,6 +108,25 @@ describe('updatePost', () => {
       const result = await updatePost(STATE, FORM_DATA)
       expect(result).toEqual({
         ...Object.fromEntries(FORM_DATA),
+        errorType: 'entity',
+        status: 'ERROR',
+      })
+    })
+
+    it('should return an error state for a not-found error', async () => {
+      mockServerSession('ADMIN')
+      updateSpy.mockImplementationOnce(
+        () =>
+          errAsync({
+            details: {},
+            status: NOT_FOUND,
+            type: 'not-found',
+          }) as unknown as UpdateReturn,
+      )
+      const result = await updatePost(STATE, FORM_DATA)
+      expect(result).toEqual({
+        ...Object.fromEntries(FORM_DATA),
+        errorType: 'not-found',
         status: 'ERROR',
       })
     })
@@ -122,6 +144,7 @@ describe('updatePost', () => {
       const result = await updatePost(STATE, FORM_DATA)
       expect(result).toEqual({
         ...Object.fromEntries(FORM_DATA),
+        errorType: 'unhandled',
         status: 'ERROR',
       })
     })
@@ -166,6 +189,7 @@ describe('updatePost', () => {
       formData.set('title', postTwo.title as string)
       const result = await updatePost({ status: 'IDLE' }, formData)
       expect(result).toEqual({
+        errorType: 'unique-constraint',
         id: String(postOne.id),
         status: 'ERROR',
         threwUniqueConstraintError: true,

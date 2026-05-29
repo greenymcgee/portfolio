@@ -4,7 +4,13 @@ import { expect } from 'vitest'
 import { flattenError, ZodError } from 'zod'
 
 import { PostService } from '@/features/posts/post.service'
-import { BAD_REQUEST, ROUTES, UNPROCESSABLE_CONTENT } from '@/globals/constants'
+import {
+  BAD_REQUEST,
+  INTERNAL_SERVER_ERROR,
+  NOT_FOUND,
+  ROUTES,
+  UNPROCESSABLE_CONTENT,
+} from '@/globals/constants'
 import { logger } from '@/lib/logger'
 import { Post } from '@/prisma/generated/client'
 import { setupTestDatabase } from '@/test/helpers/utils'
@@ -37,7 +43,9 @@ describe('getPosts', () => {
     expect(result).toEqual({
       currentPage: null,
       error: flattenError(error.details),
+      errorType: error.type,
       posts: null,
+      status: error.status,
       totalPages: null,
     })
   })
@@ -50,8 +58,24 @@ describe('getPosts', () => {
     const result = await getPosts({ page: '0' })
     expect(result).toEqual({
       currentPage: null,
-      error,
+      errorType: error.type,
       posts: null,
+      status: error.status,
+      totalPages: null,
+    })
+  })
+
+  it('should return an error for a not-found error', async () => {
+    const error = { details: {}, status: NOT_FOUND, type: 'not-found' }
+    findAndCountSpy.mockResolvedValueOnce(
+      errAsync(error) as unknown as FindAndCountReturn,
+    )
+    const result = await getPosts({ page: '0' })
+    expect(result).toEqual({
+      currentPage: null,
+      errorType: error.type,
+      posts: null,
+      status: error.status,
       totalPages: null,
     })
   })
@@ -68,7 +92,9 @@ describe('getPosts', () => {
     expect(result).toEqual({
       currentPage: null,
       error: { fieldErrors: expect.any(Object), formErrors: expect.any(Array) },
+      errorType: 'auth-zod',
       posts: null,
+      status: UNPROCESSABLE_CONTENT,
       totalPages: null,
     })
   })
@@ -85,8 +111,9 @@ describe('getPosts', () => {
     )
     expect(result).toEqual({
       currentPage: null,
-      error,
+      errorType: 'unhandled',
       posts: null,
+      status: INTERNAL_SERVER_ERROR,
       totalPages: null,
     })
   })
@@ -100,7 +127,7 @@ describe('getPosts', () => {
       expect(result.posts.length).toBe(defaultLimit)
       expect(result).toEqual({
         currentPage: expect.any(Number),
-        error: null,
+        errorType: null,
         posts: result.posts.map(() => ({
           authorId: expect.any(String),
           content: expect.any(String),

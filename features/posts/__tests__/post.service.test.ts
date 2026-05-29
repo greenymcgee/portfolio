@@ -152,7 +152,7 @@ describe('PostService', () => {
       vi.mocked(PostRepository.delete).mockResolvedValue(error)
       const result = await PostService.delete(new FindPostDto(id))
       expect(result).toEqual(
-        new Err({ details: error, status: NOT_FOUND, type: 'entity' }),
+        new Err({ details: error, status: NOT_FOUND, type: 'not-found' }),
       )
     })
 
@@ -245,7 +245,7 @@ describe('PostService', () => {
       vi.mocked(PostRepository.findOne).mockResolvedValue(error)
       const result = await PostService.findOne(new FindPostDto(id))
       expect(result).toEqual(
-        new Err({ details: error, status: NOT_FOUND, type: 'entity' }),
+        new Err({ details: error, status: NOT_FOUND, type: 'not-found' }),
       )
     })
 
@@ -355,7 +355,7 @@ describe('PostService', () => {
       })
       const result = await PostService.update(dto)
       expect(result).toEqual(
-        new Err({ details: error, status: NOT_FOUND, type: 'entity' }),
+        new Err({ details: error, status: NOT_FOUND, type: 'not-found' }),
       )
     })
 

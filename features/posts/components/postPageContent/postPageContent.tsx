@@ -14,9 +14,9 @@ type Props = { params: Promise<{ id: number }> }
 
 export async function PostPageContent({ params }: Props) {
   const { id } = await params
-  const { error, post } = await getPost(id)
+  const { errorType, post } = await getPost(id)
 
-  if (error) {
+  if (errorType) {
     return (
       <main className="pt-10">
         <Heading>Something went wrong</Heading>

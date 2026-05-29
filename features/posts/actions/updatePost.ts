@@ -26,11 +26,17 @@ export async function updatePost(_: UpdatePostState, formData: FormData) {
           return {
             ...params,
             dtoError: flattenError(error.details),
+            errorType: error.type,
             status: 'ERROR',
           } as UpdatePostState
         case 'entity':
         case 'lexical':
-          return { ...params, status: 'ERROR' } as UpdatePostState
+        case 'not-found':
+          return {
+            ...params,
+            errorType: error.type,
+            status: 'ERROR',
+          } as UpdatePostState
         case 'forbidden':
           return redirect(ROUTES.home)
         case 'unauthorized':
@@ -40,6 +46,7 @@ export async function updatePost(_: UpdatePostState, formData: FormData) {
         case 'unique-constraint':
           return {
             ...params,
+            errorType: error.type,
             status: 'ERROR',
             threwUniqueConstraintError: true,
           } as UpdatePostState
@@ -48,7 +55,11 @@ export async function updatePost(_: UpdatePostState, formData: FormData) {
             { error: error satisfies never },
             'UNHANDLED_UPDATE_POST_ERROR',
           )
-          return { ...params, status: 'ERROR' } as UpdatePostState
+          return {
+            ...params,
+            errorType: 'unhandled',
+            status: 'ERROR',
+          } as UpdatePostState
       }
     },
   )

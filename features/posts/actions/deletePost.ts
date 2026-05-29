@@ -25,15 +25,23 @@ export async function deletePost(state: DeletePostState) {
         }
         case 'forbidden':
         case 'dto':
-        case 'entity': {
-          return { ...state, status: 'ERROR' } satisfies DeletePostState
-        }
+        case 'entity':
+        case 'not-found':
+          return {
+            ...state,
+            errorType: error.type,
+            status: 'ERROR',
+          } satisfies DeletePostState
         default: {
           logger.error(
             { error: error satisfies never },
             'UNHANDLED_DELETE_POST_ERROR',
           )
-          return { ...state, status: 'ERROR' } satisfies DeletePostState
+          return {
+            ...state,
+            errorType: 'unhandled',
+            status: 'ERROR',
+          } satisfies DeletePostState
         }
       }
     },

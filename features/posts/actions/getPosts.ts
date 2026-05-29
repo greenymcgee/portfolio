@@ -1,5 +1,7 @@
 'use server'
 
+import { UNPROCESSABLE_CONTENT } from '@/globals/constants'
+
 import { FindAndCountPostsDto } from '../dto'
 import { authorizeUnpublishedPosts } from './authorizeUnpublishedPosts'
 import { getPostsCache } from './getPostsCache'
@@ -17,9 +19,11 @@ export async function getPosts(
     return {
       currentPage: null,
       error: authZodError,
+      errorType: 'auth-zod',
       posts: null,
+      status: UNPROCESSABLE_CONTENT,
       totalPages: null,
-    }
+    } as const
   }
 
   return getPostsCache(params)

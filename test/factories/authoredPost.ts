@@ -9,7 +9,7 @@ export const authoredPostFactory = Factory.define<AuthoredPost>(
   ({ associations, params, sequence }) => ({
     author: associations.author ?? DEFAULT_AUTHOR,
     authorId: associations.authorId ?? DEFAULT_AUTHOR.id,
-    content: params.content ?? {},
+    content: params.content,
     createdAt: params.createdAt ?? faker.date.past(),
     description:
       params.description ??

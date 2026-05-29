@@ -7,8 +7,10 @@ import {
   BAD_REQUEST,
   CACHE_TAGS,
   INTERNAL_SERVER_ERROR,
+  NOT_FOUND,
   ROUTES,
 } from '@/globals/constants'
+import { NotFoundError } from '@/lib/errors'
 import { prisma } from '@/lib/prisma'
 import {
   mockServerSession,
@@ -47,6 +49,8 @@ describe('createPost', () => {
         fieldErrors: expect.any(Object),
         formErrors: expect.any(Array),
       }),
+      errorType: 'dto',
+      invalid: 'anything',
       status: 'ERROR',
     })
   })
@@ -73,17 +77,38 @@ describe('createPost', () => {
         type: 'lexical',
       })
     })
-    const state: CreatePostState = {
-      ...Object.fromEntries(FORM_DATA),
-      status: 'IDLE',
-    }
+    const params = Object.fromEntries(FORM_DATA)
+    const state: CreatePostState = { ...params, status: 'IDLE' }
     const result = await createPost(state, FORM_DATA)
     expect(result).toEqual({
-      content: state.content,
-      description: state.description,
-      publishedAt: state.publishedAt,
+      content: params.content,
+      description: params.description,
+      errorType: 'lexical',
+      publishedAt: params.publishedAt,
       status: 'ERROR',
-      title: state.title,
+      title: params.title,
+    })
+  })
+
+  it('should return the error status and the previous state when a not-found error occurs', async () => {
+    mockServerSession('ADMIN')
+    createSpy.mockImplementationOnce(() => {
+      return errAsync({
+        details: new NotFoundError('1', 'Post'),
+        status: NOT_FOUND,
+        type: 'not-found',
+      })
+    })
+    const params = Object.fromEntries(FORM_DATA)
+    const state: CreatePostState = { ...params, status: 'IDLE' }
+    const result = await createPost(state, FORM_DATA)
+    expect(result).toEqual({
+      content: params.content,
+      description: params.description,
+      errorType: 'not-found',
+      publishedAt: params.publishedAt,
+      status: 'ERROR',
+      title: params.title,
     })
   })
 
@@ -96,17 +121,16 @@ describe('createPost', () => {
         type: 'totally-unexpected',
       })
     })
-    const state: CreatePostState = {
-      ...Object.fromEntries(FORM_DATA),
-      status: 'IDLE',
-    }
+    const params = Object.fromEntries(FORM_DATA)
+    const state: CreatePostState = { ...params, status: 'IDLE' }
     const result = await createPost(state, FORM_DATA)
     expect(result).toEqual({
-      content: state.content,
-      description: state.description,
-      publishedAt: state.publishedAt,
+      content: params.content,
+      description: params.description,
+      errorType: 'unhandled',
+      publishedAt: params.publishedAt,
       status: 'ERROR',
-      title: state.title,
+      title: params.title,
     })
   })
 

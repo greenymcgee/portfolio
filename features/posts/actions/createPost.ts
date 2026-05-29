@@ -12,9 +12,8 @@ import { PostService } from '../post.service'
 import { CreatePostState } from '../types'
 
 export async function createPost(state: CreatePostState, formData: FormData) {
-  const result = await PostService.create(
-    new CreatePostDto(Object.fromEntries(formData)),
-  )
+  const params = Object.fromEntries(formData)
+  const result = await PostService.create(new CreatePostDto(params))
   return result.match(
     (response) => {
       revalidateTag(CACHE_TAGS.posts, {})
@@ -26,13 +25,19 @@ export async function createPost(state: CreatePostState, formData: FormData) {
           return redirect(ROUTES.loginWithRedirect(ROUTES.newPost))
         case 'forbidden':
           return redirect(ROUTES.home)
-        case 'lexical':
         case 'entity':
-          return { ...state, status: 'ERROR' } as CreatePostState
+        case 'lexical':
+        case 'not-found':
+          return {
+            ...params,
+            errorType: error.type,
+            status: 'ERROR',
+          } as CreatePostState
         case 'dto':
           return {
-            ...state,
+            ...params,
             error: flattenError(error.details),
+            errorType: error.type,
             status: 'ERROR',
           } as CreatePostState
         default: {
@@ -40,7 +45,11 @@ export async function createPost(state: CreatePostState, formData: FormData) {
             { error: error satisfies never },
             'UNHANDLED_CREATE_POST_ERROR',
           )
-          return { ...state, status: 'ERROR' } as CreatePostState
+          return {
+            ...params,
+            errorType: 'unhandled',
+            status: 'ERROR',
+          } as CreatePostState
         }
       }
     },

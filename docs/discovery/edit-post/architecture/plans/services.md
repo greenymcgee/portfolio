@@ -36,6 +36,23 @@ cached function runs with no session context. See [`./security-considerations.md
 cacheTag(CACHE_TAGS.post)
 ```
 
+**Return shape:**
+
+```ts
+// success
+{ errorType: null, post: AuthoredPost, status: number }
+
+// known error (dto | entity | not-found)
+{ errorType: ActionError, post: null, status: number }
+
+// unhandled error
+{ errorType: 'unhandled', post: null, status: number }
+```
+
+Consumers check `errorType` to branch: `null` means success; `'not-found'`
+means the post does not exist (call `notFound()`); any other truthy value means
+a generic error. The raw error object is never exposed to callers.
+
 **Invalidation:** `updatePost`, `publishPost`, and `deletePost` each call
 `revalidateTag(CACHE_TAGS.post)`. `updatePost` and `publishPost` also call
 `revalidateTag(CACHE_TAGS.posts)`. `createPost` does not need to revalidate

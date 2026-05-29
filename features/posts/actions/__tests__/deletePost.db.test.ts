@@ -3,7 +3,7 @@ import { revalidateTag } from 'next/cache'
 import mockRouter from 'next-router-mock'
 
 import { PostService } from '@/features/posts/post.service'
-import { BAD_REQUEST, CACHE_TAGS, ROUTES } from '@/globals/constants'
+import { BAD_REQUEST, CACHE_TAGS, NOT_FOUND, ROUTES } from '@/globals/constants'
 import { prisma } from '@/lib/prisma'
 import { AUTHORED_POST } from '@/test/fixtures'
 import {
@@ -39,14 +39,22 @@ describe('deletePost', () => {
     it('should prevent a forbidden user from deleting', async () => {
       mockServerSession('USER')
       const result = await deletePost({ id: AUTHORED_POST.id, status: 'IDLE' })
-      expect(result).toEqual({ id: AUTHORED_POST.id, status: 'ERROR' })
+      expect(result).toEqual({
+        errorType: 'forbidden',
+        id: AUTHORED_POST.id,
+        status: 'ERROR',
+      })
     })
 
     it('should return an error status when the dto errors', async () => {
       mockServerSession('ADMIN')
       // @ts-expect-error: for test
       const result = await deletePost({ id: undefined, status: 'IDLE' })
-      expect(result).toEqual({ id: undefined, status: 'ERROR' })
+      expect(result).toEqual({
+        errorType: 'dto',
+        id: undefined,
+        status: 'ERROR',
+      })
     })
 
     it('should return an error status when the entity errors', async () => {
@@ -55,7 +63,24 @@ describe('deletePost', () => {
         errAsync(error) as unknown as DeleteReturn,
       )
       const result = await deletePost({ id: AUTHORED_POST.id, status: 'IDLE' })
-      expect(result).toEqual({ id: AUTHORED_POST.id, status: 'ERROR' })
+      expect(result).toEqual({
+        errorType: 'entity',
+        id: AUTHORED_POST.id,
+        status: 'ERROR',
+      })
+    })
+
+    it('should return an error status for a not-found error', async () => {
+      const error = { details: {}, status: NOT_FOUND, type: 'not-found' }
+      deleteSpy.mockResolvedValueOnce(
+        errAsync(error) as unknown as DeleteReturn,
+      )
+      const result = await deletePost({ id: AUTHORED_POST.id, status: 'IDLE' })
+      expect(result).toEqual({
+        errorType: 'not-found',
+        id: AUTHORED_POST.id,
+        status: 'ERROR',
+      })
     })
 
     it('should return an error status when any unexpected error occur', async () => {
@@ -64,7 +89,11 @@ describe('deletePost', () => {
         errAsync(error) as unknown as DeleteReturn,
       )
       const result = await deletePost({ id: AUTHORED_POST.id, status: 'IDLE' })
-      expect(result).toEqual({ id: AUTHORED_POST.id, status: 'ERROR' })
+      expect(result).toEqual({
+        errorType: 'unhandled',
+        id: AUTHORED_POST.id,
+        status: 'ERROR',
+      })
     })
   })
 
