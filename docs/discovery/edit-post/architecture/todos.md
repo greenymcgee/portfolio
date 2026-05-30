@@ -307,9 +307,9 @@ Breadcrumbs will not be added to the post page or the edit page for this project
 
 ## T24: Conditional `<SiteNavbar />` display
 
-**Status:** Resolved → D47, D48
+**Status:** Resolved → D52 (D47 superseded)
 
-`SiteNavbar` is rendered opt-in at each call site. `ClientSiteNavbar` and `usePathname` are removed. Pages that need the navbar render it directly with a server-side pathname. PR-20 covers the refactor.
+`SiteNavbar` and `ClientSiteNavbar` stay mounted in the root `app/layout.tsx`. Visibility is enforced by an in-component allowlist guard: `SiteNavbar` returns `null` unless the pathname is `/` or `/posts`. Keeping the navbar mounted in the root layout preserves the Work↔Blog sliding-pill animation, which breaks under D47's call-site opt-in (per-page mounting remounts the navbar and snaps the slider). PR-20 covers the guard.
 
 ---
 

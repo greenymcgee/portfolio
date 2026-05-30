@@ -3,11 +3,11 @@
 | Field | Value |
 |-------|-------|
 | **Phase** | Implementation in progress |
-| **Current Focus** | EDIT-POST-13 done (D51 — per-post cache tags + terminal-action redirects); T26 and T27 remain open |
-| **Current PR** | PR 13 (done) |
+| **Current Focus** | EDIT-POST-20 done (D52 — `SiteNavbar` stays in root layout, guarded by `/` + `/posts` allowlist; supersedes D47); T26 and T27 remain open |
+| **Current PR** | PR 20 (done) |
 | **Blocked** | No |
-| **Last updated** | 2026-05-29 (D51 — stale content resolution; autosave invalidates its own per-post tag; EDIT-POST-13 done) |
-| **Branch** | 179-stale-posts |
+| **Last updated** | 2026-05-30 (D52 — navbar route allowlist guard; reverses D47's call-site opt-in to preserve the Work↔Blog animation; EDIT-POST-20 done) |
+| **Branch** | 182-refactor-client-site-navbar |
 
 ## Requirements Review Progress
 
@@ -47,7 +47,7 @@
 | 16 | Edit page — generic error UI | [EDIT-POST-16](../jira/pr-16.md) | Ready |
 | 17 | `PublishUnpublishButton` component | [EDIT-POST-17](../jira/pr-17.md) | Ready |
 | 19 | Edit page — Close Button | [EDIT-POST-19](../jira/pr-19.md) | Ready |
-| 20 | Edit Post Page — Refactor ClientSiteNavbar | [EDIT-POST-20](../jira/pr-20.md) | Ready |
+| 20 | Edit Post Page — Guard SiteNavbar to a route allowlist | [EDIT-POST-20](../jira/pr-20.md) | Done |
 
 ## Open Todos
 

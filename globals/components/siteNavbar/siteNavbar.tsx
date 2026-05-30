@@ -9,13 +9,17 @@ import { SITE_NAVBAR_CLASSNAMES } from './classNames'
 
 type Props = { pathname: string }
 
+const ALLOW_LIST = [ROUTES.home, ROUTES.posts] as const
+
 /**
  * This is the public facing part of the app's navbar.
  *
  * @returns {JSX} JSX
  */
 export function SiteNavbar({ pathname }: Props) {
-  const postsRouteActive = pathname !== ROUTES.home
+  const postsRouteActive = pathname === ROUTES.posts
+
+  if (!ALLOW_LIST.includes(pathname as (typeof ALLOW_LIST)[0])) return null
 
   return (
     <nav className="flex items-center gap-4 pl-4" data-testid="site-navbar">
