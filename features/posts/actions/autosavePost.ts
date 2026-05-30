@@ -1,6 +1,6 @@
 'use server'
 
-import { revalidateTag } from 'next/cache'
+import { updateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { flattenError } from 'zod'
 
@@ -11,13 +11,12 @@ import { UpdatePostDto } from '../dto/update-post.dto'
 import { PostService } from '../post.service'
 import { UpdatePostState } from '../types'
 
-export async function updatePost(_: UpdatePostState, formData: FormData) {
+export async function autosavePost(_: UpdatePostState, formData: FormData) {
   const params = Object.fromEntries(formData)
   const result = await PostService.update(new UpdatePostDto(params))
   return result.match(
-    () => {
-      revalidateTag(CACHE_TAGS.post, {})
-      revalidateTag(CACHE_TAGS.posts, {})
+    ({ post: { id } }) => {
+      updateTag(CACHE_TAGS.post(id))
       return { ...params, status: 'SUCCESS' } as UpdatePostState
     },
     (error) => {

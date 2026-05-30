@@ -1,6 +1,6 @@
 'use server'
 
-import { revalidateTag } from 'next/cache'
+import { updateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
 
 import { CACHE_TAGS, ROUTES } from '@/globals/constants'
@@ -13,9 +13,9 @@ import { DeletePostState } from '../types'
 export async function deletePost(state: DeletePostState) {
   const result = await PostService.delete(new FindPostDto(state.id))
   return result.match(
-    () => {
-      revalidateTag(CACHE_TAGS.posts, {})
-      revalidateTag(CACHE_TAGS.post, {})
+    ({ id }) => {
+      updateTag(CACHE_TAGS.posts)
+      updateTag(CACHE_TAGS.post(id))
       redirect(ROUTES.posts)
     },
     (error) => {

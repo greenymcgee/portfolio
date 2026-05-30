@@ -1,5 +1,5 @@
 import { errAsync } from 'neverthrow'
-import { revalidateTag } from 'next/cache'
+import { updateTag } from 'next/cache'
 import mockRouter from 'next-router-mock'
 
 import { PostService } from '@/features/posts/post.service'
@@ -107,12 +107,12 @@ describe('deletePost', () => {
       expect(mockRouter.pathname).toBe(ROUTES.posts)
     })
 
-    it('should call revalidateTag with posts upon success', async () => {
+    it('should call updateTag with the posts and post tags upon success', async () => {
       await mockServerSessionAsync('ADMIN')
       const post = await prisma.post.findFirst()
       await deletePost({ id: post?.id as number, status: 'IDLE' })
-      expect(revalidateTag).toHaveBeenCalledWith(CACHE_TAGS.posts, {})
-      expect(revalidateTag).toHaveBeenCalledWith(CACHE_TAGS.post, {})
+      expect(updateTag).toHaveBeenCalledWith(CACHE_TAGS.posts)
+      expect(updateTag).toHaveBeenCalledWith(CACHE_TAGS.post(post!.id))
     })
   })
 })

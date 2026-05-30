@@ -9,7 +9,7 @@ import { FindPostDto } from '../dto'
 import { PostService } from '../post.service'
 
 export async function getPost(id: AuthoredPost['id']) {
-  cacheTag(CACHE_TAGS.post)
+  cacheTag(CACHE_TAGS.post(id))
   const result = await PostService.findOne(new FindPostDto(id))
   return result.match(
     (response) =>

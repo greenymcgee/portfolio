@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { errAsync } from 'neverthrow'
-import { revalidateTag } from 'next/cache'
+import { updateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
 
 import {
@@ -143,7 +143,7 @@ describe('createPost', () => {
       const post = await prisma.post.findFirst({
         where: { title: FORM_DATA.get('title') as string },
       })
-      expect(revalidateTag).toHaveBeenCalledWith(CACHE_TAGS.posts, {})
+      expect(updateTag).toHaveBeenCalledWith(CACHE_TAGS.posts)
       expect(redirect).toHaveBeenCalledWith(ROUTES.post(post?.id as number))
     })
   })

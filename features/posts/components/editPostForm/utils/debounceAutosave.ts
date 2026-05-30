@@ -9,11 +9,13 @@ type Params = {
   updateAction: (formData: FormData) => void
 }
 
-export function autosavePost({ formRef, timeoutRef, updateAction }: Params) {
-  cancelDebounce(timeoutRef)
-  timeoutRef.current = setTimeout(() => {
-    if (!formRef.current) return
+export function debounceAutosave(params: Params) {
+  cancelDebounce(params.timeoutRef)
+  params.timeoutRef.current = setTimeout(() => {
+    if (!params.formRef.current) return
 
-    startTransition(() => updateAction(new FormData(formRef.current!)))
+    startTransition(() => {
+      return params.updateAction(new FormData(params.formRef.current!))
+    })
   }, 1000)
 }
