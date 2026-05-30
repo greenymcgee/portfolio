@@ -3,11 +3,11 @@
 | Field | Value |
 |-------|-------|
 | **Phase** | Implementation in progress |
-| **Current Focus** | T29 resolved (D49); T26 and T27 remain open |
-| **Current PR** | PR 7 (done, pending review) |
+| **Current Focus** | EDIT-POST-13 done (D51 — per-post cache tags + terminal-action redirects); T26 and T27 remain open |
+| **Current PR** | PR 13 (done) |
 | **Blocked** | No |
-| **Last updated** | 2026-05-27 (PR #180 merged → D50; PR-14 unblocked) |
-| **Branch** | 170-edit-post-page |
+| **Last updated** | 2026-05-29 (D51 — stale content resolution; autosave invalidates its own per-post tag; EDIT-POST-13 done) |
+| **Branch** | 179-stale-posts |
 
 ## Requirements Review Progress
 
@@ -41,7 +41,7 @@
 | 10 | Edit page — Description Button and Description Modal | [EDIT-POST-10](../jira/pr-10.md) | Ready |
 | 11 | Backend: `togglePostPublishedStatus` action, service, repository + `UpdatePostDto` extensions | [EDIT-POST-11](../jira/pr-11.md) | Ready |
 | 12 | Edit Post Page — Redirect from New Post Clicked | [EDIT-POST-12](../jira/pr-12.md) | Ready |
-| 13 | Fix `/posts/[id]` stale content after autosave | [EDIT-POST-13](../jira/pr-13.md) | Not started |
+| 13 | Fix `/posts/[id]` stale content after autosave | [EDIT-POST-13](../jira/pr-13.md) | Done |
 | 14 | Edit page — error handling + `not-found.tsx` | [EDIT-POST-14](../jira/pr-14.md) | Ready |
 | 15 | Edit page — loading skeleton | [EDIT-POST-15](../jira/pr-15.md) | Ready (deferred until after PR 9) |
 | 16 | Edit page — generic error UI | [EDIT-POST-16](../jira/pr-16.md) | Ready |

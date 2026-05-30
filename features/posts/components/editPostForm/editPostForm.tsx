@@ -3,13 +3,13 @@
 import { useActionState, useCallback, useRef } from 'react'
 import type { EditorState } from 'lexical'
 
-import { updatePost } from '@/features/posts/actions'
+import { autosavePost } from '@/features/posts/actions'
 import { LegacyRichTextEditor } from '@/globals/components'
 import type { Post } from '@/prisma/generated/client'
 
 import { EditPostStatus } from '../editPostStatus'
 import {
-  autosavePost,
+  debounceAutosave,
   handleEditPostFormSubmit,
   updateContentField,
 } from './utils'
@@ -22,7 +22,7 @@ export function EditPostForm({ post }: Props) {
   const formRef = useRef<HTMLFormElement>(null)
   const contentRef = useRef<HTMLInputElement>(null)
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const [state, updateAction, saving] = useActionState(updatePost, {
+  const [state, updateAction, saving] = useActionState(autosavePost, {
     content: typeof post.content === 'string' ? post.content : null,
     status: 'IDLE',
     title: post.title,
@@ -31,7 +31,7 @@ export function EditPostForm({ post }: Props) {
     typeof state?.content === 'string' ? state.content : undefined
 
   const handleFieldChange = useCallback(
-    () => autosavePost({ formRef, timeoutRef, updateAction }),
+    () => debounceAutosave({ formRef, timeoutRef, updateAction }),
     [updateAction],
   )
 

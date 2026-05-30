@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { errAsync } from 'neverthrow'
-import { revalidateTag } from 'next/cache'
+import { updateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
 import mockRouter from 'next-router-mock'
 
@@ -21,7 +21,7 @@ import {
 } from '@/test/helpers/utils'
 
 import { UpdatePostState } from '../../types'
-import { updatePost } from '..'
+import { autosavePost } from '..'
 
 type UpdateReturn = Awaited<ReturnType<typeof PostService.update>>
 
@@ -45,10 +45,10 @@ FORM_DATA.set('id', String(ID))
 FORM_DATA.set('description', faker.lorem.word())
 FORM_DATA.set('title', faker.book.title())
 
-describe('updatePost', () => {
+describe('autosavePost', () => {
   describe('unauthorized', () => {
     it('should redirect to the login page when the user is not logged in', async () => {
-      await updatePost(STATE, FORM_DATA)
+      await autosavePost(STATE, FORM_DATA)
       expect(redirect).toHaveBeenCalledWith(
         ROUTES.loginWithRedirect(ROUTES.post(Number(FORM_DATA.get('id')))),
       )
@@ -58,7 +58,7 @@ describe('updatePost', () => {
   describe('authorized', () => {
     it('should return an error state when the user does not have permission', async () => {
       mockServerSession('USER')
-      await updatePost(STATE, FORM_DATA)
+      await autosavePost(STATE, FORM_DATA)
       expect(redirect).toHaveBeenCalledWith(ROUTES.home)
     })
 
@@ -66,7 +66,7 @@ describe('updatePost', () => {
       mockServerSession('ADMIN')
       const formData = new FormData()
       formData.set('invalid', 'anything')
-      const result = await updatePost(STATE, formData)
+      const result = await autosavePost(STATE, formData)
       expect(result).toEqual({
         ...Object.fromEntries(formData),
         dtoError: {
@@ -87,7 +87,7 @@ describe('updatePost', () => {
           type: 'lexical',
         }),
       )
-      const result = await updatePost(STATE, FORM_DATA)
+      const result = await autosavePost(STATE, FORM_DATA)
       expect(result).toEqual({
         ...Object.fromEntries(FORM_DATA),
         errorType: 'lexical',
@@ -105,7 +105,7 @@ describe('updatePost', () => {
             type: 'entity',
           }) as unknown as UpdateReturn,
       )
-      const result = await updatePost(STATE, FORM_DATA)
+      const result = await autosavePost(STATE, FORM_DATA)
       expect(result).toEqual({
         ...Object.fromEntries(FORM_DATA),
         errorType: 'entity',
@@ -123,7 +123,7 @@ describe('updatePost', () => {
             type: 'not-found',
           }) as unknown as UpdateReturn,
       )
-      const result = await updatePost(STATE, FORM_DATA)
+      const result = await autosavePost(STATE, FORM_DATA)
       expect(result).toEqual({
         ...Object.fromEntries(FORM_DATA),
         errorType: 'not-found',
@@ -141,7 +141,7 @@ describe('updatePost', () => {
             type: 'totally-unexpected',
           }) as unknown as UpdateReturn,
       )
-      const result = await updatePost(STATE, FORM_DATA)
+      const result = await autosavePost(STATE, FORM_DATA)
       expect(result).toEqual({
         ...Object.fromEntries(FORM_DATA),
         errorType: 'unhandled',
@@ -153,17 +153,6 @@ describe('updatePost', () => {
   describe('integration', () => {
     setupTestDatabase({ mutatesData: true, withPosts: true, withUsers: true })
 
-    it('should revalidate both cache tags upon success', async () => {
-      await mockServerSessionAsync('ADMIN')
-      const post = (await prisma.post.findFirst()) as Post
-      const formData = new FormData()
-      formData.set('id', String(post.id))
-      formData.set('title', faker.book.title())
-      await updatePost({ status: 'IDLE' }, formData)
-      expect(revalidateTag).toHaveBeenCalledWith(CACHE_TAGS.post, {})
-      expect(revalidateTag).toHaveBeenCalledWith(CACHE_TAGS.posts, {})
-    })
-
     it('should return a success state upon success', async () => {
       await mockServerSessionAsync('ADMIN')
       const title = faker.book.title()
@@ -172,10 +161,11 @@ describe('updatePost', () => {
       const formData = new FormData()
       formData.set('id', id)
       formData.set('title', title)
-      const result = await updatePost({ status: 'IDLE' }, formData)
+      const result = await autosavePost({ status: 'IDLE' }, formData)
       const updatedPost = (await prisma.post.findFirst({
         where: { id: post.id },
       })) as Post
+      expect(updateTag).toHaveBeenCalledWith(CACHE_TAGS.post(post.id))
       expect(updatedPost.title).toEqual(title)
       expect(result).toEqual({ id, status: 'SUCCESS', title })
     })
@@ -187,7 +177,7 @@ describe('updatePost', () => {
       const formData = new FormData()
       formData.set('id', String(postOne.id))
       formData.set('title', postTwo.title as string)
-      const result = await updatePost({ status: 'IDLE' }, formData)
+      const result = await autosavePost({ status: 'IDLE' }, formData)
       expect(result).toEqual({
         errorType: 'unique-constraint',
         id: String(postOne.id),

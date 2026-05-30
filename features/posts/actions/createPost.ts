@@ -1,6 +1,6 @@
 'use server'
 
-import { revalidateTag } from 'next/cache'
+import { updateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { flattenError } from 'zod'
 
@@ -16,7 +16,7 @@ export async function createPost(state: CreatePostState, formData: FormData) {
   const result = await PostService.create(new CreatePostDto(params))
   return result.match(
     (response) => {
-      revalidateTag(CACHE_TAGS.posts, {})
+      updateTag(CACHE_TAGS.posts)
       redirect(ROUTES.post(response.post.id))
     },
     (error) => {

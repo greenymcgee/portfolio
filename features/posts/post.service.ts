@@ -71,7 +71,7 @@ export class PostService {
       return this.respondWithNotFoundError(response, 'delete')
     }
 
-    return okAsync({ status: response.status } as const)
+    return okAsync({ id: dto.id as number, status: response.status } as const)
   }
 
   public static async findAndCount(dto: FindAndCountPostsDto) {

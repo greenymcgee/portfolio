@@ -157,10 +157,11 @@ describe('PostService', () => {
     })
 
     it('should return the given status upon success', async () => {
+      const id = 1
       mockServerSession('ADMIN')
       vi.mocked(PostRepository.delete).mockResolvedValue({ status: NO_CONTENT })
-      const result = await PostService.delete(new FindPostDto(1))
-      expect(result).toEqual(new Ok({ status: NO_CONTENT }))
+      const result = await PostService.delete(new FindPostDto(id))
+      expect(result).toEqual(new Ok({ id, status: NO_CONTENT }))
     })
   })
 
