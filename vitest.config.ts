@@ -16,7 +16,11 @@ export default defineConfig({
         'lib/logger.ts',
         'lib/prisma/errorClasses.ts',
         'lib/prisma/client.ts',
-        'components/svgs/**',
+        'globals/components/svgs/**',
+        // comprised of only Lexical components that are not visible
+        'globals/components/richTextEditor/richTextEditor.tsx',
+        // comprised of only Lexical components that are not visible
+        'globals/components/richTextContent/richTextContent.tsx',
         'globals/constants/**',
         '**/.DS_Store',
       ],
