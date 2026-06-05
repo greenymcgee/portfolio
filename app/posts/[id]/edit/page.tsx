@@ -6,7 +6,7 @@ export default function EditPostPage({
   params,
 }: PropsOf<typeof EditPostContent>) {
   return (
-    <main className="pt-10">
+    <main>
       <Suspense fallback={<p data-testid="edit-post-loader">Loading post</p>}>
         <EditPostContent params={params} />
       </Suspense>

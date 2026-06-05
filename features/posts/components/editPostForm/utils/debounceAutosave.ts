@@ -10,12 +10,13 @@ type Params = {
 }
 
 export function debounceAutosave(params: Params) {
+  if (!params.formRef.current) return
+
   cancelDebounce(params.timeoutRef)
   params.timeoutRef.current = setTimeout(() => {
-    if (!params.formRef.current) return
-
     startTransition(() => {
       return params.updateAction(new FormData(params.formRef.current!))
     })
   }, 1000)
+  params.formRef.current.reportValidity()
 }

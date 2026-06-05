@@ -1,8 +1,9 @@
+import { LexicalComposer } from '@lexical/react/LexicalComposer'
 import { act, fireEvent, screen } from '@testing-library/react'
 import { EditorState } from 'lexical'
 
 import { PostRepository } from '@/features/posts/post.repository'
-import { LegacyRichTextEditor } from '@/globals/components'
+import { RichTextEditor } from '@/globals/components'
 import { authoredPostFactory } from '@/test/factories'
 import {
   AUTHORED_POST,
@@ -19,19 +20,25 @@ vi.mock('@/globals/components', async (importActual) => {
   const { LEXICAL_EDITOR_JSON: editorJson } = await import('@/test/fixtures')
   return {
     ...barrel,
-    LegacyRichTextEditor: function LegacyRichTextEditorMock({
+    RichTextEditor: function RichTextEditorMock({
+      children,
       onChange,
-    }: PropsOf<typeof LegacyRichTextEditor>) {
+    }: PropsOf<typeof RichTextEditor>) {
       return (
-        <button
-          data-testid="trigger-content-change"
-          onClick={() =>
-            onChange?.({
-              toJSON: () => JSON.parse(editorJson),
-            } as unknown as EditorState)
-          }
-          type="button"
-        />
+        <LexicalComposer
+          initialConfig={{ namespace: 'test', onError: () => null }}
+        >
+          <button
+            data-testid="trigger-content-change"
+            onClick={() =>
+              onChange?.({
+                toJSON: () => JSON.parse(editorJson),
+              } as unknown as EditorState)
+            }
+            type="button"
+          />
+          {children}
+        </LexicalComposer>
       )
     },
   }
