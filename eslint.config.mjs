@@ -37,6 +37,7 @@ export default [
       'eslint.config.mjs',
       'prettier.config.mjs',
       'coverage/**',
+      'globals/components/svgs/**'
     ],
   },
 ]
