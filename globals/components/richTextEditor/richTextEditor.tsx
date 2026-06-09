@@ -35,7 +35,6 @@ export function RichTextEditor({
         h5: 'mb-2 leading-md font-semibold',
         h6: 'mb-2 leading-md font-semibold',
       },
-      paragraph: 'text-subtle',
       text: {
         bold: 'font-bold',
         italic: 'italic',

@@ -65,16 +65,9 @@ export default function RootLayout({ children }: Props) {
               preserveAspectRatio="none"
             />
             <div className="relative min-w-0 flex-1">
-              <header
-                className={clsx(
-                  'full-bleed-bg sticky top-0 right-0 z-10 py-6',
-                  'lg:bg-background',
-                )}
-              >
-                <Suspense fallback={<SiteNavbar pathname={ROUTES.home} />}>
-                  <ClientSiteNavbar />
-                </Suspense>
-              </header>
+              <Suspense fallback={<SiteNavbar pathname={ROUTES.home} />}>
+                <ClientSiteNavbar />
+              </Suspense>
               {children}
             </div>
             <Rainbow
