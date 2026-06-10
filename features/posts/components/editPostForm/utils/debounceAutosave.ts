@@ -17,6 +17,6 @@ export function debounceAutosave(params: Params) {
     startTransition(() => {
       return params.updateAction(new FormData(params.formRef.current!))
     })
+    params.formRef.current!.reportValidity()
   }, 1000)
-  params.formRef.current.reportValidity()
 }

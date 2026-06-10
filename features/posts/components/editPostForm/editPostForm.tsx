@@ -12,6 +12,7 @@ import {
 
 import { autosavePost } from '../../actions'
 import { EditPostStatus } from '../editPostStatus'
+import { EditPostTitleError } from '../editPostTitleError'
 import {
   debounceAutosave,
   handleEditPostFormSubmit,
@@ -56,8 +57,18 @@ export function EditPostForm({ post }: Props) {
       initialState={initialContent}
       onChange={handleContentChange}
     >
-      <div className="full-bleed-bg bg-background sticky top-0 left-0 z-10 mb-20">
+      <div
+        className={clsx(
+          'full-bleed-bg bg-background sticky top-0 left-0 z-10 mb-20',
+          'flex items-center justify-between',
+        )}
+      >
         <RichTextToolbar />
+        <EditPostStatus
+          saving={saving}
+          status={state?.status}
+          updatedAt={post.updatedAt}
+        />
       </div>
       <form
         className="mx-auto max-w-3xl px-6"
@@ -65,9 +76,6 @@ export function EditPostForm({ post }: Props) {
         onSubmit={handleEditPostFormSubmit}
         ref={formRef}
       >
-        <div className="mb-3">
-          <EditPostStatus saving={saving} status={state?.status} />
-        </div>
         <input
           data-testid="description-input"
           name="description"
@@ -84,7 +92,8 @@ export function EditPostForm({ post }: Props) {
           ref={contentRef}
           type="hidden"
         />
-        <div className="mb-8">
+        <div className="mb-8 space-y-1">
+          <EditPostTitleError state={state} />
           <input
             aria-label="Title"
             className={clsx(
