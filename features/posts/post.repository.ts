@@ -6,12 +6,11 @@ import { NO_CONTENT } from '@/globals/constants'
 import { NotFoundError, PrismaError } from '@/lib/errors'
 import { logger } from '@/lib/logger'
 import { prisma } from '@/lib/prisma'
-import type { Prisma } from '@/prisma/generated/client'
+import type { PostUpdateInput } from '@/prisma/generated/models'
 
 import type { CreatePostDto } from './dto/create-post.dto'
 import type { FindAndCountPostsDto } from './dto/find-and-count-posts.dto'
 import type { FindPostDto } from './dto/find-post.dto'
-import type { UpdatePostDto } from './dto/update-post.dto'
 import { PostEntity } from './post.entity'
 
 export class PostRepository {
@@ -97,24 +96,14 @@ export class PostRepository {
     return post
   }
 
-  public static async update(dto: UpdatePostDto) {
-    const { params } = dto
-    if (params instanceof ZodError || params instanceof Error) return params
-
+  public static async update(id: number, data: PostUpdateInput) {
     const { error, response: post } = await tryCatch(
-      prisma.post.update({
-        data: {
-          content: params.content as NonNullable<Prisma.JsonValue> | undefined,
-          description: params.description,
-          title: params.title,
-        },
-        where: { id: params.id },
-      }),
+      prisma.post.update({ data, where: { id } }),
     )
 
     if (error) return new PrismaError(error)
 
-    if (post === null) return new NotFoundError(params.id, 'Post')
+    if (post === null) return new NotFoundError(id, 'Post')
 
     return post
   }

@@ -6,15 +6,7 @@ import { LEXICAL_EDITOR_JSON } from '@/test/fixtures'
 import { UpdatePostDto } from '../update-post.dto'
 
 describe('UpdatePostDto', () => {
-  describe('getParams', () => {
-    it('should return a ZodError', () => {
-      const params = {
-        notAllowed: 1,
-      } as FirstConstructorParameterOf<typeof UpdatePostDto>
-      const dto = new UpdatePostDto(params)
-      expect(dto.params).toEqual(expect.any(ZodError))
-    })
-
+  describe('params', () => {
     it('should return parsed data', () => {
       const params = {
         content: LEXICAL_EDITOR_JSON,
@@ -24,6 +16,18 @@ describe('UpdatePostDto', () => {
       }
       const dto = new UpdatePostDto(params)
       expect(dto.params).toEqual({ ...params, id: 1 })
+    })
+
+    it('should reject unexpected params', () => {
+      const params = {
+        content: LEXICAL_EDITOR_JSON,
+        description: faker.lorem.word(),
+        id: '1',
+        notAllowed: 1,
+        title: faker.book.title(),
+      }
+      const dto = new UpdatePostDto(params)
+      expect(dto.params).toEqual(expect.any(ZodError))
     })
 
     it('should require an id', () => {
@@ -59,18 +63,6 @@ describe('UpdatePostDto', () => {
     it('should reject an empty title', () => {
       const dto = new UpdatePostDto({ id: '1', title: '' })
       expect(dto.params).toEqual(expect.any(ZodError))
-    })
-
-    it('should allow all other params as optional params', () => {
-      const title = faker.book.title()
-      const params = { id: '1', title }
-      const dto = new UpdatePostDto(params)
-      expect(dto.params).toEqual({
-        content: null,
-        description: '',
-        id: 1,
-        title,
-      })
     })
   })
 })

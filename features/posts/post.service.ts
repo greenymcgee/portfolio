@@ -20,6 +20,7 @@ import { hasPermission } from '@/lib/permissions'
 import type { CreatePostDto } from './dto/create-post.dto'
 import type { FindAndCountPostsDto } from './dto/find-and-count-posts.dto'
 import type { FindPostDto } from './dto/find-post.dto'
+import { TogglePostPublishedDto } from './dto/toggle-post-published.dto'
 import { UpdatePostDto } from './dto/update-post.dto'
 import { PostRepository } from './post.repository'
 
@@ -109,6 +110,41 @@ export class PostService {
     return okAsync({ post, status: SUCCESS } as const)
   }
 
+  public static async togglePublished(dto: TogglePostPublishedDto) {
+    const user = await authenticateAPISession()
+    if (user === null) return this.respondWithUnauthorizedError()
+
+    const authorizedUser = this.authorizeUser(user, 'publish')
+    if (authorizedUser === null) return this.respondWithForbiddenError()
+
+    const { params } = dto
+    if (params instanceof ZodError) {
+      return this.respondWithZodError(params, 'togglePublished')
+    }
+
+    if (params instanceof Error) {
+      return errAsync({
+        details: params,
+        status: BAD_REQUEST,
+        type: 'lexical',
+      } as const)
+    }
+
+    const post = await PostRepository.update(params.id, {
+      content: params.content,
+      description: params.description,
+      publishedAt: params.publishedAt ? null : new Date(),
+      title: params.title,
+    })
+    if (post instanceof PrismaError) return this.handleUpdatePrismaError(post)
+
+    if (post instanceof NotFoundError) {
+      return this.respondWithNotFoundError(post, 'togglePublished')
+    }
+
+    return okAsync({ post, status: SUCCESS } as const)
+  }
+
   public static async update(dto: UpdatePostDto) {
     const user = await authenticateAPISession()
     if (user === null) return this.respondWithUnauthorizedError()
@@ -116,23 +152,29 @@ export class PostService {
     const authorizedUser = this.authorizeUser(user, 'update')
     if (authorizedUser === null) return this.respondWithForbiddenError()
 
-    const post = await PostRepository.update(dto)
-    if (post instanceof PrismaError) return this.handleUpdatePrismaError(post)
+    const { params } = dto
 
-    if (post instanceof ZodError) {
-      return this.respondWithZodError(post, 'update')
+    if (params instanceof ZodError) {
+      return this.respondWithZodError(params, 'update')
     }
 
-    if (post instanceof NotFoundError) {
-      return this.respondWithNotFoundError(post, 'update')
-    }
-
-    if (post instanceof Error) {
+    if (params instanceof Error) {
       return errAsync({
-        details: post,
+        details: params,
         status: BAD_REQUEST,
         type: 'lexical',
       } as const)
+    }
+
+    const post = await PostRepository.update(params.id, {
+      content: params.content,
+      description: params.description,
+      title: params.title,
+    })
+    if (post instanceof PrismaError) return this.handleUpdatePrismaError(post)
+
+    if (post instanceof NotFoundError) {
+      return this.respondWithNotFoundError(post, 'update')
     }
 
     return okAsync({ post, status: SUCCESS } as const)
@@ -140,7 +182,7 @@ export class PostService {
 
   private static authorizeUser(
     user: Session['user'],
-    action: 'create' | 'delete' | 'update',
+    action: 'create' | 'delete' | 'publish' | 'update',
   ) {
     if (hasPermission(user, 'posts', action)) return user
 
@@ -167,7 +209,7 @@ export class PostService {
 
   private static respondWithNotFoundError(
     error: NotFoundError,
-    method: 'findOne' | 'delete' | 'update',
+    method: 'findOne' | 'delete' | 'togglePublished' | 'update',
   ) {
     logger.error({ error }, `PostService not found error: ${method}`)
     return errAsync({
@@ -215,7 +257,13 @@ export class PostService {
 
   private static respondWithZodError<Err>(
     error: ZodError<Err>,
-    method: 'create' | 'delete' | 'findAndCount' | 'findOne' | 'update',
+    method:
+      | 'create'
+      | 'delete'
+      | 'findAndCount'
+      | 'findOne'
+      | 'togglePublished'
+      | 'update',
   ) {
     logger.error({ error }, `PostService Zod error: ${method}`)
     return errAsync({
