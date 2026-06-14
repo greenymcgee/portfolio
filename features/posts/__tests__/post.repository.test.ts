@@ -15,7 +15,6 @@ import { prismaMock } from '@/test/mocks/prisma-mock'
 
 import { FindAndCountPostsDto, FindPostDto } from '../dto'
 import { CreatePostDto } from '../dto/create-post.dto'
-import { UpdatePostDto } from '../dto/update-post.dto'
 import { PostRepository } from '../post.repository'
 
 afterEach(() => {
@@ -172,60 +171,36 @@ describe('PostRepository', () => {
   })
 
   describe('update', () => {
-    it('should return a Zod error', async () => {
-      const dto = new UpdatePostDto({
-        id: String(PUBLISHED_POST.id),
-      })
-      const result = await PostRepository.update(dto)
-      expect(result).toEqual(expect.any(ZodError))
-    })
-
-    it('should return a Lexical validation error', async () => {
-      const dto = new UpdatePostDto({
-        content: 'not-json',
-        id: String(PUBLISHED_POST.id),
-        title: faker.book.title(),
-      })
-      const result = await PostRepository.update(dto)
-      expect(result).toEqual(new Error('Post content validation failed'))
-    })
-
     it('should return a Prisma error', async () => {
       const error = new Error('Bad')
       prismaMock.post.update.mockRejectedValueOnce(error)
-      const dto = new UpdatePostDto({
+      const result = await PostRepository.update(PUBLISHED_POST.id, {
         content: LEXICAL_EDITOR_JSON,
         description: PUBLISHED_POST.description,
-        id: String(PUBLISHED_POST.id),
         title: PUBLISHED_POST.title,
       })
-      const result = await PostRepository.update(dto)
       expect(result).toEqual(new PrismaError(error))
     })
 
     it('should return a NotFoundError for a null response', async () => {
       const id = PUBLISHED_POST.id
       prismaMock.post.update.mockResolvedValueOnce(null as unknown as Post)
-      const dto = new UpdatePostDto({
+      const result = await PostRepository.update(id, {
         content: LEXICAL_EDITOR_JSON,
         description: PUBLISHED_POST.description,
-        id: String(id),
         title: PUBLISHED_POST.title,
       })
-      const result = await PostRepository.update(dto)
       expect(result).toEqual(new NotFoundError(id, 'Post'))
     })
 
     it('should return the updated post', async () => {
       const updated = postFactory.build({ id: PUBLISHED_POST.id })
       prismaMock.post.update.mockResolvedValueOnce(updated)
-      const dto = new UpdatePostDto({
+      const result = await PostRepository.update(updated.id, {
         content: LEXICAL_EDITOR_JSON,
         description: updated.description,
-        id: String(updated.id),
         title: updated.title,
       })
-      const result = await PostRepository.update(dto)
       expect(result).toBe(updated)
     })
   })

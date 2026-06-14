@@ -5,16 +5,17 @@ import { validateLexicalContent } from '@/lib/utils'
 import type { Post } from '@/prisma/generated/client'
 import type { PostUpdateInput } from '@/prisma/generated/models'
 
-import { updatePostSchema } from '../schemas'
+import { togglePostPublishedSchema } from '../schemas'
 
 type Params = {
   content?: string | null
   description?: string | null
   id?: string | null
+  publishedAt?: string | null
   title?: string | null
 }
 
-export class UpdatePostDto {
+export class TogglePostPublishedDto {
   private content: PostUpdateInput['content'] = undefined
 
   private description: PostUpdateInput['description'] = ''
@@ -22,6 +23,8 @@ export class UpdatePostDto {
   private id: Post['id'] = NaN
 
   private error: ZodError | Error | null = null
+
+  private publishedAt: PostUpdateInput['publishedAt'] = null
 
   private title: PostUpdateInput['title'] = ''
 
@@ -36,6 +39,7 @@ export class UpdatePostDto {
       content: this.content,
       description: this.description,
       id: this.id,
+      publishedAt: this.publishedAt,
       title: this.title,
     }
   }
@@ -44,16 +48,19 @@ export class UpdatePostDto {
     const { error } = validateLexicalContent(this.content)
     if (error === null) return
 
-    logger.error({ error }, 'UpdatePostDto Lexical content validation error:')
+    logger.error(
+      { error },
+      'TogglePostPublished Lexical content validation error:',
+    )
     this.error = new Error('Post content validation failed', {
       cause: { error },
     })
   }
 
   private validateParams(params: Params) {
-    const { data, error } = updatePostSchema.strict().safeParse(params)
+    const { data, error } = togglePostPublishedSchema.strict().safeParse(params)
     if (error) {
-      logger.error({ error }, 'UpdatePostDto Zod error:')
+      logger.error({ error }, 'TogglePostPublished Zod error:')
       this.error = error
       return error
     }
@@ -62,6 +69,7 @@ export class UpdatePostDto {
     this.validateContent()
     this.description = data.description
     this.id = data.id
+    this.publishedAt = data.publishedAt
     this.title = data.title
     return data
   }

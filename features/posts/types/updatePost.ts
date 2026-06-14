@@ -17,3 +17,7 @@ export interface UpdatePostState extends ActionState {
   threwUniqueConstraintError?: boolean
   title?: FormDataEntryValue | null
 }
+
+export type TogglePostPublishedState = UpdatePostState & {
+  publishedAt?: FormDataEntryValue | null
+}
