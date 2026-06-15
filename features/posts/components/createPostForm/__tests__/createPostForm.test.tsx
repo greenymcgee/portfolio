@@ -13,6 +13,7 @@ import mockRouter from 'next-router-mock'
 import { PostRepository } from '@/features/posts/post.repository'
 import { LegacyRichTextEditor } from '@/globals/components'
 import { ROUTES } from '@/globals/constants'
+import { PrismaError } from '@/lib/errors'
 import { LEXICAL_EDITOR_JSON, UNPUBLISHED_POST } from '@/test/fixtures'
 import {
   mockAuthSessionResponse,
@@ -71,7 +72,7 @@ describe('<CreatePostForm />', () => {
 
   it('should render an error message when the POST request errors', async () => {
     vi.spyOn(PostRepository, 'create').mockResolvedValueOnce(
-      new Error('Internal Server Error'),
+      new PrismaError(new Error('Internal Server Error')),
     )
     mockServerSession('ADMIN')
     renderWithProviders(<CreatePostForm />, { includesSession: true })

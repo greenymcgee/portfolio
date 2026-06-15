@@ -80,9 +80,9 @@ describe('getPost', () => {
     it('should return the post upon success', async () => {
       const post = await prisma.post.findFirst()
       const author = await prisma.user.findFirst({
-        where: { id: post?.authorId },
+        where: { id: post!.authorId },
       })
-      const result = await getPost(post?.id as number)
+      const result = await getPost(post!.id as number)
       expect(result).toEqual({
         errorType: null,
         post: {

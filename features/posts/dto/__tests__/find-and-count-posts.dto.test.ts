@@ -40,9 +40,13 @@ describe('FindAndCountPostsDto', () => {
     const result = new FindAndCountPostsDto({})
     expect(result).toEqual(
       expect.objectContaining({
-        currentPage: 0,
-        offset: 0,
-        params: { limit: 10, page: 0, unpublished: false },
+        error: null,
+        params: {
+          currentPage: 0,
+          limit: 10,
+          offset: 0,
+          unpublished: false,
+        },
       }),
     )
   })
@@ -59,9 +63,13 @@ describe('FindAndCountPostsDto', () => {
     })
     expect(result).toEqual(
       expect.objectContaining({
-        currentPage: offset / limit,
-        offset,
-        params: { limit, page, unpublished },
+        error: null,
+        params: {
+          currentPage: offset / limit,
+          limit,
+          offset,
+          unpublished,
+        },
       }),
     )
   })

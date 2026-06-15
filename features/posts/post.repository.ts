@@ -1,6 +1,5 @@
 import { tryCatch } from '@greenymcgee/typescript-utils'
 import type { Session } from 'next-auth'
-import { ZodError } from 'zod'
 
 import { NO_CONTENT } from '@/globals/constants'
 import { NotFoundError, PrismaError } from '@/lib/errors'
@@ -8,16 +7,12 @@ import { logger } from '@/lib/logger'
 import { prisma } from '@/lib/prisma'
 import type { PostUpdateInput } from '@/prisma/generated/models'
 
-import type { CreatePostDto } from './dto/create-post.dto'
-import type { FindAndCountPostsDto } from './dto/find-and-count-posts.dto'
-import type { FindPostDto } from './dto/find-post.dto'
+import type { CreatePostParams } from './dto/create-post.dto'
+import type { FindAndCountPostParams } from './dto/find-and-count-posts.dto'
 import { PostEntity } from './post.entity'
 
 export class PostRepository {
-  public static async create(dto: CreatePostDto, user: Session['user']) {
-    const { params } = dto
-    if (params instanceof ZodError || params instanceof Error) return params
-
+  public static async create(params: CreatePostParams, user: Session['user']) {
     const { error, response: post } = await tryCatch(
       prisma.post.create({
         data: {
@@ -41,10 +36,7 @@ export class PostRepository {
     return post
   }
 
-  public static async delete(dto: FindPostDto) {
-    const { id } = dto
-    if (id instanceof ZodError) return id
-
+  public static async delete(id: number) {
     const { error, response } = await tryCatch(
       prisma.post.delete({ where: { id } }),
     )
@@ -55,14 +47,11 @@ export class PostRepository {
     return { status: NO_CONTENT } as const
   }
 
-  public static async findAndCount(dto: FindAndCountPostsDto) {
-    const { currentPage, offset, params } = dto
-    if (params instanceof ZodError) return params
-
+  public static async findAndCount(params: FindAndCountPostParams) {
     const { error, response: posts } = await tryCatch(
       PostEntity.findMany({
         limit: params.limit,
-        offset,
+        offset: params.offset,
         unpublished: params.unpublished,
       }),
     )
@@ -72,17 +61,14 @@ export class PostRepository {
     if (count instanceof PrismaError) return count
 
     return {
-      currentPage,
-      offset,
+      currentPage: params.currentPage,
+      offset: params.offset,
       posts,
       totalPages: Math.ceil(count / params.limit),
     }
   }
 
-  public static async findOne(dto: FindPostDto) {
-    const { id } = dto
-    if (id instanceof ZodError) return id
-
+  public static async findOne(id: number) {
     const { error, response: post } = await tryCatch(
       prisma.post.findUnique({
         include: { author: { select: { firstName: true, lastName: true } } },

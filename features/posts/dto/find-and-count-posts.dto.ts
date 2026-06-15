@@ -1,11 +1,14 @@
 import { ZodError } from 'zod'
 
 import { logger } from '@/lib/logger'
+import type { DtoParams } from '@/types/dto-params'
 
 import { findAndCountPostsSchema } from '../schemas'
 import type { FindAndCountPostsDtoError } from '../types'
 
 type Params = { limit?: string; page?: string; unpublished?: string }
+
+export type FindAndCountPostParams = DtoParams<FindAndCountPostsDto>
 
 export class FindAndCountPostsDto {
   private error: FindAndCountPostsDtoError | null = null
@@ -23,14 +26,19 @@ export class FindAndCountPostsDto {
   public get params() {
     if (this.error instanceof ZodError) return this.error
 
-    return { limit: this.limit, page: this.page, unpublished: this.unpublished }
+    return {
+      currentPage: this.currentPage,
+      limit: this.limit,
+      offset: this.offset,
+      unpublished: this.unpublished,
+    }
   }
 
-  public get currentPage() {
+  private get currentPage() {
     return this.offset / this.limit
   }
 
-  public get offset() {
+  private get offset() {
     return this.page * this.limit
   }
 

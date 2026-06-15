@@ -3,6 +3,7 @@ import type { ZodError } from 'zod'
 import { createHeadlessBlogEditor } from '@/lib/lexical'
 import { logger } from '@/lib/logger'
 import type { Post } from '@/prisma/generated/client'
+import type { DtoParams } from '@/types/dto-params'
 
 import { createPostSchema } from '../schemas'
 
@@ -12,6 +13,8 @@ type Params = {
   publishedAt?: string | null
   title?: string | null
 }
+
+export type CreatePostParams = DtoParams<CreatePostDto>
 
 export class CreatePostDto {
   private content: Post['content'] = null

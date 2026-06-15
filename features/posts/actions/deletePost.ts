@@ -11,7 +11,7 @@ import { PostService } from '../post.service'
 import { DeletePostState } from '../types'
 
 export async function deletePost(state: DeletePostState) {
-  const result = await PostService.delete(new FindPostDto(state.id))
+  const result = await PostService.delete(new FindPostDto({ id: state.id }))
   return result.match(
     ({ id }) => {
       updateTag(CACHE_TAGS.posts)
