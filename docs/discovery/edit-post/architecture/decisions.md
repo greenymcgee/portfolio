@@ -833,3 +833,48 @@ provides no additional safety over DTO validation.
 - **Supersedes:** D47 (the navbar is not removed from the root layout, `ClientSiteNavbar`/`usePathname` are kept, and visibility is an in-component allowlist rather than call-site opt-in).
 - **Resolves:** EDIT-POST-20 (rescoped to the allowlist guard).
 - **Step:** Step 3 — Iterative Refinement (EDIT-POST-20 / PR-20)
+
+---
+
+## 2026-06-05 - D53: `RichTextEditor` split into composable `globals/components/` pieces (PR #185)
+
+- **Decision:** The new edit-page editor (D21) shipped as three peer components under `globals/components/`, not a single component: `RichTextEditor` (owns its own `LexicalComposer`), `RichTextContent` (renders saved content read-only), and `RichTextToolbar` (the controls surface). `RichTextToolbar` contains a `controls/` directory (one file per control — `bold`, `italic`, `underline`, `strikethrough`, `alignLeft/Center/Right/Justify`, `blockType`, `undo`, `redo`) and a `utils/` directory (`handleBlockTypeChange`, `updateToolbar`). A new global type `types/rich-text-block-type.ts` backs the block-type select. The toolbar reads editor state via `useLexicalComposerContext()` and can render **outside** the editor's DOM subtree: when it does, the wrapping `LexicalComposer` is lifted to a common ancestor and `RichTextEditor` is rendered with `omitToolbar`. This refactor landed as its own PR before the sticky action bar (EDIT-POST-9) because the action bar depends on the out-of-tree toolbar capability.
+- **Why:** D21 established a purpose-built editor with `LexicalComposer` ownership outside the component. Splitting the toolbar into its own component with a per-control file layout makes the action bar work tractable — the toolbar can be mounted in the sticky bar while the editable surface stays in the page body, sharing one lifted `LexicalComposer`. One-file-per-control keeps each control small and independently testable, matching the repo's flat component conventions. This is the architecture now documented in CLAUDE.md (RichTextEditor section).
+- **Alternatives considered:** A single `RichTextEditor` with an internal toolbar and an `omitToolbar` branch — rejected by D21 already; the split realizes that decision concretely. Keeping toolbar controls in one file — harder to test and read than one file per control.
+- **Implements:** D21 (the new `RichTextEditor` foundation), unblocks EDIT-POST-9.
+- **Step:** PR #185 — Implementation
+
+---
+
+## 2026-06-09 - D55: `EditPostTitleError` component for inline title validation errors (EDIT-POST-8)
+
+- **Decision:** Title-input validation errors surface through a dedicated **`EditPostTitleError`** component (`features/posts/components/editPostTitleError/`), introduced with EDIT-POST-8 (Title Input). It renders the unique-constraint and Zod field errors for the title above the input, per D37 point 6. The same PR styled the title input and updated `EditPostStatus`.
+- **Why:** Isolating the title-error rendering into its own component keeps `EditPostForm` thin and makes the error surface independently testable, consistent with the repo's small-component convention. It also gives the title its own error slot independent of the autosave-status error surface.
+- **Alternatives considered:** Inlining the error markup in `EditPostForm` / the title input — rejected; bloats the form and mixes presentation concerns into the orchestrating component.
+- **Step:** PR #188 — Implementation (Issue #187 / EDIT-POST-8)
+
+---
+
+## 2026-06-14 - D54: Backend ships as `togglePostPublished` with its own DTO/schema, `validateLexicalContent`, and `lexical`/`unique-constraint` error types — supersedes D40/D44 for this action
+
+- **Decision:** EDIT-POST-11 shipped as the action **`togglePostPublished`** (not `togglePostPublishedStatus` per D40). Contrary to D40's "reuse `UpdatePostDto`" plan, it has its own **`toggle-post-published.dto.ts`** + **`toggle-post-published.schema.ts`** and a dedicated `TogglePostPublishedState` type. Lexical content safety validation was extracted into a shared util, **`lib/utils/validateLexicalContent.ts`** (headless editor `parseEditorState`, only validates non-empty string content), used by the DTO path rather than being inherited implicitly from `UpdatePostDto`. The action's error union gains two types beyond D50's set: **`'lexical'`** (content fails `parseEditorState`) and **`'unique-constraint'`** (returns `threwUniqueConstraintError: true`). Navigation contract is unchanged from D40/D39: on **publish** (`post.publishedAt` truthy) → `updateTag(CACHE_TAGS.post(id))` + `redirect(ROUTES.post(id))`; on **unpublish** → `updateTag` + return `SUCCESS` state (stays on the edit page). `forbidden` → redirect home; `unauthorized` → redirect to login-with-redirect.
+- **Why:** A dedicated DTO/schema keeps the toggle's validation surface independent of `UpdatePostDto` — the two actions can evolve separately without one's required fields constraining the other. Extracting `validateLexicalContent` into `lib/utils/` makes the content-safety check reusable across DTOs instead of being buried in one DTO's constructor. The explicit `'lexical'` error type gives the UI a precise signal when content can't be parsed, distinct from generic `'entity'` failures. The publish-redirects / unpublish-stays split matches the D9/D39 navigation behavior confirmed from the designs.
+- **Alternatives considered:** Reusing `UpdatePostDto` (D40 plan) — rejected in implementation; a separate DTO avoids coupling the toggle's field requirements to autosave's. Folding lexical validation back into each DTO — rejected; a shared util removes duplication. Keeping the `togglePostPublishedStatus` name (D40) — shortened to `togglePostPublished` (parallels the `updatePost → autosavePost` rename in D51).
+- **Supersedes:** D40 and D44 for this action (the `togglePostPublishedStatus` name, the `UpdatePostDto`-reuse plan, and the `redirectPath`-on-the-shared-DTO routing for the toggle path no longer apply — the toggle action carries its own DTO/schema and routes via `ROUTES.post(id)`).
+- **Resolves:** EDIT-POST-11 (backend).
+- **Step:** PR #189 — Implementation (Issue #178)
+
+---
+
+## 2026-06-14 - D56: AutoSaveStatus indicator shipped as `EditPostStatus` with revised error copy — supersedes D39 point 1 (naming + error text)
+
+- **Decision:** EDIT-POST-18's save-state indicator shipped as **`EditPostStatus`** (`features/posts/components/editPostStatus/`), not `AutoSaveStatus` as D39 point 1 named it. Its props are `{ saving: boolean; status: ActionState['status']; updatedAt }`. State rendering:
+  - `saving` → `"Saving..."` + inline `Spinner`.
+  - `status === 'IDLE'` → `"Edited {formatDistanceToNow(updatedAt, { addSuffix: true })}"` (matches D37 point 1 / D39 IDLE phrasing).
+  - `status === 'ERROR'` → **`"Unable to save..."`** in `text-destructive` (D39 point 1 specified `"Updates not saved"`).
+  - terminal/SUCCESS fallthrough → `"Saved"`.
+- **Why:** `EditPostStatus` reads as the edit-page's status line and sits alongside the other `editPost*` feature components, so the name follows the feature's component naming rather than the design-doc label. The error copy was shortened to `"Unable to save..."` to match the `"Saving..."` phrasing of the in-flight state. The IDLE timestamp and Saved/Saving behaviors are unchanged from D37/D39.
+- **Alternatives considered:** Keeping the `AutoSaveStatus` name from D39 — rejected; `EditPostStatus` is consistent with the `editPost*` component family. Keeping `"Updates not saved"` (D39 copy) — superseded by the shorter `"Unable to save..."`.
+- **Supersedes:** D39 point 1 (the `AutoSaveStatus` name and the `"Updates not saved"` error text only — the Saving/IDLE/Saved behaviors stand).
+- **Resolves:** EDIT-POST-18.
+- **Step:** Implementation (EDIT-POST-18 / `editPostStatus.tsx`)

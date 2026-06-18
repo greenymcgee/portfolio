@@ -3,11 +3,11 @@
 | Field | Value |
 |-------|-------|
 | **Phase** | Implementation in progress |
-| **Current Focus** | EDIT-POST-20 done (D52 — `SiteNavbar` stays in root layout, guarded by `/` + `/posts` allowlist; supersedes D47); T26 and T27 remain open |
-| **Current PR** | PR 20 (done) |
+| **Current Focus** | EDIT-POST-8, EDIT-POST-9, EDIT-POST-11 merged; RTE split (PR #185) merged as the precursor refactor that enables the out-of-tree toolbar (D53). T26 and T27 remain open |
+| **Current PR** | PR 11 backend (merged, #189) |
 | **Blocked** | No |
-| **Last updated** | 2026-05-30 (D52 — navbar route allowlist guard; reverses D47's call-site opt-in to preserve the Work↔Blog animation; EDIT-POST-20 done) |
-| **Branch** | 182-refactor-client-site-navbar |
+| **Last updated** | 2026-06-14 (D53 RTE split; D54 `togglePostPublished`; D55 `EditPostTitleError`; D56 `EditPostStatus`; PRs 8/9/11/18 done) |
+| **Branch** | main (merged through #189) |
 
 ## Requirements Review Progress
 
@@ -35,11 +35,12 @@
 | 5.5 | `Switch` variant prop — `default`, `inverted`, `primary` | [EDIT-POST-5.5](../jira/pr-05.5.md) | Done |
 | 6 | `PostsPageAdminMenuContent` unpublished toggle | [EDIT-POST-6](../jira/pr-06.md) | Done |
 | 7 | Edit page — core structure + autosave | [EDIT-POST-7](../jira/pr-07.md) | Done |
-| 8 | Edit page — title + RTE styles | [EDIT-POST-8](../jira/pr-08.md) | Ready |
-| 9 | Edit page — sticky action bar + RTE controls | [EDIT-POST-9](../jira/pr-09.md) | Ready |
-| 18 | Edit page — AutoSaveStatus indicator | [EDIT-POST-18](../jira/pr-18.md) | Ready |
+| — | RTE component split — `RichTextEditor` / `RichTextContent` / `RichTextToolbar` (PR #185, D53) | *(no ticket)* | Done |
+| 8 | Edit page — title + RTE styles | [EDIT-POST-8](../jira/pr-08.md) | Done |
+| 9 | Edit page — sticky action bar + RTE controls | [EDIT-POST-9](../jira/pr-09.md) | Done |
+| 18 | Edit page — AutoSaveStatus indicator (shipped as `EditPostStatus`, D56) | [EDIT-POST-18](../jira/pr-18.md) | Done |
 | 10 | Edit page — Description Button and Description Modal | [EDIT-POST-10](../jira/pr-10.md) | Ready |
-| 11 | Backend: `togglePostPublishedStatus` action, service, repository + `UpdatePostDto` extensions | [EDIT-POST-11](../jira/pr-11.md) | Ready |
+| 11 | Backend: `togglePostPublished` action, service, repository + dedicated `TogglePostPublishedDto` (D54) | [EDIT-POST-11](../jira/pr-11.md) | Done |
 | 12 | Edit Post Page — Redirect from New Post Clicked | [EDIT-POST-12](../jira/pr-12.md) | Ready |
 | 13 | Fix `/posts/[id]` stale content after autosave | [EDIT-POST-13](../jira/pr-13.md) | Done |
 | 14 | Edit page — error handling + `not-found.tsx` | [EDIT-POST-14](../jira/pr-14.md) | Ready |
