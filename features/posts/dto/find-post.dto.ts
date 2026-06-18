@@ -1,21 +1,34 @@
-import { coerce } from 'zod'
+import { ZodError } from 'zod'
 
 import { logger } from '@/lib/logger'
 
-export class FindPostDto {
-  private param: AuthoredPost['id']
+import { findPostSchema } from '../schemas'
 
-  constructor(id: AuthoredPost['id']) {
-    this.param = id
+type Params = { id: number }
+
+export class FindPostDto {
+  private error: ZodError | null = null
+
+  private id: AuthoredPost['id'] = NaN
+
+  constructor(params: Params) {
+    this.validateParams(params)
   }
 
-  public get id() {
-    const { data, error } = coerce.number().min(1).safeParse(this.param)
+  public get params() {
+    if (this.error) return this.error
+
+    return { id: this.id }
+  }
+
+  private validateParams(params: Params) {
+    const { data, error } = findPostSchema.strict().safeParse(params)
     if (error) {
-      logger.error({ error }, `FindPostDto error: ${this.param}`)
-      return error
+      logger.error({ error }, `FindPostDto error: ${params.id}`)
+      this.error = error
+      return
     }
 
-    return data
+    this.id = data.id
   }
 }

@@ -17,6 +17,7 @@ import {
 } from '@/globals/constants'
 import { NotFoundError, PrismaError } from '@/lib/errors'
 import {
+  AUTHORED_POST,
   LEXICAL_EDITOR_JSON,
   POSTS,
   PUBLISHED_POST,
@@ -30,7 +31,6 @@ import { TogglePostPublishedDto } from '../dto/toggle-post-published.dto'
 import { UpdatePostDto } from '../dto/update-post.dto'
 import { PostRepository } from '../post.repository'
 import { PostService } from '../post.service'
-import type { FindAndCountPostsDtoError } from '../types'
 
 vi.mock('../post.repository', () => ({
   PostRepository: {
@@ -66,8 +66,7 @@ describe('PostService', () => {
 
     it('should return a dto error when params fail validation', async () => {
       mockServerSession('ADMIN')
-      const dto = new CreatePostDto({})
-      vi.mocked(PostRepository.create).mockResolvedValueOnce(new ZodError([]))
+      const dto = new CreatePostDto({ description: 1 as unknown as string })
       const result = await PostService.create(dto)
       expect(result).toEqual(
         new Err({
@@ -97,18 +96,20 @@ describe('PostService', () => {
       )
     })
 
-    it('should return an entity error when the repository returns a validation Error', async () => {
+    it('should return an entity error when the dto returns a content validation Error', async () => {
       mockServerSession('ADMIN')
-      const error = new Error('Post content validation failed')
-      vi.mocked(PostRepository.create).mockResolvedValueOnce(error)
       const dto = new CreatePostDto({
-        content: LEXICAL_EDITOR_JSON,
+        content: 'no',
         publishedAt: null,
         title: faker.book.title(),
       })
       const result = await PostService.create(dto)
       expect(result).toEqual(
-        new Err({ details: error, status: BAD_REQUEST, type: 'lexical' }),
+        new Err({
+          details: new Error('Post content validation failed'),
+          status: BAD_REQUEST,
+          type: 'lexical',
+        }),
       )
     })
 
@@ -130,7 +131,7 @@ describe('PostService', () => {
       mockServerSession('ADMIN')
       const error = new PrismaError(new Error('bad'))
       vi.mocked(PostRepository.delete).mockResolvedValueOnce(error)
-      const result = await PostService.delete(new FindPostDto(1))
+      const result = await PostService.delete(new FindPostDto({ id: 1 }))
       expect(result).toEqual(
         new Err({
           details: error.details,
@@ -140,15 +141,15 @@ describe('PostService', () => {
       )
     })
 
-    it('should return a ZodError returned by the repository', async () => {
+    it('should return an error for an invalid id', async () => {
       mockServerSession('ADMIN')
-      const error = new ZodError([])
-      vi.mocked(PostRepository.delete).mockResolvedValue(
-        error as ZodError<number>,
-      )
-      const result = await PostService.delete(new FindPostDto(NaN))
+      const result = await PostService.delete(new FindPostDto({ id: NaN }))
       expect(result).toEqual(
-        new Err({ details: error, status: UNPROCESSABLE_CONTENT, type: 'dto' }),
+        new Err({
+          details: expect.any(ZodError),
+          status: UNPROCESSABLE_CONTENT,
+          type: 'dto',
+        }),
       )
     })
 
@@ -157,7 +158,7 @@ describe('PostService', () => {
       const id = 1
       const error = new NotFoundError(id, 'Post')
       vi.mocked(PostRepository.delete).mockResolvedValue(error)
-      const result = await PostService.delete(new FindPostDto(id))
+      const result = await PostService.delete(new FindPostDto({ id }))
       expect(result).toEqual(
         new Err({ details: error, status: NOT_FOUND, type: 'not-found' }),
       )
@@ -167,7 +168,7 @@ describe('PostService', () => {
       const id = 1
       mockServerSession('ADMIN')
       vi.mocked(PostRepository.delete).mockResolvedValue({ status: NO_CONTENT })
-      const result = await PostService.delete(new FindPostDto(id))
+      const result = await PostService.delete(new FindPostDto({ id }))
       expect(result).toEqual(new Ok({ id, status: NO_CONTENT }))
     })
   })
@@ -189,15 +190,15 @@ describe('PostService', () => {
     })
 
     it('should return a DTO error', async () => {
-      const error = new ZodError([])
-      vi.mocked(PostRepository.findAndCount).mockResolvedValue(
-        error as FindAndCountPostsDtoError,
-      )
       const result = await PostService.findAndCount(
         new FindAndCountPostsDto({ limit: 'invalid' }),
       )
       expect(result).toEqual(
-        new Err({ details: error, status: UNPROCESSABLE_CONTENT, type: 'dto' }),
+        new Err({
+          details: expect.any(ZodError),
+          status: UNPROCESSABLE_CONTENT,
+          type: 'dto',
+        }),
       )
     })
 
@@ -226,7 +227,7 @@ describe('PostService', () => {
     it('should return a PrismaError', async () => {
       const error = new PrismaError(new Error('bad'))
       vi.mocked(PostRepository.findOne).mockResolvedValueOnce(error)
-      const result = await PostService.findOne(new FindPostDto(1))
+      const result = await PostService.findOne(new FindPostDto({ id: 1 }))
       expect(result).toEqual(
         new Err({
           details: error.details,
@@ -237,13 +238,13 @@ describe('PostService', () => {
     })
 
     it('should return a ZodError', async () => {
-      const error = new ZodError([])
-      vi.mocked(PostRepository.findOne).mockResolvedValue(
-        error as ZodError<number>,
-      )
-      const result = await PostService.findOne(new FindPostDto(1))
+      const result = await PostService.findOne(new FindPostDto({ id: 0 }))
       expect(result).toEqual(
-        new Err({ details: error, status: UNPROCESSABLE_CONTENT, type: 'dto' }),
+        new Err({
+          details: expect.any(ZodError),
+          status: UNPROCESSABLE_CONTENT,
+          type: 'dto',
+        }),
       )
     })
 
@@ -251,17 +252,16 @@ describe('PostService', () => {
       const id = 1
       const error = new NotFoundError(id, 'Post')
       vi.mocked(PostRepository.findOne).mockResolvedValue(error)
-      const result = await PostService.findOne(new FindPostDto(id))
+      const result = await PostService.findOne(new FindPostDto({ id }))
       expect(result).toEqual(
         new Err({ details: error, status: NOT_FOUND, type: 'not-found' }),
       )
     })
 
     it('should return a post', async () => {
-      // @ts-expect-error: the author isn't important for this test
-      vi.mocked(PostRepository.findOne).mockResolvedValue(PUBLISHED_POST)
-      const result = await PostService.findOne(new FindPostDto(1))
-      expect(result).toEqual(new Ok({ post: PUBLISHED_POST, status: SUCCESS }))
+      vi.mocked(PostRepository.findOne).mockResolvedValue(AUTHORED_POST)
+      const result = await PostService.findOne(new FindPostDto({ id: 1 }))
+      expect(result).toEqual(new Ok({ post: AUTHORED_POST, status: SUCCESS }))
     })
   })
 

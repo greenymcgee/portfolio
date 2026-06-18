@@ -19,7 +19,7 @@ import { hasPermission } from '@/lib/permissions'
 
 import type { CreatePostDto } from './dto/create-post.dto'
 import type { FindAndCountPostsDto } from './dto/find-and-count-posts.dto'
-import type { FindPostDto } from './dto/find-post.dto'
+import { FindPostDto } from './dto/find-post.dto'
 import { TogglePostPublishedDto } from './dto/toggle-post-published.dto'
 import { UpdatePostDto } from './dto/update-post.dto'
 import { PostRepository } from './post.repository'
@@ -32,21 +32,22 @@ export class PostService {
     const authorizedUser = this.authorizeUser(user, 'create')
     if (authorizedUser === null) return this.respondWithForbiddenError()
 
-    const post = await PostRepository.create(dto, user)
-    if (post instanceof PrismaError) {
-      return this.respondWithPrismaError(post, 'create')
+    const { params } = dto
+    if (params instanceof ZodError) {
+      return this.respondWithZodError(params, 'create')
     }
 
-    if (post instanceof ZodError) {
-      return this.respondWithZodError(post, 'create')
-    }
-
-    if (post instanceof Error) {
+    if (params instanceof Error) {
       return errAsync({
-        details: post,
+        details: params,
         status: BAD_REQUEST,
         type: 'lexical',
       } as const)
+    }
+
+    const post = await PostRepository.create(params, user)
+    if (post instanceof PrismaError) {
+      return this.respondWithPrismaError(post, 'create')
     }
 
     return okAsync({ post, status: CREATED } as const)
@@ -59,30 +60,38 @@ export class PostService {
     const authorizedUser = this.authorizeUser(user, 'delete')
     if (authorizedUser === null) return this.respondWithForbiddenError()
 
-    const response = await PostRepository.delete(dto)
-    if (response instanceof PrismaError) {
-      return this.respondWithPrismaError(response, 'delete')
+    const { params } = dto
+    if (params instanceof ZodError) {
+      return this.respondWithZodError(params, 'delete')
     }
 
-    if (response instanceof ZodError) {
-      return this.respondWithZodError(response, 'delete')
+    const response = await PostRepository.delete(params.id)
+    if (response instanceof PrismaError) {
+      return this.respondWithPrismaError(response, 'delete')
     }
 
     if (response instanceof NotFoundError) {
       return this.respondWithNotFoundError(response, 'delete')
     }
 
-    return okAsync({ id: dto.id as number, status: response.status } as const)
+    return okAsync({ id: params.id, status: response.status } as const)
   }
 
   public static async findAndCount(dto: FindAndCountPostsDto) {
-    const response = await PostRepository.findAndCount(dto)
-    if (response instanceof PrismaError) {
-      return this.respondWithPrismaError(response, 'findAndCount')
+    const { params } = dto
+    if (params instanceof ZodError) {
+      return this.respondWithZodError(params, 'findAndCount')
     }
 
-    if (response instanceof ZodError) {
-      return this.respondWithZodError(response, 'findAndCount')
+    const response = await PostRepository.findAndCount({
+      currentPage: params.currentPage,
+      limit: params.limit,
+      offset: params.offset,
+      unpublished: params.unpublished,
+    })
+
+    if (response instanceof PrismaError) {
+      return this.respondWithPrismaError(response, 'findAndCount')
     }
 
     return okAsync({
@@ -94,13 +103,14 @@ export class PostService {
   }
 
   public static async findOne(dto: FindPostDto) {
-    const post = await PostRepository.findOne(dto)
-    if (post instanceof PrismaError) {
-      return this.respondWithPrismaError(post, 'findOne')
+    const { params } = dto
+    if (params instanceof ZodError) {
+      return this.respondWithZodError(params, 'findOne')
     }
 
-    if (post instanceof ZodError) {
-      return this.respondWithZodError(post, 'findOne')
+    const post = await PostRepository.findOne(params.id)
+    if (post instanceof PrismaError) {
+      return this.respondWithPrismaError(post, 'findOne')
     }
 
     if (post instanceof NotFoundError) {
