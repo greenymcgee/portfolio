@@ -1,14 +1,17 @@
-import { coerce, object, string } from 'zod'
+import { object, string } from 'zod'
 
-/**
- * Everything is required from the form upon every submission whether it's from
- * the Close button, the description modal, or the autosave.
- */
+function transformString(value: string | null | undefined) {
+  if (typeof value === 'string' || value === undefined) return value
+
+  return undefined
+}
+
 export const updatePostSchema = object({
-  content: string()
+  content: string().nullable().optional().transform(transformString),
+  description: string()
+    .max(100)
+    .optional()
     .nullable()
-    .transform((value) => (typeof value === 'string' ? value : undefined)),
-  description: string().max(100),
-  id: coerce.number().int().min(1),
-  title: string().min(1),
+    .transform(transformString),
+  title: string().min(1).optional().nullable().transform(transformString),
 })

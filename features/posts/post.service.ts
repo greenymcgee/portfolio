@@ -16,11 +16,11 @@ import { authenticateAPISession } from '@/lib/auth'
 import { NotFoundError, PrismaError } from '@/lib/errors'
 import { logger } from '@/lib/logger'
 import { hasPermission } from '@/lib/permissions'
+import type { PostDefaultArgs } from '@/prisma/generated/models'
 
 import type { CreatePostDto } from './dto/create-post.dto'
 import type { FindAndCountPostsDto } from './dto/find-and-count-posts.dto'
 import { FindPostDto } from './dto/find-post.dto'
-import { TogglePostPublishedDto } from './dto/toggle-post-published.dto'
 import { UpdatePostDto } from './dto/update-post.dto'
 import { PostRepository } from './post.repository'
 
@@ -102,13 +102,16 @@ export class PostService {
     } as const)
   }
 
-  public static async findOne(dto: FindPostDto) {
+  public static async findOne<Options extends PostDefaultArgs>(
+    dto: FindPostDto,
+    options?: Options,
+  ) {
     const { params } = dto
     if (params instanceof ZodError) {
       return this.respondWithZodError(params, 'findOne')
     }
 
-    const post = await PostRepository.findOne(params.id)
+    const post = await PostRepository.findOne<Options>(params.id, options)
     if (post instanceof PrismaError) {
       return this.respondWithPrismaError(post, 'findOne')
     }
@@ -120,42 +123,37 @@ export class PostService {
     return okAsync({ post, status: SUCCESS } as const)
   }
 
-  public static async togglePublished(dto: TogglePostPublishedDto) {
+  public static async togglePublished(id: number) {
     const user = await authenticateAPISession()
     if (user === null) return this.respondWithUnauthorizedError()
 
     const authorizedUser = this.authorizeUser(user, 'publish')
     if (authorizedUser === null) return this.respondWithForbiddenError()
 
-    const { params } = dto
-    if (params instanceof ZodError) {
-      return this.respondWithZodError(params, 'togglePublished')
+    const post = await PostRepository.findOne(id)
+    if (post instanceof PrismaError) {
+      return this.respondWithPrismaError(post, 'togglePublished')
     }
-
-    if (params instanceof Error) {
-      return errAsync({
-        details: params,
-        status: BAD_REQUEST,
-        type: 'lexical',
-      } as const)
-    }
-
-    const post = await PostRepository.update(params.id, {
-      content: params.content,
-      description: params.description,
-      publishedAt: params.publishedAt ? null : new Date(),
-      title: params.title,
-    })
-    if (post instanceof PrismaError) return this.handleUpdatePrismaError(post)
 
     if (post instanceof NotFoundError) {
       return this.respondWithNotFoundError(post, 'togglePublished')
     }
 
-    return okAsync({ post, status: SUCCESS } as const)
+    const updatedPost = await PostRepository.update(id, {
+      publishedAt: post.publishedAt ? null : new Date(),
+    })
+    if (updatedPost instanceof PrismaError) {
+      return this.respondWithPrismaError(updatedPost, 'togglePublished')
+    }
+
+    if (updatedPost instanceof NotFoundError) {
+      return this.respondWithNotFoundError(updatedPost, 'togglePublished')
+    }
+
+    return okAsync({ post: updatedPost, status: SUCCESS } as const)
   }
 
-  public static async update(dto: UpdatePostDto) {
+  public static async update(id: number, dto: UpdatePostDto) {
     const user = await authenticateAPISession()
     if (user === null) return this.respondWithUnauthorizedError()
 
@@ -176,11 +174,7 @@ export class PostService {
       } as const)
     }
 
-    const post = await PostRepository.update(params.id, {
-      content: params.content,
-      description: params.description,
-      title: params.title,
-    })
+    const post = await PostRepository.update(id, params)
     if (post instanceof PrismaError) return this.handleUpdatePrismaError(post)
 
     if (post instanceof NotFoundError) {
@@ -221,7 +215,7 @@ export class PostService {
     error: NotFoundError,
     method: 'findOne' | 'delete' | 'togglePublished' | 'update',
   ) {
-    logger.error({ error }, `PostService not found error: ${method}`)
+    logger.error(error, `PostService not found error: ${method}`)
     return errAsync({
       details: error,
       status: error.status,
@@ -231,9 +225,15 @@ export class PostService {
 
   private static respondWithPrismaError<Err extends Error>(
     error: PrismaError<Err>,
-    method: 'create' | 'delete' | 'findAndCount' | 'findOne' | 'update',
+    method:
+      | 'create'
+      | 'delete'
+      | 'findAndCount'
+      | 'findOne'
+      | 'togglePublished'
+      | 'update',
   ) {
-    logger.error({ error }, `PostService Prisma error: ${method}`)
+    logger.error(error, `PostService Prisma error: ${method}`)
     return errAsync({
       details: error.details,
       status: error.status,
@@ -254,10 +254,7 @@ export class PostService {
   private static respondWithUniqueConstraintError<Err extends Error>(
     error: PrismaError<Err>,
   ) {
-    logger.error(
-      { error },
-      'PostService PrismaUniqueConstraintError error: update',
-    )
+    logger.error(error, 'PostService PrismaUniqueConstraintError error: update')
     return errAsync({
       details: error,
       status: CONFLICT,
@@ -267,15 +264,9 @@ export class PostService {
 
   private static respondWithZodError<Err>(
     error: ZodError<Err>,
-    method:
-      | 'create'
-      | 'delete'
-      | 'findAndCount'
-      | 'findOne'
-      | 'togglePublished'
-      | 'update',
+    method: 'create' | 'delete' | 'findAndCount' | 'findOne' | 'update',
   ) {
-    logger.error({ error }, `PostService Zod error: ${method}`)
+    logger.error(error, `PostService Zod error: ${method}`)
     return errAsync({
       details: error,
       status: UNPROCESSABLE_CONTENT,

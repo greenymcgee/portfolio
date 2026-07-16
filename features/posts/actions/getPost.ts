@@ -10,7 +10,9 @@ import { PostService } from '../post.service'
 
 export async function getPost(id: AuthoredPost['id']) {
   cacheTag(CACHE_TAGS.post(id))
-  const result = await PostService.findOne(new FindPostDto({ id }))
+  const result = await PostService.findOne(new FindPostDto({ id }), {
+    include: { author: { select: { firstName: true, lastName: true } } },
+  })
   return result.match(
     (response) =>
       ({

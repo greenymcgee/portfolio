@@ -4,7 +4,9 @@ import { renderWithProviders } from '@/test/helpers/utils'
 
 import { EditPostTitleError } from '..'
 
-const PROPS: PropsOf<typeof EditPostTitleError> = { state: { status: 'IDLE' } }
+const PROPS: PropsOf<typeof EditPostTitleError> = {
+  state: { id: 1, status: 'IDLE' },
+}
 
 describe('<EditPostTitleError />', () => {
   it('should render nothing when state is undefined', () => {
@@ -25,7 +27,7 @@ describe('<EditPostTitleError />', () => {
   it('should render a unique constraint error when the title is already taken', () => {
     renderWithProviders(
       <EditPostTitleError
-        state={{ status: 'ERROR', threwUniqueConstraintError: true }}
+        state={{ id: 1, status: 'ERROR', threwUniqueConstraintError: true }}
       />,
     )
     expect(screen.getByTestId('unique-constraint-error')).toBeVisible()
@@ -37,6 +39,7 @@ describe('<EditPostTitleError />', () => {
       <EditPostTitleError
         state={{
           dtoError: { fieldErrors: { title: [titleError] }, formErrors: [] },
+          id: 1,
           status: 'ERROR',
         }}
       />,

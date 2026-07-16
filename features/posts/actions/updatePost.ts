@@ -11,13 +11,13 @@ import { UpdatePostDto } from '../dto/update-post.dto'
 import { PostService } from '../post.service'
 import { UpdatePostState } from '../types'
 
-export async function autosavePost(_: UpdatePostState, formData: FormData) {
+export async function updatePost(state: UpdatePostState, formData: FormData) {
   const params = Object.fromEntries(formData)
-  const result = await PostService.update(new UpdatePostDto(params))
+  const result = await PostService.update(state.id, new UpdatePostDto(params))
   return result.match(
     ({ post: { id } }) => {
       updateTag(CACHE_TAGS.post(id))
-      return { ...params, status: 'SUCCESS' } as UpdatePostState
+      return { ...params, id, status: 'SUCCESS' } as UpdatePostState
     },
     (error) => {
       switch (error.type) {
@@ -26,6 +26,7 @@ export async function autosavePost(_: UpdatePostState, formData: FormData) {
             ...params,
             dtoError: flattenError(error.details),
             errorType: error.type,
+            id: state.id,
             status: 'ERROR',
           } as UpdatePostState
         case 'entity':
@@ -34,18 +35,18 @@ export async function autosavePost(_: UpdatePostState, formData: FormData) {
           return {
             ...params,
             errorType: error.type,
+            id: state.id,
             status: 'ERROR',
           } as UpdatePostState
         case 'forbidden':
           return redirect(ROUTES.home)
         case 'unauthorized':
-          return redirect(
-            ROUTES.loginWithRedirect(ROUTES.post(Number(params.id))),
-          )
+          return redirect(ROUTES.loginWithRedirect(ROUTES.post(state.id)))
         case 'unique-constraint':
           return {
             ...params,
             errorType: error.type,
+            id: state.id,
             status: 'ERROR',
             threwUniqueConstraintError: true,
           } as UpdatePostState
@@ -57,6 +58,7 @@ export async function autosavePost(_: UpdatePostState, formData: FormData) {
           return {
             ...params,
             errorType: 'unhandled',
+            id: state.id,
             status: 'ERROR',
           } as UpdatePostState
       }

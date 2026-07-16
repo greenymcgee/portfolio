@@ -10,18 +10,22 @@ export class PrismaError<
 > {
   public details: ErrorType
 
+  public status: number
+
   constructor(details: ErrorType) {
     this.details = details
+    this.status = this.computeStatus(details)
   }
 
-  public get status() {
-    const { details } = this
-    if (!details || !(details instanceof PrismaClientKnownRequestError)) {
+  private computeStatus(details: ErrorType) {
+    if (!(details instanceof PrismaClientKnownRequestError)) {
       return INTERNAL_SERVER_ERROR
     }
 
-    const status =
-      PRISMA_ERROR_CODE_TO_HTTP_STATUS[details.code as PrismaHTTPErrorCodeKey]
-    return status ?? INTERNAL_SERVER_ERROR
+    return (
+      PRISMA_ERROR_CODE_TO_HTTP_STATUS[
+        details.code as PrismaHTTPErrorCodeKey
+      ] ?? INTERNAL_SERVER_ERROR
+    )
   }
 }

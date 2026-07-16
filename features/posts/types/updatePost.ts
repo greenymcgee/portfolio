@@ -9,15 +9,16 @@ export interface UpdatePostState extends ActionState {
   dtoError?: $ZodFlattenedError<{
     content: string | null
     description: string
-    id: number
     title: string
   }>
   errorType?: ActionError
+  id: number
   response?: { message: string; post: Post }
   threwUniqueConstraintError?: boolean
   title?: FormDataEntryValue | null
 }
 
-export type TogglePostPublishedState = UpdatePostState & {
+export type TogglePostPublishedState = ActionState & {
+  id: number
   publishedAt?: FormDataEntryValue | null
 }
