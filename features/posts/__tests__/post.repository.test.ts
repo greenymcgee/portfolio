@@ -139,6 +139,16 @@ describe('PostRepository', () => {
       const result = await PostRepository.findOne(PUBLISHED_POST.id)
       expect(result).toBe(PUBLISHED_POST)
     })
+
+    it('should accept options', async () => {
+      const options = { include: { author: { select: { firstName: true } } } }
+      prismaMock.post.findUnique.mockResolvedValueOnce(PUBLISHED_POST)
+      await PostRepository.findOne(PUBLISHED_POST.id, options)
+      expect(prismaMock.post.findUnique).toHaveBeenCalledWith({
+        include: options.include,
+        where: { id: PUBLISHED_POST.id },
+      })
+    })
   })
 
   describe('update', () => {

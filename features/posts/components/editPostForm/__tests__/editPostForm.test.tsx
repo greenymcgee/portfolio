@@ -55,7 +55,7 @@ afterAll(() => rootLayoutServer.close())
 const PROPS: PropsOf<typeof EditPostForm> = { post: AUTHORED_POST }
 
 describe('<EditPostForm />', () => {
-  it.each(['content-input', 'description-input', 'id-input', 'title-input'])(
+  it.each(['content-input', 'title-input'])(
     'should render the post inputs',
     (id) => {
       renderWithProviders(<EditPostForm {...PROPS} />)

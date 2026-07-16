@@ -21,7 +21,7 @@ import {
 } from '@/test/helpers/utils'
 
 import { UpdatePostState } from '../../types'
-import { autosavePost } from '..'
+import { updatePost } from '..'
 
 type UpdateReturn = Awaited<ReturnType<typeof PostService.update>>
 
@@ -38,19 +38,18 @@ afterEach(() => {
   vi.resetAllMocks()
 })
 
-const STATE: UpdatePostState = { status: 'IDLE' }
+const STATE: UpdatePostState = { id: ID, status: 'IDLE' }
 
 const FORM_DATA = new FormData()
-FORM_DATA.set('id', String(ID))
 FORM_DATA.set('description', faker.lorem.word())
 FORM_DATA.set('title', faker.book.title())
 
-describe('autosavePost', () => {
+describe('updatePost', () => {
   describe('unauthorized', () => {
     it('should redirect to the login page when the user is not logged in', async () => {
-      await autosavePost(STATE, FORM_DATA)
+      await updatePost(STATE, FORM_DATA)
       expect(redirect).toHaveBeenCalledWith(
-        ROUTES.loginWithRedirect(ROUTES.post(Number(FORM_DATA.get('id')))),
+        ROUTES.loginWithRedirect(ROUTES.post(ID)),
       )
     })
   })
@@ -58,7 +57,7 @@ describe('autosavePost', () => {
   describe('authorized', () => {
     it('should return an error state when the user does not have permission', async () => {
       mockServerSession('USER')
-      await autosavePost(STATE, FORM_DATA)
+      await updatePost(STATE, FORM_DATA)
       expect(redirect).toHaveBeenCalledWith(ROUTES.home)
     })
 
@@ -66,7 +65,7 @@ describe('autosavePost', () => {
       mockServerSession('ADMIN')
       const formData = new FormData()
       formData.set('invalid', 'anything')
-      const result = await autosavePost(STATE, formData)
+      const result = await updatePost(STATE, formData)
       expect(result).toEqual({
         ...Object.fromEntries(formData),
         dtoError: {
@@ -74,6 +73,7 @@ describe('autosavePost', () => {
           formErrors: expect.any(Array),
         },
         errorType: 'dto',
+        id: ID,
         status: 'ERROR',
       })
     })
@@ -87,10 +87,11 @@ describe('autosavePost', () => {
           type: 'lexical',
         }),
       )
-      const result = await autosavePost(STATE, FORM_DATA)
+      const result = await updatePost(STATE, FORM_DATA)
       expect(result).toEqual({
         ...Object.fromEntries(FORM_DATA),
         errorType: 'lexical',
+        id: ID,
         status: 'ERROR',
       })
     })
@@ -105,10 +106,11 @@ describe('autosavePost', () => {
             type: 'entity',
           }) as unknown as UpdateReturn,
       )
-      const result = await autosavePost(STATE, FORM_DATA)
+      const result = await updatePost(STATE, FORM_DATA)
       expect(result).toEqual({
         ...Object.fromEntries(FORM_DATA),
         errorType: 'entity',
+        id: STATE.id,
         status: 'ERROR',
       })
     })
@@ -123,10 +125,11 @@ describe('autosavePost', () => {
             type: 'not-found',
           }) as unknown as UpdateReturn,
       )
-      const result = await autosavePost(STATE, FORM_DATA)
+      const result = await updatePost(STATE, FORM_DATA)
       expect(result).toEqual({
         ...Object.fromEntries(FORM_DATA),
         errorType: 'not-found',
+        id: STATE.id,
         status: 'ERROR',
       })
     })
@@ -141,10 +144,11 @@ describe('autosavePost', () => {
             type: 'totally-unexpected',
           }) as unknown as UpdateReturn,
       )
-      const result = await autosavePost(STATE, FORM_DATA)
+      const result = await updatePost(STATE, FORM_DATA)
       expect(result).toEqual({
         ...Object.fromEntries(FORM_DATA),
         errorType: 'unhandled',
+        id: STATE.id,
         status: 'ERROR',
       })
     })
@@ -158,13 +162,11 @@ describe('autosavePost', () => {
       const title = faker.book.title()
       const description = faker.lorem.sentence()
       const post = (await prisma.post.findFirst()) as Post
-      const id = String(post.id)
       const formData = new FormData()
       formData.set('content', '')
       formData.set('description', description)
-      formData.set('id', id)
       formData.set('title', title)
-      const result = await autosavePost({ status: 'IDLE' }, formData)
+      const result = await updatePost({ id: post.id, status: 'IDLE' }, formData)
       const updatedPost = (await prisma.post.findFirst({
         where: { id: post.id },
       })) as Post
@@ -173,7 +175,7 @@ describe('autosavePost', () => {
       expect(result).toEqual({
         content: '',
         description,
-        id,
+        id: post.id,
         status: 'SUCCESS',
         title,
       })
@@ -186,14 +188,16 @@ describe('autosavePost', () => {
       const formData = new FormData()
       formData.set('content', String(postOne.content))
       formData.set('description', String(postOne.description))
-      formData.set('id', String(postOne.id))
       formData.set('title', postTwo.title as string)
-      const result = await autosavePost({ status: 'IDLE' }, formData)
+      const result = await updatePost(
+        { id: postOne.id, status: 'IDLE' },
+        formData,
+      )
       expect(result).toEqual({
         content: postOne.content,
         description: postOne.description,
         errorType: 'unique-constraint',
-        id: String(postOne.id),
+        id: postOne.id,
         status: 'ERROR',
         threwUniqueConstraintError: true,
         title: postTwo.title,

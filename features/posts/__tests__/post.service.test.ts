@@ -27,7 +27,6 @@ import { mockServerSession } from '@/test/helpers/utils'
 
 import { FindAndCountPostsDto, FindPostDto } from '../dto'
 import { CreatePostDto } from '../dto/create-post.dto'
-import { TogglePostPublishedDto } from '../dto/toggle-post-published.dto'
 import { UpdatePostDto } from '../dto/update-post.dto'
 import { PostRepository } from '../post.repository'
 import { PostService } from '../post.service'
@@ -237,6 +236,24 @@ describe('PostService', () => {
       )
     })
 
+    it('should return a not-found PrismaError', async () => {
+      const error = new PrismaError(
+        new PrismaClientKnownRequestError('Record not found', {
+          clientVersion: '',
+          code: 'P2025',
+        }),
+      )
+      vi.mocked(PostRepository.findOne).mockResolvedValueOnce(error)
+      const result = await PostService.findOne(new FindPostDto({ id: 1 }))
+      expect(result).toEqual(
+        new Err({
+          details: error.details,
+          status: NOT_FOUND,
+          type: 'not-found',
+        }),
+      )
+    })
+
     it('should return a ZodError', async () => {
       const result = await PostService.findOne(new FindPostDto({ id: 0 }))
       expect(result).toEqual(
@@ -263,19 +280,19 @@ describe('PostService', () => {
       const result = await PostService.findOne(new FindPostDto({ id: 1 }))
       expect(result).toEqual(new Ok({ post: AUTHORED_POST, status: SUCCESS }))
     })
+
+    it('should forward the given options to the repository', async () => {
+      const options = { include: { author: true } }
+      vi.mocked(PostRepository.findOne).mockResolvedValueOnce(AUTHORED_POST)
+      await PostService.findOne(new FindPostDto({ id: 1 }), options)
+      expect(PostRepository.findOne).toHaveBeenCalledWith(1, options)
+    })
   })
 
   describe('togglePublished', () => {
     it('should return unauthorized when there is no session user', async () => {
       mockServerSession(null)
-      const dto = new TogglePostPublishedDto({
-        content: LEXICAL_EDITOR_JSON,
-        description: faker.lorem.sentence(),
-        id: String(PUBLISHED_POST.id),
-        publishedAt: null,
-        title: faker.book.title(),
-      })
-      const result = await PostService.togglePublished(dto)
+      const result = await PostService.togglePublished(PUBLISHED_POST.id)
       expect(result).toEqual(
         new Err({ status: UNAUTHORIZED, type: 'unauthorized' }),
       )
@@ -283,77 +300,46 @@ describe('PostService', () => {
 
     it('should return forbidden when the user cannot update posts', async () => {
       mockServerSession('USER')
-      const dto = new TogglePostPublishedDto({
-        content: LEXICAL_EDITOR_JSON,
-        description: faker.lorem.sentence(),
-        id: String(PUBLISHED_POST.id),
-        publishedAt: null,
-        title: faker.book.title(),
-      })
-      const result = await PostService.togglePublished(dto)
+      const result = await PostService.togglePublished(PUBLISHED_POST.id)
       expect(result).toEqual(new Err({ status: FORBIDDEN, type: 'forbidden' }))
     })
 
-    it('should return a dto error when params fail validation', async () => {
+    it('should return a PrismaError returned by findOne', async () => {
       mockServerSession('ADMIN')
-      const dto = new TogglePostPublishedDto({
-        content: LEXICAL_EDITOR_JSON,
-        description: faker.lorem.sentence(),
-        id: String(PUBLISHED_POST.id),
-        publishedAt: null,
-        title: '',
-      })
-      const result = await PostService.togglePublished(dto)
+      const error = new PrismaError(new Error('bad'))
+      vi.mocked(PostRepository.findOne).mockResolvedValueOnce(error)
+      const result = await PostService.togglePublished(PUBLISHED_POST.id)
       expect(result).toEqual(
         new Err({
-          details: expect.any(ZodError),
-          status: UNPROCESSABLE_CONTENT,
-          type: 'dto',
+          details: error.details,
+          status: error.status,
+          type: 'entity',
         }),
       )
     })
 
-    it('should return a lexical error when the dto returns a content validation Error', async () => {
+    it('should return a NotFoundError returned by findOne', async () => {
       mockServerSession('ADMIN')
-      const dto = new TogglePostPublishedDto({
-        content: 'invalid',
-        description: faker.lorem.sentence(),
-        id: String(PUBLISHED_POST.id),
-        publishedAt: '',
-        title: faker.book.title(),
-      })
-      const result = await PostService.togglePublished(dto)
+      const id = PUBLISHED_POST.id
+      const error = new NotFoundError(id, 'Post')
+      vi.mocked(PostRepository.findOne).mockResolvedValueOnce(error)
+      const result = await PostService.togglePublished(id)
       expect(result).toEqual(
-        new Err({
-          details: new Error('Post content validation failed'),
-          status: BAD_REQUEST,
-          type: 'lexical',
-        }),
+        new Err({ details: error, status: NOT_FOUND, type: 'not-found' }),
       )
     })
 
-    it('should return a unique constraint error when the repository returns a unique violation', async () => {
+    it('should return a PrismaError returned by update', async () => {
       mockServerSession('ADMIN')
-      const prismaError = new PrismaError(
-        new PrismaClientKnownRequestError('Unique constraint failed', {
-          clientVersion: '',
-          code: 'P2002',
-        }),
-      )
-      vi.mocked(PostRepository.update).mockResolvedValueOnce(prismaError)
-      const dto = new TogglePostPublishedDto({
-        content: LEXICAL_EDITOR_JSON,
-        description: faker.lorem.sentence(),
-        id: String(PUBLISHED_POST.id),
-        publishedAt: '',
-        title: faker.book.title(),
-      })
-      const result = await PostService.togglePublished(dto)
+      const error = new PrismaError(new Error('bad'))
+      vi.mocked(PostRepository.findOne).mockResolvedValueOnce(AUTHORED_POST)
+      vi.mocked(PostRepository.update).mockResolvedValueOnce(error)
+      const result = await PostService.togglePublished(AUTHORED_POST.id)
       expect(result).toEqual(
         new Err({
-          details: prismaError,
-          status: CONFLICT,
-          type: 'unique-constraint',
+          details: error.details,
+          status: error.status,
+          type: 'entity',
         }),
       )
     })
@@ -362,15 +348,9 @@ describe('PostService', () => {
       mockServerSession('ADMIN')
       const id = PUBLISHED_POST.id
       const error = new NotFoundError(id, 'Post')
+      vi.mocked(PostRepository.findOne).mockResolvedValueOnce(AUTHORED_POST)
       vi.mocked(PostRepository.update).mockResolvedValueOnce(error)
-      const dto = new TogglePostPublishedDto({
-        content: LEXICAL_EDITOR_JSON,
-        description: faker.lorem.sentence(),
-        id: String(PUBLISHED_POST.id),
-        publishedAt: '',
-        title: faker.book.title(),
-      })
-      const result = await PostService.togglePublished(dto)
+      const result = await PostService.togglePublished(AUTHORED_POST.id)
       expect(result).toEqual(
         new Err({ details: error, status: NOT_FOUND, type: 'not-found' }),
       )
@@ -382,27 +362,17 @@ describe('PostService', () => {
         vi.useFakeTimers({ toFake: ['Date'] })
         vi.setSystemTime(now)
         mockServerSession('ADMIN')
+        vi.mocked(PostRepository.findOne).mockResolvedValueOnce(
+          UNPUBLISHED_POST as AuthoredPost,
+        )
         vi.mocked(PostRepository.update).mockResolvedValueOnce(UNPUBLISHED_POST)
-        const params = {
-          content: LEXICAL_EDITOR_JSON,
-          description: faker.lorem.sentence(),
-          id: String(UNPUBLISHED_POST.id),
-          publishedAt: '',
-          title: faker.book.title(),
-        } as const
-        const dto = new TogglePostPublishedDto(params)
-        const result = await PostService.togglePublished(dto)
+        const result = await PostService.togglePublished(UNPUBLISHED_POST.id)
         expect(result).toEqual(
           new Ok({ post: UNPUBLISHED_POST, status: SUCCESS }),
         )
         expect(PostRepository.update).toHaveBeenCalledWith(
           UNPUBLISHED_POST.id,
-          {
-            content: params.content,
-            description: params.description,
-            publishedAt: now,
-            title: params.title,
-          },
+          { publishedAt: now },
         )
       })
     })
@@ -413,24 +383,12 @@ describe('PostService', () => {
         vi.useFakeTimers({ toFake: ['Date'] })
         vi.setSystemTime(now)
         mockServerSession('ADMIN')
-        vi.mocked(PostRepository.update).mockResolvedValueOnce(PUBLISHED_POST)
-        const params = {
-          content: LEXICAL_EDITOR_JSON,
-          description: faker.lorem.sentence(),
-          id: String(PUBLISHED_POST.id),
-          publishedAt: faker.date.past().toISOString(),
-          title: faker.book.title(),
-        } as const
-        const dto = new TogglePostPublishedDto(params)
-        const result = await PostService.togglePublished(dto)
-        expect(result).toEqual(
-          new Ok({ post: PUBLISHED_POST, status: SUCCESS }),
-        )
-        expect(PostRepository.update).toHaveBeenCalledWith(PUBLISHED_POST.id, {
-          content: params.content,
-          description: params.description,
+        vi.mocked(PostRepository.findOne).mockResolvedValueOnce(AUTHORED_POST)
+        vi.mocked(PostRepository.update).mockResolvedValueOnce(AUTHORED_POST)
+        const result = await PostService.togglePublished(AUTHORED_POST.id)
+        expect(result).toEqual(new Ok({ post: AUTHORED_POST, status: SUCCESS }))
+        expect(PostRepository.update).toHaveBeenCalledWith(AUTHORED_POST.id, {
           publishedAt: null,
-          title: params.title,
         })
       })
     })
@@ -439,11 +397,8 @@ describe('PostService', () => {
   describe('update', () => {
     it('should return unauthorized when there is no session user', async () => {
       mockServerSession(null)
-      const dto = new UpdatePostDto({
-        id: String(PUBLISHED_POST.id),
-        title: faker.book.title(),
-      })
-      const result = await PostService.update(dto)
+      const dto = new UpdatePostDto({ title: faker.book.title() })
+      const result = await PostService.update(PUBLISHED_POST.id, dto)
       expect(result).toEqual(
         new Err({ status: UNAUTHORIZED, type: 'unauthorized' }),
       )
@@ -451,21 +406,16 @@ describe('PostService', () => {
 
     it('should return forbidden when the user cannot update posts', async () => {
       mockServerSession('USER')
-      const dto = new UpdatePostDto({
-        id: String(PUBLISHED_POST.id),
-        title: faker.book.title(),
-      })
-      const result = await PostService.update(dto)
+      const dto = new UpdatePostDto({ title: faker.book.title() })
+      const result = await PostService.update(PUBLISHED_POST.id, dto)
       expect(result).toEqual(new Err({ status: FORBIDDEN, type: 'forbidden' }))
     })
 
     it('should return a dto error when params fail validation', async () => {
       mockServerSession('ADMIN')
-      const dto = new UpdatePostDto({
-        id: String(PUBLISHED_POST.id),
-        title: faker.book.title(),
-      })
-      const result = await PostService.update(dto)
+      // @ts-expect-error: we need to test
+      const dto = new UpdatePostDto({ title: 1 })
+      const result = await PostService.update(PUBLISHED_POST.id, dto)
       expect(result).toEqual(
         new Err({
           details: expect.any(ZodError),
@@ -487,10 +437,9 @@ describe('PostService', () => {
       const dto = new UpdatePostDto({
         content: LEXICAL_EDITOR_JSON,
         description: PUBLISHED_POST.description,
-        id: String(PUBLISHED_POST.id),
         title: PUBLISHED_POST.title,
       })
-      const result = await PostService.update(dto)
+      const result = await PostService.update(PUBLISHED_POST.id, dto)
       expect(result).toEqual(
         new Err({
           details: prismaError,
@@ -507,10 +456,9 @@ describe('PostService', () => {
       const dto = new UpdatePostDto({
         content: LEXICAL_EDITOR_JSON,
         description: PUBLISHED_POST.description,
-        id: String(PUBLISHED_POST.id),
         title: PUBLISHED_POST.title,
       })
-      const result = await PostService.update(dto)
+      const result = await PostService.update(PUBLISHED_POST.id, dto)
       expect(result).toEqual(
         new Err({
           details: error.details,
@@ -528,10 +476,9 @@ describe('PostService', () => {
       const dto = new UpdatePostDto({
         content: LEXICAL_EDITOR_JSON,
         description: PUBLISHED_POST.description,
-        id: String(id),
         title: PUBLISHED_POST.title,
       })
-      const result = await PostService.update(dto)
+      const result = await PostService.update(id, dto)
       expect(result).toEqual(
         new Err({ details: error, status: NOT_FOUND, type: 'not-found' }),
       )
@@ -542,10 +489,9 @@ describe('PostService', () => {
       const dto = new UpdatePostDto({
         content: 'invalid',
         description: PUBLISHED_POST.description,
-        id: String(PUBLISHED_POST.id),
         title: PUBLISHED_POST.title,
       })
-      const result = await PostService.update(dto)
+      const result = await PostService.update(PUBLISHED_POST.id, dto)
       expect(result).toEqual(
         new Err({
           details: new Error('Post content validation failed'),
@@ -561,10 +507,9 @@ describe('PostService', () => {
       const dto = new UpdatePostDto({
         content: LEXICAL_EDITOR_JSON,
         description: PUBLISHED_POST.description,
-        id: String(PUBLISHED_POST.id),
         title: PUBLISHED_POST.title,
       })
-      const result = await PostService.update(dto)
+      const result = await PostService.update(PUBLISHED_POST.id, dto)
       expect(result).toEqual(new Ok({ post: PUBLISHED_POST, status: SUCCESS }))
     })
   })

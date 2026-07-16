@@ -10,7 +10,7 @@ import {
   RichTextToolbar,
 } from '@/globals/components'
 
-import { autosavePost } from '../../actions'
+import { updatePost } from '../../actions'
 import { EditPostStatus } from '../editPostStatus'
 import { EditPostTitleError } from '../editPostTitleError'
 import {
@@ -29,8 +29,9 @@ export function EditPostForm({ post }: Props) {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const initialContent =
     typeof post.content === 'string' ? post.content : undefined
-  const [state, updateAction, saving] = useActionState(autosavePost, {
+  const [state, updateAction, saving] = useActionState(updatePost, {
     content: initialContent,
+    id: post.id,
     status: 'IDLE',
     title: post.title,
   })
@@ -76,13 +77,6 @@ export function EditPostForm({ post }: Props) {
         onSubmit={handleEditPostFormSubmit}
         ref={formRef}
       >
-        <input
-          data-testid="description-input"
-          name="description"
-          type="hidden"
-          value={post.description}
-        />
-        <input data-testid="id-input" name="id" type="hidden" value={post.id} />
         <input
           data-testid="content-input"
           defaultValue={

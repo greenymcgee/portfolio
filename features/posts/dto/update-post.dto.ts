@@ -2,7 +2,6 @@ import type { ZodError } from 'zod'
 
 import { logger } from '@/lib/logger'
 import { validateLexicalContent } from '@/lib/utils'
-import type { Post } from '@/prisma/generated/client'
 import type { PostUpdateInput } from '@/prisma/generated/models'
 
 import { updatePostSchema } from '../schemas'
@@ -10,7 +9,6 @@ import { updatePostSchema } from '../schemas'
 type Params = {
   content?: string | null
   description?: string | null
-  id?: string | null
   title?: string | null
 }
 
@@ -18,8 +16,6 @@ export class UpdatePostDto {
   private content: PostUpdateInput['content'] = undefined
 
   private description: PostUpdateInput['description'] = ''
-
-  private id: Post['id'] = NaN
 
   private error: ZodError | Error | null = null
 
@@ -35,7 +31,6 @@ export class UpdatePostDto {
     return {
       content: this.content,
       description: this.description,
-      id: this.id,
       title: this.title,
     }
   }
@@ -61,7 +56,6 @@ export class UpdatePostDto {
     this.content = data.content
     this.validateContent()
     this.description = data.description
-    this.id = data.id
     this.title = data.title
     return data
   }

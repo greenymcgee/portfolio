@@ -5,7 +5,11 @@ import { NO_CONTENT } from '@/globals/constants'
 import { NotFoundError, PrismaError } from '@/lib/errors'
 import { logger } from '@/lib/logger'
 import { prisma } from '@/lib/prisma'
-import type { PostUpdateInput } from '@/prisma/generated/models'
+import type {
+  PostDefaultArgs,
+  PostGetPayload,
+  PostUpdateInput,
+} from '@/prisma/generated/models'
 
 import type { CreatePostParams } from './dto/create-post.dto'
 import type { FindAndCountPostParams } from './dto/find-and-count-posts.dto'
@@ -68,18 +72,18 @@ export class PostRepository {
     }
   }
 
-  public static async findOne(id: number) {
+  public static async findOne<Options extends PostDefaultArgs>(
+    id: number,
+    options?: Options,
+  ) {
     const { error, response: post } = await tryCatch(
-      prisma.post.findUnique({
-        include: { author: { select: { firstName: true, lastName: true } } },
-        where: { id },
-      }),
+      prisma.post.findUnique({ where: { id }, ...options }),
     )
     if (error) return new PrismaError(error)
 
     if (post === null) return new NotFoundError(id, 'Post')
 
-    return post
+    return post as PostGetPayload<Options>
   }
 
   public static async update(id: number, data: PostUpdateInput) {
