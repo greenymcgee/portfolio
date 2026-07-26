@@ -11,6 +11,7 @@ import {
 } from '@/globals/components'
 
 import { updatePost } from '../../actions'
+import { EditPostDescriptionModal } from '../editPostDescriptionModal'
 import { EditPostStatus } from '../editPostStatus'
 import { EditPostTitleError } from '../editPostTitleError'
 import {
@@ -29,12 +30,16 @@ export function EditPostForm({ post }: Props) {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const initialContent =
     typeof post.content === 'string' ? post.content : undefined
-  const [state, updateAction, saving] = useActionState(updatePost, {
+  const initialState = {
     content: initialContent,
     id: post.id,
-    status: 'IDLE',
+    status: 'IDLE' as const,
     title: post.title,
-  })
+  }
+  const [state = initialState, updateAction, saving] = useActionState(
+    updatePost,
+    initialState,
+  )
 
   const handleFieldChange = useCallback(
     () => debounceAutosave({ formRef, timeoutRef, updateAction }),
@@ -61,10 +66,17 @@ export function EditPostForm({ post }: Props) {
       <div
         className={clsx(
           'full-bleed-bg bg-background sticky top-0 left-0 z-10 mb-20',
-          'flex items-center justify-between',
+          'flex max-w-full items-center justify-between',
         )}
       >
-        <RichTextToolbar />
+        <div className="flex items-center gap-1">
+          <RichTextToolbar />
+          <EditPostDescriptionModal
+            defaultDescription={post.description}
+            postId={post.id}
+            title={typeof state.title === 'string' ? state.title : post.title}
+          />
+        </div>
         <EditPostStatus
           saving={saving}
           status={state?.status}

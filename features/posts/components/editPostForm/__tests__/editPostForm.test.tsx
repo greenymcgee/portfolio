@@ -2,7 +2,9 @@ import { LexicalComposer } from '@lexical/react/LexicalComposer'
 import { act, fireEvent, screen } from '@testing-library/react'
 import { EditorState } from 'lexical'
 
+import * as postActions from '@/features/posts/actions'
 import { PostRepository } from '@/features/posts/post.repository'
+import type { UpdatePostState } from '@/features/posts/types'
 import { RichTextEditor } from '@/globals/components'
 import { authoredPostFactory } from '@/test/factories'
 import {
@@ -121,5 +123,24 @@ describe('<EditPostForm />', () => {
     await act(() => vi.advanceTimersByTimeAsync(1000))
     expect(PostRepository.update).toHaveBeenCalledTimes(1)
     vi.useRealTimers()
+  })
+
+  it('should fall back to the post title when the update result omits it', async () => {
+    vi.useFakeTimers()
+    vi.spyOn(postActions, 'updatePost').mockResolvedValueOnce({
+      id: AUTHORED_POST.id,
+      status: 'SUCCESS',
+    } as UpdatePostState)
+    mockServerSession('ADMIN')
+    renderWithProviders(<EditPostForm {...PROPS} />, { includesSession: true })
+    fireEvent.change(screen.getByTestId('title-input'), {
+      target: { value: 'a title not in state' },
+    })
+    await act(() => vi.advanceTimersByTimeAsync(1000))
+    vi.useRealTimers()
+    fireEvent.click(screen.getByRole('button', { name: 'Description' }))
+    expect(
+      screen.getByRole('heading', { name: AUTHORED_POST.title }),
+    ).toBeVisible()
   })
 })
