@@ -3,7 +3,7 @@ import { type ComponentProps, useMemo } from 'react'
 import { cn } from '@/lib/utils'
 
 type Props = ComponentProps<'div'> & {
-  errors?: Array<{ message?: string } | undefined> | undefined
+  errors?: string[] | undefined
 }
 
 export function FieldError({
@@ -17,19 +17,13 @@ export function FieldError({
 
     if (!errors.length) return null
 
-    const uniqueErrors = [
-      ...new Map(errors.map((error) => [error?.message, error])).values(),
-    ]
-    if (uniqueErrors.length === 1) {
-      const [error] = uniqueErrors
-      return error?.message
-    }
+    if (errors.length === 1) return errors.toString()
 
     return (
       <ul className="ml-4 flex list-disc flex-col gap-1">
-        {uniqueErrors.map((error) =>
-          error?.message ? <li key={error.message}>{error.message}</li> : null,
-        )}
+        {errors.map((error) => (
+          <li key={error}>{error}</li>
+        ))}
       </ul>
     )
   }, [children, errors])
