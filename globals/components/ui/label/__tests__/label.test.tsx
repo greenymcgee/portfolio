@@ -35,4 +35,14 @@ describe('<Label />', () => {
     const { container } = render(<Label {...PROPS} htmlFor="input-id" />)
     expect(container.querySelector('label')).toHaveAttribute('for', 'input-id')
   })
+
+  it('does not render an asterisk by default', () => {
+    render(<Label htmlFor={HTML_FOR} {...PROPS} />)
+    expect(screen.queryByText('*')).not.toBeInTheDocument()
+  })
+
+  it('renders an asterisk when required is true', () => {
+    render(<Label htmlFor={HTML_FOR} {...PROPS} required />)
+    expect(screen.getByText('*')).toBeVisible()
+  })
 })

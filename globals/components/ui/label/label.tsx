@@ -5,7 +5,14 @@ import { Root } from '@radix-ui/react-label'
 
 import { cn } from '@/lib/utils/index'
 
-export function Label({ className, ...props }: ComponentProps<typeof Root>) {
+type Props = ComponentProps<typeof Root> & { required?: boolean }
+
+export function Label({
+  children,
+  className,
+  required = false,
+  ...props
+}: Props) {
   return (
     <Root
       className={cn(
@@ -17,6 +24,9 @@ export function Label({ className, ...props }: ComponentProps<typeof Root>) {
       )}
       data-slot="label"
       {...props}
-    />
+    >
+      {children}
+      {required ? <span className="text-destructive -ml-1">*</span> : null}
+    </Root>
   )
 }

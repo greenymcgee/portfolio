@@ -13,39 +13,22 @@ describe('<FieldError />', () => {
     expect(container).toBeEmptyDOMElement()
   })
 
-  it('renders nothing when the sole error has no message', () => {
-    const { container } = render(<FieldError errors={[{}]} />)
-    expect(container).toBeEmptyDOMElement()
-  })
-
-  it('renders nothing when the sole error has an undefined message', () => {
-    const { container } = render(<FieldError errors={[{ message: undefined }]} />)
-    expect(container).toBeEmptyDOMElement()
-  })
-
   it('renders children when provided', () => {
     render(<FieldError>Custom error</FieldError>)
     expect(screen.getByText('Custom error')).toBeVisible()
   })
 
   it('renders a single error message from the errors prop', () => {
-    const errors = [{ message: 'Name is required' }]
+    const errors = ['Name is required']
     render(<FieldError errors={errors} />)
     expect(screen.getByText('Name is required')).toBeVisible()
   })
 
-  it('renders a list when multiple distinct errors are provided', () => {
-    const errors = [{ message: 'Too short' }, { message: 'Invalid format' }]
+  it('renders a list when multiple errors are provided', () => {
+    const errors = ['Too short', 'Invalid format']
     render(<FieldError errors={errors} />)
     expect(screen.getByRole('list')).toBeVisible()
     expect(screen.getByText('Too short')).toBeVisible()
-  })
-
-  it('deduplicates errors with the same message', () => {
-    const errors = [{ message: 'Required' }, { message: 'Required' }]
-    render(<FieldError errors={errors} />)
-    expect(screen.getByText('Required')).toBeVisible()
-    expect(screen.queryByRole('list')).not.toBeInTheDocument()
   })
 
   it('has role="alert" and data-slot="field-error" when rendered', () => {

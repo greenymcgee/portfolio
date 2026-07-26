@@ -10,7 +10,7 @@ type Props = ComponentProps<typeof Title>
 export function DialogTitle({ className, ...props }: Props) {
   return (
     <Title
-      className={cn('font-heading leading-none font-medium', className)}
+      className={cn('font-sans text-lg leading-7 font-semibold', className)}
       data-slot="dialog-title"
       {...props}
     />
