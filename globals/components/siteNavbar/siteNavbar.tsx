@@ -2,7 +2,7 @@ import { Suspense } from 'react'
 import clsx from 'clsx'
 import Link from 'next/link'
 
-import { ROUTES } from '@/globals/constants'
+import { ENV, ROUTES } from '@/globals/constants'
 
 import { AdminMenu } from '../adminMenu'
 import { SITE_NAVBAR_CLASSNAMES } from './classNames'
@@ -19,7 +19,11 @@ const ALLOW_LIST = [ROUTES.home, ROUTES.posts] as const
 export function SiteNavbar({ pathname }: Props) {
   const postsRouteActive = pathname === ROUTES.posts
 
-  if (!ALLOW_LIST.includes(pathname as (typeof ALLOW_LIST)[0])) return null
+  if (
+    !ENV.BLOG_FEATURE_ENABLED ||
+    !ALLOW_LIST.includes(pathname as (typeof ALLOW_LIST)[0])
+  )
+    return null
 
   return (
     <header
