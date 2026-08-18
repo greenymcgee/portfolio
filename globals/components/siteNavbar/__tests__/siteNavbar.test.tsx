@@ -16,12 +16,22 @@ describe('<SiteNavbar />', () => {
     expect(container).toBeEmptyDOMElement()
   })
 
+  it('should not render when the blog feature flag is false', () => {
+    vi.stubEnv('NEXT_PUBLIC_BLOG_FEATURE', 'false')
+    const { container } = renderWithProviders(
+      <SiteNavbar pathname={ROUTES.home} />,
+    )
+    expect(container).toBeEmptyDOMElement()
+  })
+
   it('should render for the /posts page', () => {
+    vi.stubEnv('NEXT_PUBLIC_BLOG_FEATURE', 'true')
     renderWithProviders(<SiteNavbar pathname={ROUTES.posts} />)
     expect(screen.getByTestId('site-navbar')).toBeVisible()
   })
 
   it('should render for the home page', () => {
+    vi.stubEnv('NEXT_PUBLIC_BLOG_FEATURE', 'true')
     renderWithProviders(<SiteNavbar {...PROPS} />)
     expect(screen.getByTestId('site-navbar')).toBeVisible()
   })
