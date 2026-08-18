@@ -2,6 +2,7 @@
  * A type to make sure the same names are used and  typed consistently.
  */
 type SoftwareTool =
+  | 'NestJS'
   | 'Next.js'
   | 'TypeScript'
   | 'TailwindCSS'

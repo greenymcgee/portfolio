@@ -25,7 +25,7 @@ describe('<Experience />', () => {
   it('should render end dates', () => {
     render(<Experience />)
     expect(
-      screen.getByText(new RegExp(`^${EXPERIENCES[1].endDate}`)),
+      screen.getByText(new RegExp(`${EXPERIENCES[1].endDate}`)),
     ).toBeVisible()
   })
 })

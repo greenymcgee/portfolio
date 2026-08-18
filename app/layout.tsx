@@ -49,7 +49,7 @@ export default function RootLayout({ children }: Props) {
   return (
     <html
       className={clsx(
-        'leading-lg font-open-sans overscroll-behavior-none',
+        'leading-lg font-open-sans',
         porterSansBlock.variable,
         openSans.variable,
       )}

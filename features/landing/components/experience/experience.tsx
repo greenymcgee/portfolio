@@ -17,7 +17,7 @@ export function Experience() {
           title={
             <>
               {experience.name}{' '}
-              <span className="text-subtle flex items-center text-sm">
+              <span className="text-subtle flex items-center text-xs sm:text-sm">
                 {experience.startDate}
                 {experience.endDate ? (
                   <>

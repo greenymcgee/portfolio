@@ -17,8 +17,11 @@ export default function HomePage() {
           <div className="mb-8">
             <h1
               className={clsx(
-                'font-porter-sans-block leading-md bg-background -ml-[0.2rem] pt-28 text-xl xl:bg-transparent',
-                'sm:text-2xl md:-ml-[1.9rem] md:text-3xl lg:text-4xl',
+                'font-porter-sans-block leading-md bg-background -ml-[0.3rem] pt-28 text-xl',
+                'sm:text-2xl',
+                'md:-ml-[1.9rem] md:text-3xl',
+                'lg:text-4xl',
+                'xl:bg-transparent',
               )}
               data-testid="home-page-heading"
             >
@@ -38,31 +41,41 @@ export default function HomePage() {
           </div>
           <div
             className={clsx(
-              'bg-computer-xs -ml-[0.1rem] h-60 max-h-128 w-60 max-w-lg bg-cover bg-center bg-no-repeat',
-              'md:bg-computer-md lg:bg-computer-lg sm:-ml-6 sm:h-108 sm:w-108 lg:h-128 lg:w-[calc(50%-9rem)]',
+              'bg-computer-xs -ml-[0.1rem] h-60 w-60 max-w-lg bg-cover bg-center bg-no-repeat',
+              'sm:-ml-6 sm:h-108 sm:w-108',
+              'md:bg-computer-md',
+              'lg:bg-computer-lg lg:h-128 lg:w-[calc(50%-9rem)]',
+              '2xl:max-w-170',
             )}
           />
         </header>
-        <div className={clsx('lg:pt-80', LANDING_PAGE_CLASS_NAMES.column)}>
-          <article className="text-subtle mb-24">
-            <p className="mb-2">
-              My name is Houston, and I&apos;m a software engineer, but more
-              importantly, I&apos;m a creative person. I get deep fulfillment
-              from bringing something new to life, and oftentimes the way I do
-              that comes in the form of code.
-            </p>
-            <p className="mb-2">
-              Someone once told me, &quot;...making sure the next dev can read
-              your code might be just as important as the code itself.&quot; At
-              first, this didn&apos;t stick out to me as something worth paying
-              too much attention to. It wasn&apos;t until I built my first
-              feature that I realized this advice was profound.
+        <div
+          className={clsx('pt-10 lg:pt-80', LANDING_PAGE_CLASS_NAMES.column)}
+        >
+          <article className="text-subtle mb-10 space-y-2 md:mb-24">
+            <p>
+              My name is Houston, and I&apos;m a software engineer. I thoroughly
+              enjoy creating applications that people find useful, and I love
+              expressing my creativity through code.
             </p>
             <p>
-              After getting lost in my own code a few times, it became clear
-              that optimizing readability must be a top priority. This driving
-              force helped shape my career, and now I specialize in building
-              scalable web apps that stand the test of time.
+              I enjoy keeping up with the latest technologies by experimenting
+              with libraries like Next.js, NestJS, and anything else that piques
+              my interest in the Node.js/React and TypeScript universe. I
+              genuinely love to throw myself into a project in my free time and
+              consider different approaches based on what I learned in the last
+              project.
+            </p>
+            <p>
+              When I&apos;m not writing code, I&apos;m often playing music,
+              carving wood, reading, or playing video games. I have a lot of
+              interests, and quite often, it&apos;s also hard to find enough
+              time to satisfy them all.
+            </p>
+            <p>
+              Currently, I&apos;m working on a project with a friend and former
+              product manager, and I&apos;m very excited to see where we&apos;re
+              headed with it.
             </p>
           </article>
           <section className="mb-20">

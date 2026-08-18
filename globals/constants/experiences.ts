@@ -12,8 +12,19 @@ type Experience = {
 export const EXPERIENCES = [
   {
     description:
-      'I lead teams that build and maintain features for an event management SasS platform. I work closely with product and design teams to build consistent experiences for users from many different hotels and restaurants.',
-    endDate: 'Present',
+      'I deployed new features and maintained the internal admin site that allowed super users to work with patients and physicians schedules.',
+    endDate: 'August 2026',
+    id: 'solace',
+    link: 'https://www.solace.health/',
+    name: 'Solace',
+    startDate: 'May 2026',
+    title: 'Senior Fullstack Software Engineer - Healthcare',
+    tools: ['React', 'TypeScript', 'Next.js', 'NestJS'],
+  } satisfies Experience,
+  {
+    description:
+      'I led teams that built and maintained features for an event management SasS platform. I worked closely with product and design teams to build consistent experiences for users from many different hotels and restaurants.',
+    endDate: 'April 2026',
     id: 'tripleseat',
     link: 'https://tripleseat.com',
     name: 'Tripleseat',
