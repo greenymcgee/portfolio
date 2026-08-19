@@ -123,7 +123,7 @@ importers:
         version: 0.1.8(@vitest/eslint-plugin@1.6.27(@typescript-eslint/eslint-plugin@8.67.0(@typescript-eslint/parser@8.67.0(eslint@9.39.3(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.3(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.3(jiti@2.6.1))(typescript@5.9.3)(vitest@4.0.18(@types/node@26.2.0)(happy-dom@20.8.4)(jiti@2.6.1)(jsdom@30.0.1(@noble/hashes@1.8.0))(lightningcss@1.31.1)(msw@2.12.10(@types/node@26.2.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)))(eslint-config-next@16.3.1(@typescript-eslint/parser@8.67.0(eslint@9.39.3(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.3(jiti@2.6.1))(typescript@5.9.3))(eslint-plugin-simple-import-sort@12.1.1(eslint@9.39.3(jiti@2.6.1)))(eslint@9.39.3(jiti@2.6.1))
       '@greenymcgee/tailwind-prettier-config':
         specifier: ^0.1.1
-        version: 0.1.1(prettier-plugin-tailwindcss@0.7.2(prettier@3.8.1))(prettier@3.8.1)
+        version: 0.1.1(prettier-plugin-tailwindcss@0.7.2(prettier@3.9.6))(prettier@3.9.6)
       '@greenymcgee/utility-types':
         specifier: ^0.1.1
         version: 0.1.1
@@ -200,11 +200,11 @@ importers:
         specifier: ^8.5.26
         version: 8.5.26
       prettier:
-        specifier: ^3.8.1
-        version: 3.8.1
+        specifier: ^3.9.6
+        version: 3.9.6
       prettier-plugin-tailwindcss:
         specifier: ^0.7.2
-        version: 0.7.2(prettier@3.8.1)
+        version: 0.7.2(prettier@3.9.6)
       prisma:
         specifier: ^7.5.0
         version: 7.5.0(@types/react@19.2.10)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3)
@@ -4801,8 +4801,8 @@ packages:
       prettier-plugin-svelte:
         optional: true
 
-  prettier@3.8.1:
-    resolution: {integrity: sha512-UOnG6LftzbdaHZcKoPFtOcCKztrQ57WkHDeRD9t/PTQtmT0NHSeWWepj6pS0z/N7+08BHFDQVUrfmfMRcZwbMg==}
+  prettier@3.9.6:
+    resolution: {integrity: sha512-OpN0zzVdiaiAhxpuuj5efpIS4sY9j7bY6uR5mnj5yPzGkdkjNKSJeUThPb60Jw29QuAZgA4o+/iB49kFiaBX6g==}
     engines: {node: '>=14'}
     hasBin: true
 
@@ -6631,10 +6631,10 @@ snapshots:
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
 
-  '@greenymcgee/tailwind-prettier-config@0.1.1(prettier-plugin-tailwindcss@0.7.2(prettier@3.8.1))(prettier@3.8.1)':
+  '@greenymcgee/tailwind-prettier-config@0.1.1(prettier-plugin-tailwindcss@0.7.2(prettier@3.9.6))(prettier@3.9.6)':
     dependencies:
-      prettier: 3.8.1
-      prettier-plugin-tailwindcss: 0.7.2(prettier@3.8.1)
+      prettier: 3.9.6
+      prettier-plugin-tailwindcss: 0.7.2(prettier@3.9.6)
 
   '@greenymcgee/typescript-utils@0.1.8': {}
 
@@ -10409,11 +10409,11 @@ snapshots:
 
   prelude-ls@1.2.1: {}
 
-  prettier-plugin-tailwindcss@0.7.2(prettier@3.8.1):
+  prettier-plugin-tailwindcss@0.7.2(prettier@3.9.6):
     dependencies:
-      prettier: 3.8.1
+      prettier: 3.9.6
 
-  prettier@3.8.1: {}
+  prettier@3.9.6: {}
 
   pretty-format@27.5.1:
     dependencies:
