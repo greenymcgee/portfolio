@@ -18,7 +18,7 @@ export const EXPERIENCES = [
     link: 'https://www.solace.health/',
     name: 'Solace',
     startDate: 'May 2026',
-    title: 'Senior Fullstack Software Engineer - Healthcare',
+    title: 'Senior Full Stack Software Engineer - Healthcare',
     tools: ['React', 'TypeScript', 'Next.js', 'NestJS'],
   } satisfies Experience,
   {
