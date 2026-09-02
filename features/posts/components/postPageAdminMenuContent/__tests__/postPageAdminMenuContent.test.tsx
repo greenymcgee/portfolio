@@ -22,10 +22,7 @@ afterEach(() => vi.restoreAllMocks())
 describe('<PostPageAdminMenuContent />', () => {
   it('should render a link to the new post page', () => {
     renderWithProviders(<PostPageAdminMenuContent {...PROPS} />)
-    expect(screen.getByRole('link', { name: /New Post/ })).toHaveAttribute(
-      'href',
-      ROUTES.newPost,
-    )
+    expect(screen.getByTestId('new-post-form')).toBeVisible()
   })
 
   it('should toast an error message when the delete request fails', async () => {

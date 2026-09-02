@@ -1,10 +1,8 @@
-import { faker } from '@faker-js/faker'
 import { errAsync } from 'neverthrow'
 import { updateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
 
 import {
-  BAD_REQUEST,
   CACHE_TAGS,
   INTERNAL_SERVER_ERROR,
   NOT_FOUND,
@@ -33,61 +31,16 @@ afterEach(() => {
   vi.resetAllMocks()
 })
 
-const FORM_DATA = new FormData()
-FORM_DATA.set('description', faker.lorem.word())
-FORM_DATA.set('publishedAt', faker.date.future().toISOString())
-FORM_DATA.set('title', faker.book.title())
-
 describe('createPost', () => {
-  it('should return a Zod validation error', async () => {
-    mockServerSession('ADMIN')
-    const formData = new FormData()
-    formData.set('invalid', 'anything')
-    const result = await createPost({ status: 'IDLE' }, formData)
-    expect(result).toEqual({
-      error: expect.objectContaining({
-        fieldErrors: expect.any(Object),
-        formErrors: expect.any(Array),
-      }),
-      errorType: 'dto',
-      invalid: 'anything',
-      status: 'ERROR',
-    })
-  })
-
   it('should redirect to the login page when a user is not logged in', async () => {
-    await createPost({ status: 'IDLE' }, FORM_DATA)
-    expect(redirect).toHaveBeenCalledWith(
-      ROUTES.loginWithRedirect(ROUTES.newPost),
-    )
+    await createPost({ status: 'IDLE' })
+    expect(redirect).toHaveBeenCalledWith(ROUTES.login)
   })
 
   it('should redirect to the home page when the response is forbidden', async () => {
     mockServerSession('USER')
-    await createPost({ status: 'IDLE' }, FORM_DATA)
+    await createPost({ status: 'IDLE' })
     expect(redirect).toHaveBeenCalledWith(ROUTES.home)
-  })
-
-  it('should return the error status and the previous state when a lexical error occurs', async () => {
-    mockServerSession('ADMIN')
-    createSpy.mockImplementationOnce(() => {
-      return errAsync({
-        details: new Error('Lexical error'),
-        status: BAD_REQUEST,
-        type: 'lexical',
-      })
-    })
-    const params = Object.fromEntries(FORM_DATA)
-    const state: CreatePostState = { ...params, status: 'IDLE' }
-    const result = await createPost(state, FORM_DATA)
-    expect(result).toEqual({
-      content: params.content,
-      description: params.description,
-      errorType: 'lexical',
-      publishedAt: params.publishedAt,
-      status: 'ERROR',
-      title: params.title,
-    })
   })
 
   it('should return the error status and the previous state when a not-found error occurs', async () => {
@@ -99,16 +52,10 @@ describe('createPost', () => {
         type: 'not-found',
       })
     })
-    const params = Object.fromEntries(FORM_DATA)
-    const state: CreatePostState = { ...params, status: 'IDLE' }
-    const result = await createPost(state, FORM_DATA)
+    const result = await createPost({ status: 'IDLE' })
     expect(result).toEqual({
-      content: params.content,
-      description: params.description,
       errorType: 'not-found',
-      publishedAt: params.publishedAt,
       status: 'ERROR',
-      title: params.title,
     })
   })
 
@@ -121,30 +68,24 @@ describe('createPost', () => {
         type: 'totally-unexpected',
       })
     })
-    const params = Object.fromEntries(FORM_DATA)
-    const state: CreatePostState = { ...params, status: 'IDLE' }
-    const result = await createPost(state, FORM_DATA)
+    const state: CreatePostState = { status: 'IDLE' }
+    const result = await createPost(state)
     expect(result).toEqual({
-      content: params.content,
-      description: params.description,
       errorType: 'unhandled',
-      publishedAt: params.publishedAt,
       status: 'ERROR',
-      title: params.title,
     })
   })
 
   describe('integration', () => {
     setupTestDatabase({ mutatesData: true, withUsers: true })
 
-    it('should redirect to the post page upon success', async () => {
+    it('should redirect to the edit post page upon success', async () => {
       await mockServerSessionAsync('ADMIN')
-      await createPost({ status: 'IDLE' }, FORM_DATA)
-      const post = await prisma.post.findFirst({
-        where: { title: FORM_DATA.get('title') as string },
-      })
+      await createPost({ status: 'IDLE' })
+      const posts = await prisma.post.findMany()
+      const post = posts[posts.length - 1]
       expect(updateTag).toHaveBeenCalledWith(CACHE_TAGS.posts)
-      expect(redirect).toHaveBeenCalledWith(ROUTES.post(post?.id as number))
+      expect(redirect).toHaveBeenCalledWith(ROUTES.editPost(post!.id))
     })
   })
 })

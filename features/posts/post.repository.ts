@@ -6,17 +6,20 @@ import { NotFoundError, PrismaError } from '@/lib/errors'
 import { logger } from '@/lib/logger'
 import { prisma } from '@/lib/prisma'
 import type {
+  PostCreateArgs,
   PostDefaultArgs,
   PostGetPayload,
   PostUpdateInput,
 } from '@/prisma/generated/models'
 
-import type { CreatePostParams } from './dto/create-post.dto'
 import type { FindAndCountPostParams } from './dto/find-and-count-posts.dto'
 import { PostEntity } from './post.entity'
 
 export class PostRepository {
-  public static async create(params: CreatePostParams, user: Session['user']) {
+  public static async create(
+    params: Omit<PostCreateArgs['data'], 'author'>,
+    user: Session['user'],
+  ) {
     const { error, response: post } = await tryCatch(
       prisma.post.create({
         data: {

@@ -26,7 +26,6 @@ import {
 import { mockServerSession } from '@/test/helpers/utils'
 
 import { FindAndCountPostsDto, FindPostDto } from '../dto'
-import { CreatePostDto } from '../dto/create-post.dto'
 import { UpdatePostDto } from '../dto/update-post.dto'
 import { PostRepository } from '../post.repository'
 import { PostService } from '../post.service'
@@ -49,8 +48,7 @@ afterEach(() => {
 describe('PostService', () => {
   describe('create', () => {
     it('should return unauthorized when there is no session user', async () => {
-      const dto = new CreatePostDto({})
-      const result = await PostService.create(dto)
+      const result = await PostService.create()
       expect(result).toEqual(
         new Err({ status: UNAUTHORIZED, type: 'unauthorized' }),
       )
@@ -58,34 +56,15 @@ describe('PostService', () => {
 
     it('should return forbidden when the user cannot create posts', async () => {
       mockServerSession('USER')
-      const dto = new CreatePostDto({})
-      const result = await PostService.create(dto)
+      const result = await PostService.create()
       expect(result).toEqual(new Err({ status: FORBIDDEN, type: 'forbidden' }))
-    })
-
-    it('should return a dto error when params fail validation', async () => {
-      mockServerSession('ADMIN')
-      const dto = new CreatePostDto({ description: 1 as unknown as string })
-      const result = await PostService.create(dto)
-      expect(result).toEqual(
-        new Err({
-          details: expect.any(ZodError),
-          status: UNPROCESSABLE_CONTENT,
-          type: 'dto',
-        }),
-      )
     })
 
     it('should return a PrismaError provided by the repository', async () => {
       mockServerSession('ADMIN')
       const error = new PrismaError(new Error('bad'))
       vi.mocked(PostRepository.create).mockResolvedValueOnce(error)
-      const dto = new CreatePostDto({
-        content: LEXICAL_EDITOR_JSON,
-        publishedAt: null,
-        title: faker.book.title(),
-      })
-      const result = await PostService.create(dto)
+      const result = await PostService.create()
       expect(result).toEqual(
         new Err({
           details: error.details,
@@ -95,32 +74,10 @@ describe('PostService', () => {
       )
     })
 
-    it('should return an entity error when the dto returns a content validation Error', async () => {
-      mockServerSession('ADMIN')
-      const dto = new CreatePostDto({
-        content: 'no',
-        publishedAt: null,
-        title: faker.book.title(),
-      })
-      const result = await PostService.create(dto)
-      expect(result).toEqual(
-        new Err({
-          details: new Error('Post content validation failed'),
-          status: BAD_REQUEST,
-          type: 'lexical',
-        }),
-      )
-    })
-
     it('should return created when the repository returns a post', async () => {
       mockServerSession('ADMIN')
       vi.mocked(PostRepository.create).mockResolvedValueOnce(PUBLISHED_POST)
-      const dto = new CreatePostDto({
-        content: LEXICAL_EDITOR_JSON,
-        publishedAt: null,
-        title: 'Title',
-      })
-      const result = await PostService.create(dto)
+      const result = await PostService.create()
       expect(result).toEqual(new Ok({ post: PUBLISHED_POST, status: CREATED }))
     })
   })
