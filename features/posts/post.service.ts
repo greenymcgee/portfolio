@@ -1,3 +1,4 @@
+import { format } from 'date-fns'
 import { errAsync, okAsync } from 'neverthrow'
 import type { Session } from 'next-auth'
 import { ZodError } from 'zod'
@@ -18,34 +19,23 @@ import { logger } from '@/lib/logger'
 import { hasPermission } from '@/lib/permissions'
 import type { PostDefaultArgs } from '@/prisma/generated/models'
 
-import type { CreatePostDto } from './dto/create-post.dto'
 import type { FindAndCountPostsDto } from './dto/find-and-count-posts.dto'
 import { FindPostDto } from './dto/find-post.dto'
 import { UpdatePostDto } from './dto/update-post.dto'
 import { PostRepository } from './post.repository'
 
 export class PostService {
-  public static async create(dto: CreatePostDto) {
+  public static async create() {
     const user = await authenticateAPISession()
     if (user === null) return this.respondWithUnauthorizedError()
 
     const authorizedUser = this.authorizeUser(user, 'create')
     if (authorizedUser === null) return this.respondWithForbiddenError()
 
-    const { params } = dto
-    if (params instanceof ZodError) {
-      return this.respondWithZodError(params, 'create')
-    }
-
-    if (params instanceof Error) {
-      return errAsync({
-        details: params,
-        status: BAD_REQUEST,
-        type: 'lexical',
-      } as const)
-    }
-
-    const post = await PostRepository.create(params, user)
+    const post = await PostRepository.create(
+      { title: `Untitled — ${format(new Date(), 'yyyy-MM-dd HH:mm:ss')}` },
+      user,
+    )
     if (post instanceof PrismaError) {
       return this.respondWithPrismaError(post, 'create')
     }

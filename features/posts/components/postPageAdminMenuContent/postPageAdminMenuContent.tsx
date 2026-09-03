@@ -2,7 +2,7 @@
 
 import { useActionState } from 'react'
 import { withCallbacks } from '@greenymcgee/typescript-utils'
-import { CirclePlus, Pencil, Trash2Icon } from 'lucide-react'
+import { Pencil, Trash2Icon } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 
@@ -11,6 +11,7 @@ import { ROUTES } from '@/globals/constants'
 
 import { deletePost } from '../../actions'
 import { DeletePostState } from '../../types'
+import { NewPostForm } from '../newPostForm'
 
 type Props = { post: AuthoredPost }
 
@@ -26,17 +27,7 @@ export function PostPageAdminMenuContent({ post }: Props) {
 
   return (
     <nav className="space-y-2" data-testid="post-page-admin-menu-content">
-      <div>
-        <Button asChild className="justify-start" variant="ghost">
-          <Link href={ROUTES.newPost}>
-            <CirclePlus
-              aria-hidden
-              className="inline h-[1em] w-[1em] align-middle"
-            />{' '}
-            <span className="align-middle">New Post</span>
-          </Link>
-        </Button>
-      </div>
+      <NewPostForm />
       <div>
         <Button asChild className="justify-start" variant="ghost">
           <Link
