@@ -37,7 +37,11 @@ afterEach(() => {
   vi.resetAllMocks()
 })
 
-const STATE: TogglePostPublishedState = { id: ID, status: 'IDLE' }
+const STATE: TogglePostPublishedState = {
+  id: ID,
+  publishedAt: undefined,
+  status: 'IDLE',
+}
 
 describe('togglePostPublished', () => {
   describe('unauthorized', () => {
@@ -119,7 +123,11 @@ describe('togglePostPublished', () => {
       const post = (await prisma.post.findFirst({
         where: { publishedAt: null },
       })) as Post
-      await togglePostPublished({ id: post.id, status: 'IDLE' })
+      await togglePostPublished({
+        id: post.id,
+        publishedAt: undefined,
+        status: 'IDLE',
+      })
       expect(updateTag).toHaveBeenCalledWith(CACHE_TAGS.post(post.id))
       expect(redirect).toHaveBeenCalledWith(ROUTES.post(post.id))
     })
@@ -127,7 +135,11 @@ describe('togglePostPublished', () => {
     it('should return a success state upon unpublish success', async () => {
       await mockServerSessionAsync('ADMIN')
       const post = (await prisma.post.findFirst()) as Post
-      const result = await togglePostPublished({ id: post.id, status: 'IDLE' })
+      const result = await togglePostPublished({
+        id: post.id,
+        publishedAt: undefined,
+        status: 'IDLE',
+      })
       expect(updateTag).toHaveBeenCalledWith(CACHE_TAGS.post(post.id))
       expect(result).toEqual({
         id: post.id,

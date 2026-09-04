@@ -14,6 +14,7 @@ import { updatePost } from '../../actions'
 import { EditPostDescriptionModal } from '../editPostDescriptionModal'
 import { EditPostStatus } from '../editPostStatus'
 import { EditPostTitleError } from '../editPostTitleError'
+import { TogglePostPublishedForm } from '../togglePostPublishedForm/togglePostPublishedForm'
 import {
   debounceAutosave,
   handleEditPostFormSubmit,
@@ -77,11 +78,14 @@ export function EditPostForm({ post }: Props) {
             title={typeof state.title === 'string' ? state.title : post.title}
           />
         </div>
-        <EditPostStatus
-          saving={saving}
-          status={state?.status}
-          updatedAt={post.updatedAt}
-        />
+        <div className="flex items-center gap-2">
+          <EditPostStatus
+            saving={saving}
+            status={state?.status}
+            updatedAt={post.updatedAt}
+          />
+          <TogglePostPublishedForm post={post} />
+        </div>
       </div>
       <form
         className="mx-auto max-w-3xl px-6"

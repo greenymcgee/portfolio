@@ -20,5 +20,5 @@ export interface UpdatePostState extends ActionState {
 
 export type TogglePostPublishedState = ActionState & {
   id: number
-  publishedAt?: FormDataEntryValue | null
+  publishedAt: Post['publishedAt'] | null | undefined
 }
