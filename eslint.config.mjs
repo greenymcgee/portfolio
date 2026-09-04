@@ -44,7 +44,7 @@ export default [
       'prisma/generated/**',
       'prisma/migrations/**',
       'AGENTS.md',
-      'CLAUD.md',
+      'CLAUDE.md',
       'components.json',
       '.vercel/**',
       '.pnpm-store/**',

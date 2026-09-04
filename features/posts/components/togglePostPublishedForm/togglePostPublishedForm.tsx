@@ -4,7 +4,7 @@ import { useActionState } from 'react'
 import { withCallbacks } from '@greenymcgee/typescript-utils'
 import { toast } from 'sonner'
 
-import { Button, Spinner } from '@/globals/components/ui'
+import { Button } from '@/globals/components/ui'
 import { Post } from '@/prisma/generated/client'
 
 import { togglePostPublished } from '../../actions'
@@ -32,15 +32,14 @@ export function TogglePostPublishedForm({ post }: Props) {
 
   return (
     <form action={action}>
-      {post.publishedAt ? (
-        <Button disabled={pending} type="submit" variant="outline">
-          Unpublish {pending ? <Spinner /> : null}
-        </Button>
-      ) : (
-        <Button disabled={pending} type="submit">
-          Publish {pending ? <Spinner /> : null}
-        </Button>
-      )}
+      <Button
+        disabled={pending}
+        loading={pending}
+        type="submit"
+        variant={post.publishedAt ? 'outline' : undefined}
+      >
+        {post.publishedAt ? 'Unpublish' : 'Publish'}
+      </Button>
     </form>
   )
 }

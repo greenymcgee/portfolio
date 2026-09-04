@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker'
 import { errAsync } from 'neverthrow'
 import { updateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
@@ -39,7 +40,7 @@ afterEach(() => {
 
 const STATE: TogglePostPublishedState = {
   id: ID,
-  publishedAt: undefined,
+  publishedAt: faker.date.past(),
   status: 'IDLE',
 }
 
@@ -74,6 +75,7 @@ describe('togglePostPublished', () => {
       expect(result).toEqual({
         errorType: 'entity',
         id: STATE.id,
+        publishedAt: STATE.publishedAt,
         status: 'ERROR',
       })
     })
@@ -92,6 +94,7 @@ describe('togglePostPublished', () => {
       expect(result).toEqual({
         errorType: 'not-found',
         id: STATE.id,
+        publishedAt: STATE.publishedAt,
         status: 'ERROR',
       })
     })
@@ -110,6 +113,7 @@ describe('togglePostPublished', () => {
       expect(result).toEqual({
         errorType: 'unhandled',
         id: STATE.id,
+        publishedAt: STATE.publishedAt,
         status: 'ERROR',
       })
     })
@@ -129,6 +133,7 @@ describe('togglePostPublished', () => {
         status: 'IDLE',
       })
       expect(updateTag).toHaveBeenCalledWith(CACHE_TAGS.post(post.id))
+      expect(updateTag).toHaveBeenCalledWith(CACHE_TAGS.posts)
       expect(redirect).toHaveBeenCalledWith(ROUTES.post(post.id))
     })
 

@@ -25,7 +25,7 @@ describe('<TogglePostPublishedForm />', () => {
     expect(screen.getByRole('button', { name: /Unpublish/ })).toBeEnabled()
   })
 
-  it('should disable the button and show a loading spinner while the request is pending', async () => {
+  it('should disable the button while the request is pending', () => {
     vi.spyOn(postActions, 'togglePostPublished').mockResolvedValueOnce({
       id: UNPUBLISHED_POST.id,
       publishedAt: UNPUBLISHED_POST.publishedAt,
@@ -33,9 +33,7 @@ describe('<TogglePostPublishedForm />', () => {
     } as TogglePostPublishedState)
     renderWithProviders(<TogglePostPublishedForm post={UNPUBLISHED_POST} />)
     fireEvent.click(screen.getByRole('button', { name: /Publish/ }))
-    expect(screen.getByRole('status')).toBeVisible()
     expect(screen.getByRole('button', { name: /Publish/ })).toBeDisabled()
-    await waitForElementToBeRemoved(screen.getByRole('status'))
   })
 
   it('should toast a success message when unpublishing succeeds', async () => {

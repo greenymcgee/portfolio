@@ -71,4 +71,24 @@ describe('<Button />', () => {
     expect(link).toHaveAttribute('href', href)
     expect(link).toHaveAttribute('data-slot', 'button')
   })
+
+  it('should render the spinner when loading is true', () => {
+    render(<Button {...PROPS} loading />)
+    expect(screen.getByRole('status', { name: 'Loading' })).toBeVisible()
+  })
+
+  it('should not render the spinner when loading is not provided', () => {
+    render(<Button {...PROPS} />)
+    expect(screen.queryByRole('status')).not.toBeInTheDocument()
+  })
+
+  it('should throw an error when loading and asChild are both true', () => {
+    expect(() =>
+      render(
+        <Button asChild loading>
+          <a href="https://example.com">Link text</a>
+        </Button>,
+      ),
+    ).toThrow('loading prop not allowed when asChild prop is true')
+  })
 })
