@@ -37,7 +37,18 @@ export default [
       'eslint.config.mjs',
       'prettier.config.mjs',
       'coverage/**',
-      'globals/components/svgs/**'
+      'globals/components/svgs/**',
+      'docs/**',
+      '.claude/**',
+      '.cursor/**',
+      'prisma/generated/**',
+      'prisma/migrations/**',
+      'AGENTS.md',
+      'CLAUDE.md',
+      'components.json',
+      '.vercel/**',
+      '.pnpm-store/**',
+      'tmp/**'
     ],
   },
 ]

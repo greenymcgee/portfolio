@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker'
 import { errAsync } from 'neverthrow'
 import { updateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
@@ -37,7 +38,11 @@ afterEach(() => {
   vi.resetAllMocks()
 })
 
-const STATE: TogglePostPublishedState = { id: ID, status: 'IDLE' }
+const STATE: TogglePostPublishedState = {
+  id: ID,
+  publishedAt: faker.date.past(),
+  status: 'IDLE',
+}
 
 describe('togglePostPublished', () => {
   describe('unauthorized', () => {
@@ -70,6 +75,7 @@ describe('togglePostPublished', () => {
       expect(result).toEqual({
         errorType: 'entity',
         id: STATE.id,
+        publishedAt: STATE.publishedAt,
         status: 'ERROR',
       })
     })
@@ -88,6 +94,7 @@ describe('togglePostPublished', () => {
       expect(result).toEqual({
         errorType: 'not-found',
         id: STATE.id,
+        publishedAt: STATE.publishedAt,
         status: 'ERROR',
       })
     })
@@ -106,6 +113,7 @@ describe('togglePostPublished', () => {
       expect(result).toEqual({
         errorType: 'unhandled',
         id: STATE.id,
+        publishedAt: STATE.publishedAt,
         status: 'ERROR',
       })
     })
@@ -119,15 +127,24 @@ describe('togglePostPublished', () => {
       const post = (await prisma.post.findFirst({
         where: { publishedAt: null },
       })) as Post
-      await togglePostPublished({ id: post.id, status: 'IDLE' })
+      await togglePostPublished({
+        id: post.id,
+        publishedAt: undefined,
+        status: 'IDLE',
+      })
       expect(updateTag).toHaveBeenCalledWith(CACHE_TAGS.post(post.id))
+      expect(updateTag).toHaveBeenCalledWith(CACHE_TAGS.posts)
       expect(redirect).toHaveBeenCalledWith(ROUTES.post(post.id))
     })
 
     it('should return a success state upon unpublish success', async () => {
       await mockServerSessionAsync('ADMIN')
       const post = (await prisma.post.findFirst()) as Post
-      const result = await togglePostPublished({ id: post.id, status: 'IDLE' })
+      const result = await togglePostPublished({
+        id: post.id,
+        publishedAt: undefined,
+        status: 'IDLE',
+      })
       expect(updateTag).toHaveBeenCalledWith(CACHE_TAGS.post(post.id))
       expect(result).toEqual({
         id: post.id,

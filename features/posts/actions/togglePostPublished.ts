@@ -14,6 +14,7 @@ export async function togglePostPublished(state: TogglePostPublishedState) {
   return result.match(
     ({ post }) => {
       updateTag(CACHE_TAGS.post(post.id))
+      updateTag(CACHE_TAGS.posts)
       if (post.publishedAt) return redirect(ROUTES.post(post.id))
 
       return {
@@ -29,6 +30,7 @@ export async function togglePostPublished(state: TogglePostPublishedState) {
           return {
             errorType: error.type,
             id: state.id,
+            publishedAt: state.publishedAt,
             status: 'ERROR',
           } as TogglePostPublishedState
         case 'forbidden':
@@ -43,6 +45,7 @@ export async function togglePostPublished(state: TogglePostPublishedState) {
           return {
             errorType: 'unhandled',
             id: state.id,
+            publishedAt: state.publishedAt,
             status: 'ERROR',
           } as TogglePostPublishedState
       }
