@@ -11,6 +11,7 @@ import {
 } from '@/globals/components'
 
 import { updatePost } from '../../actions'
+import { POST_PAGE_CLASS_NAMES } from '../../constants'
 import { EditPostDescriptionModal } from '../editPostDescriptionModal'
 import { EditPostStatus } from '../editPostStatus'
 import { EditPostTitleError } from '../editPostTitleError'
@@ -64,12 +65,7 @@ export function EditPostForm({ post }: Props) {
       initialState={initialContent}
       onChange={handleContentChange}
     >
-      <div
-        className={clsx(
-          'full-bleed-bg bg-background sticky top-0 left-0 z-10 mb-20',
-          'flex max-w-full items-center justify-between',
-        )}
-      >
+      <div className={POST_PAGE_CLASS_NAMES.editActionBar}>
         <div className="flex items-center gap-1">
           <RichTextToolbar />
           <EditPostDescriptionModal
@@ -88,7 +84,7 @@ export function EditPostForm({ post }: Props) {
         </div>
       </div>
       <form
-        className="mx-auto max-w-3xl px-6"
+        className={POST_PAGE_CLASS_NAMES.editFormWidth}
         data-testid="edit-post-form"
         onSubmit={handleEditPostFormSubmit}
         ref={formRef}
@@ -102,7 +98,7 @@ export function EditPostForm({ post }: Props) {
           ref={contentRef}
           type="hidden"
         />
-        <div className="mb-8 space-y-1">
+        <div className={POST_PAGE_CLASS_NAMES.editTitleBlock}>
           <EditPostTitleError state={state} />
           <input
             aria-label="Title"

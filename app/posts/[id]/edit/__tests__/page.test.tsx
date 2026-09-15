@@ -21,8 +21,8 @@ const PROPS: PropsOf<typeof EditPostPage> = {
 }
 
 describe('<EditPostPage />', () => {
-  it('should render the edit post loader', () => {
+  it('should render the edit post skeleton while the post loads', () => {
     render(<EditPostPage {...PROPS} />)
-    expect(screen.getByTestId('edit-post-loader')).toBeVisible()
+    expect(screen.getByTestId('edit-post-skeleton')).toBeVisible()
   })
 })
