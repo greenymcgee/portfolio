@@ -6,10 +6,20 @@ type Experience = {
   name: string
   startDate: string
   title: string
-  tools: SoftwareTool[]
+  tools?: SoftwareTool[]
 }
 
 export const EXPERIENCES = [
+  {
+    description:
+      'I serve as the technical advisor to the founder in weekly working sessions where we discuss different strategies and ideas.',
+    endDate: 'Present',
+    id: 'thrivant-solutions',
+    link: 'https://www.linkedin.com/company/thrivant/',
+    name: 'Thrivant Solutions',
+    startDate: 'January 2026',
+    title: 'Software Engineering Consultant - AI',
+  } satisfies Experience,
   {
     description:
       'I deployed new features and maintained the internal admin site that allowed super users to work with patients and physicians schedules.',

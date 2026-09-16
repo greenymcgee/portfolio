@@ -10,11 +10,6 @@ describe('<Experience />', () => {
     expect(screen.getByTestId(`card-${id}`)).toBeVisible()
   })
 
-  it('should render tools', () => {
-    render(<Experience />)
-    expect(screen.getAllByTestId('card-tools')).toHaveLength(EXPERIENCES.length)
-  })
-
   it('should render start dates', () => {
     render(<Experience />)
     expect(

@@ -54,29 +54,17 @@ export default function HomePage() {
         >
           <article className="text-subtle mb-10 space-y-2 md:mb-24">
             <p>
-              My name is Houston, and I&apos;m a software engineer. I thoroughly
-              enjoy creating applications that people find useful, and I love
-              expressing my creativity through code.
+              My name is Houston, and I&apos;m a software engineer. I&apos;m a
+              creative person, and it&apos;s often hard to find enough hours in
+              the day between software projects and whatever else I might be
+              obsessed with at the moment.
             </p>
             <p>
-              I enjoy keeping up with the latest technologies by experimenting
-              with libraries like Next.js, NestJS, and anything else that piques
-              my interest in the Node.js/React and TypeScript universe. I
-              genuinely love to throw myself into a project in my free time and
-              consider different approaches based on what I learned in the last
-              project.
+              I currently serve as the software engineering consultant at
+              Thrivant Solutions where we&apos;re creating AI focused tooling
+              for software developers.
             </p>
-            <p>
-              When I&apos;m not writing code, I&apos;m often playing music,
-              carving wood, reading, or playing video games. I have a lot of
-              interests, and quite often, it&apos;s also hard to find enough
-              time to satisfy them all.
-            </p>
-            <p>
-              Currently, I&apos;m working on a project with a friend and former
-              product manager, and I&apos;m very excited to see where we&apos;re
-              headed with it.
-            </p>
+            <p>Please, feel free to scroll and learn more about my work.</p>
           </article>
           <section className="mb-20">
             <h2 className="font-porter-sans-block leading-md mb-6 text-xl md:text-2xl">
