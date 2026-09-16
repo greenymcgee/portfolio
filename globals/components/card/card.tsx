@@ -46,7 +46,7 @@ export function Card({
               rel={external ? 'noopener noreferrer' : undefined}
               target={external ? '_blank' : undefined}
             >
-              <h3 className="text-primary flex items-center gap-2 font-semibold">
+              <h3 className="text-primary flex flex-col gap-2 font-semibold sm:flex-row sm:items-center">
                 {title}
               </h3>
             </Link>
