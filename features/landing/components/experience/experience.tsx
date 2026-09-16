@@ -32,7 +32,7 @@ export function Experience() {
             </>
           }
         >
-          <Tools tools={experience.tools} />
+          {'tools' in experience ? <Tools tools={experience.tools} /> : null}
         </Card>
       ))}
     </CardGroup>
