@@ -57,7 +57,7 @@
   },
   "devDependencies": {
     "@eslint/compat": "^2.1.0",
-    "@faker-js/faker": "^10.3.0",
+    "@faker-js/faker": "^10.6.0",
     "@greenymcgee/next-eslint-config": "^0.1.8",
     "@greenymcgee/tailwind-prettier-config": "^0.1.1",
     "@greenymcgee/utility-types": "^0.1.1",
