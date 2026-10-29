@@ -47,7 +47,7 @@
     "next-auth": "^4.24.13",
     "next-themes": "^0.4.6",
     "pino": "^10.3.0",
-    "react": "19.2.4",
+    "react": "19.3.1",
     "react-dom": "19.2.4",
     "shadcn": "^4.22.1",
     "sonner": "^2.0.7",
@@ -68,7 +68,7 @@
     "@testing-library/user-event": "^14.6.1",
     "@types/jest": "^30.0.0",
     "@types/node": "^26.2.0",
-    "@types/react": "19.2.10",
+    "@types/react": "19.3.0",
     "@types/react-dom": "19.2.3",
     "@typescript-eslint/parser": "^8.67.0",
     "@vitest/coverage-v8": "^4.0.18",
@@ -96,7 +96,7 @@
   },
   "pnpm": {
     "overrides": {
-      "@types/react": "19.2.10",
+      "@types/react": "19.3.0",
       "@types/react-dom": "19.2.3"
     }
   },
